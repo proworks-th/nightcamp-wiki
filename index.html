@@ -70,14 +70,14 @@ html,body{overflow-x:hidden}
   </div>
 </header>
 <div class="stage">
-<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=03cbc172"></iframe>
-<iframe id="f-equip" title="คลังอุปกรณ์" data-src="equip.html?v=343f029c" hidden></iframe>
-<iframe id="f-sim" title="Build Simulator" data-src="sim.html?v=2c654e3b" hidden></iframe>
-<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=10034bf0" hidden></iframe>
+<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=5135fc50"></iframe>
+<iframe id="f-equip" title="คลังอุปกรณ์" data-src="equip.html?v=4bd2a17b" hidden></iframe>
+<iframe id="f-sim" title="Build Simulator" data-src="sim.html?v=f72f7092" hidden></iframe>
+<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=1226bcde" hidden></iframe>
 <div class="skel" id="skel" aria-hidden="true"><div class="in"><i style="height:150px"></i><i style="height:22px;width:55%"></i><i style="height:110px"></i><i style="height:110px"></i><i style="height:180px"></i></div></div>
 </div>
 <script>
-const TABS = ['guide', 'equip', 'sim', 'patch'], F = Object.fromEntries(TABS.map((x) => [x, document.getElementById('f-' + x)]));
+const TABS = ["guide", "equip", "sim", "patch"], F = Object.fromEntries(TABS.map((x) => [x, document.getElementById('f-' + x)]));
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
 let P = (() => { try { return JSON.parse(store.get('nc_profile') || 'null'); } catch (e) { return null; } })() || { job: 'knight', lv: 10 };
 const pJob = document.getElementById('pJob'), pLv = document.getElementById('pLv');
@@ -248,7 +248,7 @@ go(back || (linkCode ? 'sim' : location.hash.slice(1)));
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=187c22f9'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=d60af112'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
