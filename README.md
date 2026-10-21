@@ -13,5 +13,5 @@ Fan-made wiki and tools for the Thai MMORPG **NightCamp**, by KhumGameLab. `inde
 
 Set your job and level once in the top bar and every page follows it. Press EN / ไทย in the top bar to switch language (English names are fan translations, not official).
 
-Based on the NightCamp test build of 21 Oct 2026 (game-20261021-1537); numbers may change with patches.
+Based on the NightCamp test build of 21 Oct 2026, late build (game-20261021-2343); numbers may change with patches.
 Game names, art and data belong to the Night Camp team; the logo, key art and job portraits come from the Night Camp press kit and are used with permission. This is a fan site, not an official one.

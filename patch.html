@@ -55,6 +55,35 @@ footer{margin-top:24px;color:var(--muted);font-size:13px}
 // Each build: what changed, in plain words. th / en side by side (the page picks by the viewer's language).
 // Kept to what players can see and use: nothing admin-only, nothing still hidden in the code.
 const PATCHES = [
+  { build: 'game-20261021-2343', date: { th: '21 ต.ค. 2026 (รอบดึก)', en: '21 Oct 2026 (late build)' },
+    hl: { th: 'ฮูมะเปลี่ยนชื่อเป็น "ดาวยักษ์" นักล่าหมาป่าสั่งเหยี่ยวโฉบรัว ๆ ได้ วัตถุดิบเควสเนื้อเรื่องดรอปเต็มแม้เลเวลห่าง ดื่มยาระหว่างร่ายได้ และออโต้ในปาร์ตี้ไม่หลุดวง',
+          en: 'Huuma is now "Giant Star", the Wolf Hunter\'s falcon dives can be chained, story-quest materials ignore the level gap, potions work while casting, and AUTO stays inside the party ring.' },
+    secs: [
+      { k: 'balance', items: [
+        { th: 'นักล่าหมาป่า · เหยี่ยวโฉบล่า: กดรัวได้ไม่ต้องรอเหยี่ยวบินกลับ การโฉบสะสมต่อกันได้สูงสุด 10 ครั้ง (ดาเมจต่อครั้ง คูลดาวน์ 4 วิ และ SP เท่าเดิม) · โฉบเองอัตโนมัติก็ไม่ต้องรอเหยี่ยวกลับแล้ว', en: 'Wolf Hunter · Falcon Strike: press it again without waiting for the falcon to return; dives queue up to 10 (damage per dive, the 4 s cooldown and SP unchanged). The automatic dive no longer waits either.' },
+        { th: 'วัตถุดิบที่เควสเนื้อเรื่องตอนนี้ยังต้องการ ดรอปเต็มจำนวนแม้เลเวลเราสูงกว่ามอนมาก (ไม่โดนลดตามช่องว่างเลเวล)', en: 'Materials your current story quest still needs drop in full even far above the monster\'s level (no level-gap cut).' },
+        { th: 'ดื่มยาแดง/ยาฟ้า (ปุ่ม 1, 2) ได้แล้วระหว่างร่ายสกิลหรือสกิลหมุนตัว', en: 'Red and blue potions (keys 1 and 2) work while casting or channelling, e.g. the berserker\'s spin.' },
+      ] },
+      { k: 'items', items: [
+        { th: 'อาวุธสายฮูมะของนินจาเปลี่ยนชื่อเป็น "ดาวยักษ์" ทั้งหมด (ชนิดอาวุธ อาวุธเริ่มต้น "ดาวกระจายยักษ์" และอาวุธอีก 45 ชิ้น) ค่าสเตตัสเท่าเดิม · ค้นด้วยชื่อเก่าในวิกิก็ยังเจอ', en: 'The ninja\'s huuma line is renamed "Giant Star" (the weapon type, the starter "ดาวกระจายยักษ์" and 45 more weapons); stats unchanged. The old name still finds them here.' },
+        { th: 'บอสผู้ถูกรากสิงที่ไร่ฟักทอง ฮาร์ล็อก เปลี่ยนชื่อเป็น "ฮาร์เวน ผู้เก็บเกี่ยวยามดึก" รวมชื่อของที่ดรอป ค่าสเตตัสเท่าเดิม', en: 'The pumpkin-farm root-possessed boss Harlock is now "Harven the Night Reaper", drops included; stats unchanged.' },
+      ] },
+      { k: 'bot', items: [
+        { th: 'อยู่ในปาร์ตี้: ล่าและเก็บของเฉพาะในวงปาร์ตี้ ไม่เดินหลุดไปไกลจากเพื่อน', en: 'In a party, AUTO hunts and loots only inside the party ring.' },
+        { th: 'เก็บของทีละชิ้น ยืนทับ 4 วิแล้วเก็บไม่ได้จะข้ามไป · โหมดตีก่อนแล้วเก็บ นับไฟต์ของเพื่อนในตี้ด้วย', en: 'Loots one drop at a time and skips one it can\'t pick up after 4 s; "fight first" counts a teammate\'s fight too.' },
+      ], link: { tab: 'guide', th: 'ดูคู่มือออโต้ฟาร์ม', en: 'Open the auto farm guide' } },
+      { k: 'online', items: [
+        { th: 'ปฏิทินเช็คอินอยู่ในแท็บ "ปฏิทิน" ของหน้าเควส (J) และรับของวันนี้ให้เองหลังเข้าเกมไม่นาน', en: 'The check-in calendar is the "ปฏิทิน" tab of the quest page (J); today\'s gift is claimed for you shortly after you log in.' },
+        { th: 'เก็บของออนไลน์ติดง่ายขึ้น ข้อความเก็บของบอกชื่อของหรือจำนวนเงิน และกระเป๋าที่เปิดอยู่อัปเดตทันที', en: 'Online pickups are more reliable, pickup lines name the item or the gold, and an open bag refreshes at once.' },
+        { th: 'ป้ายสถานะบอกแมพ แชนแนล คนรอบตัว และปิง (เลิกแสดง FPS และจำนวนคนทั้งเซิร์ฟ)', en: 'The status badge shows map, channel, players nearby and ping (no more FPS or server-wide counts).' },
+      ] },
+      { k: 'fix', items: [
+        { th: 'แก้สกิลกดไม่ได้หลังเริ่มตัดไม้/ขุดแร่/ตกปลาระหว่างร่าย · กดสกิลระหว่างเก็บของจะหยุดการเก็บก่อน', en: 'Fixed skills locking up after starting to gather during a cast; pressing a skill while gathering stops the gathering first.' },
+        { th: 'วงจังหวะตัดไม้ย้ายมาอยู่ที่ลำต้นฝั่งที่เรายืน ระดับมือ และขนาดตามความกว้างของต้น', en: 'The woodcutting timing ring now sits on the trunk at your side, at hand height, sized to the tree.' },
+        { th: 'หน้าต่างเก่าถูกถอดออก ใช้หน้าต่างใหม่แทน (กระเป๋า I, สมุดอาชีพเสริม H, ปาร์ตี้, ร้านค้า, แผนที่โลก, สกิล K) · ปุ่ม L ห้องดูท่าทางเอาออกแล้ว', en: 'The old windows are gone in favour of the new ones (bag I, life book H, party, shop, world map, skills K); the L pose room is removed.' },
+        { th: 'แชท: ข้อความ "ออฟไลน์อยู่" ไม่ค้างล่างสุด · ไม่เด้ง "เข้าปาร์ตี้" ซ้ำตอนเปลี่ยนแมพ · ตัวละครใหม่เข้าหน้าสร้างตัวละครเสมอ', en: 'Chat: the "offline" notice no longer sticks; no repeated "joined party" card on map change; new heroes always get the character creator.' },
+      ] },
+    ] },
   { build: 'game-20261021-1537', date: { th: '21 ต.ค. 2026', en: '21 Oct 2026' },
     hl: { th: 'ตัวติดซอกมีทางออกแล้ว (ปุ่มในเมนู ESC และ /ติด) ออโต้ฟาร์มไม่เรียกสัตว์ซ้ำและไม่ขยับระหว่างร่าย ดวงไฟติดศัตรูของผู้เลี้ยงดวงไฟแรงขึ้น และแก้บั๊กออนไลน์อีกเยอะ',
           en: 'A way out when you get wedged (ESC menu button and /ติด), an auto farm that stops re-summoning and stands still while casting, a stronger Wisp Shepherd mark, and many online fixes.' },
@@ -182,7 +211,7 @@ window.addEventListener('message', (e) => {
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=fd958ff8'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=961c6642'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
