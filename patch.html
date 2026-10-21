@@ -55,6 +55,16 @@ footer{margin-top:24px;color:var(--muted);font-size:13px}
 // Each build: what changed, in plain words. th / en side by side (the page picks by the viewer's language).
 // Kept to what players can see and use: nothing admin-only, nothing still hidden in the code.
 const PATCHES = [
+  { build: 'game-20261022-0059', date: { th: '22 ต.ค. 2026', en: '22 Oct 2026' },
+    hl: { th: 'แพตช์เล็ก: แถบสถานะออนไลน์ (FPS ปิง จำนวนคนออนไลน์) กลับมา และคำลอยเหนือหุ่นฝึกไม่บังเลขดาเมจแล้ว', en: 'A small one: the online status strip (FPS, ping, players online) is back, and words over the training dummy no longer cover its damage numbers.' },
+    secs: [
+      { k: 'online', items: [
+        { th: 'แถบสถานะออนไลน์กลับมา: FPS สัญญาณ/ปิง แชนแนล และจำนวนคนออนไลน์ทั้งเซิร์ฟและรายแมพ (อัปเดตทุก 10 วิ) · มือถือ/แท็บเล็ตอยู่เหนือการ์ดตัวละคร', en: 'The online status strip is back: FPS, signal/ping, channel, and players online on the server and per map (every 10 s); on phones and tablets it sits above the hero card.' },
+      ] },
+      { k: 'fix', items: [
+        { th: 'คำลอยเหนือหุ่นฝึกขยับขึ้นและเล็กลง ไม่บังชื่อ DPS และยอดดาเมจของหุ่นแล้ว', en: 'Words over a training dummy float higher and smaller, so they no longer cover its name, DPS and totals.' },
+      ] },
+    ] },
   { build: 'game-20261021-2343', date: { th: '21 ต.ค. 2026 (รอบดึก)', en: '21 Oct 2026 (late build)' },
     hl: { th: 'ฮูมะเปลี่ยนชื่อเป็น "ดาวยักษ์" นักล่าหมาป่าสั่งเหยี่ยวโฉบรัว ๆ ได้ วัตถุดิบเควสเนื้อเรื่องดรอปเต็มแม้เลเวลห่าง ดื่มยาระหว่างร่ายได้ และออโต้ในปาร์ตี้ไม่หลุดวง',
           en: 'Huuma is now "Giant Star", the Wolf Hunter\'s falcon dives can be chained, story-quest materials ignore the level gap, potions work while casting, and AUTO stays inside the party ring.' },
@@ -75,7 +85,7 @@ const PATCHES = [
       { k: 'online', items: [
         { th: 'ปฏิทินเช็คอินอยู่ในแท็บ "ปฏิทิน" ของหน้าเควส (J) และรับของวันนี้ให้เองหลังเข้าเกมไม่นาน', en: 'The check-in calendar is the "ปฏิทิน" tab of the quest page (J); today\'s gift is claimed for you shortly after you log in.' },
         { th: 'เก็บของออนไลน์ติดง่ายขึ้น ข้อความเก็บของบอกชื่อของหรือจำนวนเงิน และกระเป๋าที่เปิดอยู่อัปเดตทันที', en: 'Online pickups are more reliable, pickup lines name the item or the gold, and an open bag refreshes at once.' },
-        { th: 'ป้ายสถานะบอกแมพ แชนแนล คนรอบตัว และปิง (เลิกแสดง FPS และจำนวนคนทั้งเซิร์ฟ)', en: 'The status badge shows map, channel, players nearby and ping (no more FPS or server-wide counts).' },
+        { th: 'ป้ายสถานะบอกแมพ แชนแนล คนรอบตัว และปิง (แถบ FPS และจำนวนคนทั้งเซิร์ฟถูกถอดในเวอร์ชันนี้ แล้วกลับมาในเวอร์ชัน 22 ต.ค.)', en: 'The status badge shows map, channel, players nearby and ping (the FPS strip and server-wide counts left in this build and came back on 22 Oct).' },
       ] },
       { k: 'fix', items: [
         { th: 'แก้สกิลกดไม่ได้หลังเริ่มตัดไม้/ขุดแร่/ตกปลาระหว่างร่าย · กดสกิลระหว่างเก็บของจะหยุดการเก็บก่อน', en: 'Fixed skills locking up after starting to gather during a cast; pressing a skill while gathering stops the gathering first.' },
