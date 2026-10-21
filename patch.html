@@ -1,0 +1,210 @@
+<!doctype html><html lang="th"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>[hidden]{display:none!important}</style></head><body><title>NightCamp Patch Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Patch notes: one card per game build, newest first; each change a short line under its heading, with a link to the page it touches. */
+:root{
+  --bg:#eef0f6; --panel:#ffffff; --panel2:#e6e9f2; --line:#cdd2e1; --fg:#18203a; --muted:#56607c;
+  --ember:#c4561a; --ember-soft:#f8e3d3; --moon:#3c4fa8; --moon-soft:#e0e5fb; --good:#2f8a55; --bad:#b33a3a;
+  --display:'Mitr','Noto Sans Thai',system-ui,sans-serif; --body:'IBM Plex Sans Thai','Noto Sans Thai',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10132a; --panel:#181c38; --panel2:#20254a; --line:#2f3563; --fg:#e9ebf7; --muted:#a3a9cc;
+  --ember:#f59a4c; --ember-soft:#3a2a26; --moon:#aab8ff; --moon-soft:#262d5c; --good:#6fd39a; --bad:#ff8a8a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10132a; --panel:#181c38; --panel2:#20254a; --line:#2f3563; --fg:#e9ebf7; --muted:#a3a9cc;
+  --ember:#f59a4c; --ember-soft:#3a2a26; --moon:#aab8ff; --moon-soft:#262d5c; --good:#6fd39a; --bad:#ff8a8a; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:16px/1.65 var(--body);margin:0}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 56px}
+h1{font:600 clamp(28px,5vw,40px)/1.1 var(--display);margin:0}
+h2{font:500 clamp(21px,3.2vw,26px)/1.25 var(--display);margin:0}
+h3{font:600 15px/1.3 var(--display);margin:0;display:flex;align-items:center;gap:8px}
+p{margin:0}
+.kicker{font:600 11.5px var(--mono);letter-spacing:1.2px;text-transform:uppercase;color:var(--ember)}
+.muted{color:var(--muted)}
+header.top{padding:26px 0 14px}
+header.top p{color:var(--muted);margin-top:6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-top:14px}
+.chead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 14px}
+.build{font:500 13px var(--mono);color:var(--muted)}
+.hl{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--ember-soft)}
+.sec{margin-top:16px}
+.sec ul{margin:6px 0 0;padding-left:20px}
+.sec li{margin:5px 0}
+.tag{font:600 11px var(--mono);padding:2px 8px;border-radius:999px;background:var(--moon-soft);color:var(--moon);letter-spacing:.5px}
+.go{font:500 13px var(--body);color:var(--moon);background:none;border:0;padding:0 0 0 6px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.go:focus-visible{outline:2px solid var(--moon);outline-offset:2px}
+footer{margin-top:24px;color:var(--muted);font-size:13px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="kicker" id="kick"></div>
+    <h1 id="ttl"></h1>
+    <p id="sub"></p>
+  </header>
+  <main id="list"></main>
+  <footer id="foot"></footer>
+</div>
+
+<script>
+// Each build: what changed, in plain words. th / en side by side (the page picks by the viewer's language).
+// Kept to what players can see and use: nothing admin-only, nothing still hidden in the code.
+const PATCHES = [
+  { build: 'game-20261020-1409', date: { th: '20 ต.ค. 2026', en: '20 Oct 2026' },
+    hl: { th: 'ออโต้ฟาร์มฉลาดขึ้นมาก โล่ดรอปได้แล้วพร้อมโล่ใหม่ 7 ชิ้น อัลติของนักเชิดหุ่นกับผู้เลี้ยงดวงไฟแรงขึ้น และเปลี่ยนเป็น Class 3 ได้ตั้งแต่ Base Lv 80',
+          en: 'A much smarter auto farm, shields now drop (plus 7 new ones), stronger Puppeteer and Wisp Shepherd ultimates, and class 3 from Base Lv 80.' },
+    secs: [
+      { k: 'new', items: [
+        { th: 'หน้าต่าง "ตารางธาตุ" สอนระบบธาตุ: ธาตุไหนแรงหรืออ่อนกับอะไร เปิดได้จากธาตุบนกรอบเป้าหมาย หน้าสถานะ หรือปุ่มในเมนู', en: 'An Element Table window that teaches the element system; open it from the target frame\'s element, the status window or the menu.' },
+        { th: 'การ์ดไอเทมแบบใหม่ เทียบกับของที่ใส่อยู่ให้เลย (ดีกว่า / แย่กว่า / พอ ๆ กัน) และช่องในกระเป๋ามีลูกศรเขียว/แดงบอก', en: 'A new item card that compares with what you wear (better / worse / about the same); bag cells show green or red arrows.' },
+        { th: 'สีของไอเทมตามความหายาก ส่วนเกรดขัดแสดงเป็นเพชร ◆ 0–5 เม็ด หน้าขัดเกรดเลือกชิ้นจากรายการได้', en: 'Items are coloured by rarity and their polish grade shows as 0–5 ◆ gems; the polish page lists your pieces to pick from.' },
+        { th: 'ปุ่ม Discord สำหรับแจ้งบั๊กและเสนอแนะ เกมคัดลอกข้อมูลเครื่องและเวอร์ชันให้พร้อมวาง', en: 'A Discord button for bug reports and ideas; the game copies your version and device info for the post.' },
+        { th: 'การ์ดแจ้งเตือนคำเชิญปาร์ตี้ กิลด์ และคำท้าดวล กดตอบได้ทันที', en: 'Pop-up cards for party, guild and duel invites with answer buttons.' },
+        { th: 'กดค้างที่ปุ่ม + เพื่ออัปสเตตัสรัว ๆ ได้', en: 'Hold the + button to raise a stat quickly.' },
+        { th: 'ไอเทมชิ้นเดียวกันแต่ต่างเกรดแยกช่องในกระเป๋า ไม่รวมกันแล้ว', en: 'Copies of the same item with different grades now get their own bag cells.' },
+      ] },
+      { k: 'bot', items: [
+        { th: 'เลือกเป้าฉลาดขึ้น: ตีตัวที่เลือดใกล้หมดก่อน เลือกมอนที่แพ้ธาตุอาวุธเรา และเลี่ยงมอนเลเวลสูงเกิน', en: 'Smarter targets: finishes hurt monsters first, prefers ones weak to your element, avoids ones far above your level.' },
+        { th: 'โหมด "ตีก่อน แล้วค่อยเก็บของ" (ค่าเริ่มต้น) ไม่วิ่งไปเก็บของกลางไฟต์', en: 'New "fight first, then loot" mode (default): no running for drops mid-fight.' },
+        { th: 'ถอยออกจากฝูงเองเมื่อเลือดต่ำกว่า 30% และยังดื่มยาไม่ได้', en: 'Steps out of a fight going wrong when HP is under 30% and no potion can be drunk.' },
+        { th: 'ดื่มยาแดงตามความเร็วที่เลือดลด ไม่รอจนต่ำกว่าเส้น', en: 'Drinks red potions by how fast HP is falling, not only at the threshold.' },
+        { th: 'ฟาร์มใกล้ปาร์ตี้ได้ เพื่อให้ได้โบนัสเส้นด้ายปาร์ตี้ และช่วยตีมอนที่รุมเพื่อน', en: 'Can farm beside the party to keep the party threads bonus and help a member under attack.' },
+        { th: 'ไม่แย่งมอนที่ผู้เล่นอื่นนอกปาร์ตี้กำลังตี', en: 'Leaves monsters other players (outside the party) are fighting.' },
+        { th: 'แก้บั๊กที่บอทใช้แค่สกิลช่องแรกที่พร้อม ตอนนี้เลือกสกิลที่คุ้มที่สุดตามจริง', en: 'Fixed the bot casting only the first ready slot; it now ranks skills properly.' },
+      ], link: { tab: 'guide', th: 'ดูคู่มือออโต้ฟาร์ม', en: 'Open the auto farm guide' } },
+      { k: 'balance', items: [
+        { th: 'เปลี่ยนเป็น Class 3 ได้ที่ 2nd Job Lv 50 และ Base Lv 80 (จากเดิม 99)', en: 'Class 3 at 2nd-job Job Lv 50 and Base Lv 80 (was 99).' },
+        { th: 'นักเชิดหุ่น · โรงละครหุ่นเชิด: เวทีตามตัวเรา วง 900 นาน 8 วิ คูลดาวน์ 11 วิ มอนบนเวทีถูกตรึงและฟาดกันเองด้วยพลังเรา ทุก 2 วิ กระตุกด้ายดึงมอนเข้า ปิดท้ายด้วย "ปิดม่าน"', en: 'Puppeteer · Puppet Theatre: the stage follows you (900 wide, 8 s, 11 s cooldown), holds monsters that strike each other with your power, yanks them in every 2 s and ends with a Curtain Call.' },
+        { th: 'นักเชิดหุ่น · ขึงด้ายเหล็ก และ รัดด้าย แรงขึ้น ×1.3', en: 'Puppeteer · Steel Thread Snare and Thread Bind hit ×1.3 harder.' },
+        { th: 'ผู้เลี้ยงดวงไฟ · คืนหิ่งห้อยพันดวง: ทั้งจอ 10 วิ ศัตรูตีเบาลงครึ่งหนึ่ง ฝนดวงไฟทุก 2 วิ ทีมรับดาเมจ ×0.8 และได้โล่ดวงไฟ · ฝูงดวงไฟพุ่ง ระเบิดกว้างขึ้น', en: 'Wisp Shepherd · Thousand Fireflies Night: whole screen for 10 s, enemies hit half as hard, a wisp rain every 2 s, the party takes ×0.8 and you get a wisp shield · Wisp Swarm Rush bursts wider.' },
+      ], link: { tab: 'sim', th: 'ลองใน Build Sim', en: 'Try it in the Build Sim' } },
+      { k: 'items', items: [
+        { th: 'โล่ดรอปจากมอนที่ถือโล่แล้ว (โล่ไม้กลม โล่อัศวินกางเขนทอง)', en: 'Shields now drop from the monsters that carry them (Round Wooden Shield, Golden Cross Knight Shield).' },
+        { th: 'โล่ใหม่ 7 ชิ้น Lv 20–95 ตั้งแต่โล่กระดองเต่าตะไคร่ถึงโล่หน้าปัดเที่ยงคืน', en: 'Seven new shields from Lv 20 to 95, from the Mossy Turtle Shell Shield to the Midnight Dial Shield.' },
+      ], link: { tab: 'equip', th: 'ดูโล่ทั้งหมด', en: 'See every shield' } },
+      { k: 'online', items: [
+        { th: 'ออนไลน์: ตั้งแต่ Lv 20 หมดแรงแล้วเสีย EXP 1% ของเลเวลนั้น (ไม่ตกเลเวล) ถ้ามีขนนกไออุ่นจะใช้ขนนกแทน', en: 'Online: from Lv 20 a faint costs 1% of the level\'s EXP (never a level); a Warm Feather is used up instead if you carry one.' },
+        { th: 'ช่วงทดสอบ: EXP จากการล่ามอน x1.5 มีไอคอนบัฟบอกตอนเปิดอยู่', en: 'Test period: monster EXP x1.5, shown as a buff icon while it is on.' },
+      ] },
+      { k: 'fix', items: [
+        { th: 'บอสที่ถูกลากออกนอกเขตเดินกลับบ้านได้ถูกต้อง ไม่ฟื้นเลือดระหว่างโดนตี', en: 'Bosses pulled off their spot walk home properly and no longer heal while being hit.' },
+        { th: 'รีเซ็ตสกิลแล้วรูนที่ใส่ไว้กลับเข้ากระเป๋า ไม่หายแล้ว', en: 'Resetting skills now returns socketed runes to the bag.' },
+        { th: 'ออนไลน์: อัปเครื่องมือหรือขยายแปลงกับครูอาชีพเสริมได้แล้ว (เกมเดินไปหาครูให้ก่อน)', en: 'Online: life-skill teachers\' upgrades work again (the hero walks up to the teacher first).' },
+        { th: 'เควสดื่มยาแดงนับผ่านได้แม้เลือดเต็ม', en: 'The drink-a-red-potion lesson counts even at full HP.' },
+        { th: 'ออนไลน์: การล็อกไอเทมในกระเป๋าไม่หายตอนรีเฟรช', en: 'Online: item locks in the bag survive a refresh.' },
+      ] },
+    ] },
+];
+const SEC = {
+  new: { th: 'ระบบใหม่', en: 'New' }, bot: { th: 'ออโต้ฟาร์ม', en: 'Auto farm' }, balance: { th: 'ปรับสมดุล', en: 'Balance' },
+  items: { th: 'ไอเทมและดรอป', en: 'Items & drops' }, online: { th: 'ออนไลน์', en: 'Online' }, fix: { th: 'แก้บั๊ก', en: 'Fixes' },
+};
+let L = 'th';
+try { L = localStorage.getItem('nc_lang') === 'en' ? 'en' : 'th'; } catch (e) {}
+document.documentElement.lang = L;
+const t = (o) => (o && (o[L] || o.th)) || '';
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const $ = (s) => document.querySelector(s);
+$('#kick').textContent = L === 'en' ? 'Patch notes · KhumGameLab' : 'อัปเดตเกม · KhumGameLab';
+$('#ttl').textContent = L === 'en' ? 'What changed in Night Camp' : 'Night Camp อัปเดตอะไรบ้าง';
+$('#sub').textContent = L === 'en' ? 'Each game build in plain words, newest first. Numbers come from the game\'s own files.' : 'สรุปแต่ละเวอร์ชันของเกมแบบอ่านง่าย ล่าสุดอยู่บนสุด ตัวเลขอ้างอิงจากไฟล์ของเกม';
+$('#foot').textContent = L === 'en' ? 'Fan-made summary of the Night Camp test builds; the game may change again before release. Thanks to the Night Camp team for the updates.' : 'สรุปโดยแฟนเกมจากเวอร์ชันทดสอบของ Night Camp เกมอาจเปลี่ยนอีกก่อนเปิดจริง ขอบคุณทีมงาน Night Camp สำหรับอัปเดตครับ';
+$('#list').innerHTML = PATCHES.map((P) => `<article class="card">
+  <div class="chead"><h2>${esc(t(P.date))}</h2><span class="build">${esc(P.build)}</span></div>
+  <div class="hl">${esc(t(P.hl))}</div>
+  ${P.secs.map((s) => `<section class="sec"><h3><span class="tag">${esc(t(SEC[s.k]))}</span>${s.link ? `<button class="go" data-tab="${s.link.tab}">${esc(t(s.link))} →</button>` : ''}</h3>
+    <ul>${s.items.map((i) => `<li>${esc(t(i))}</li>`).join('')}</ul></section>`).join('')}
+</article>`).join('');
+const inShell = window.parent && window.parent !== window;
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (b && inShell) window.parent.postMessage({ nc: 'nav', tab: b.dataset.tab }, '*'); });
+</script>
+<script>/* English mode: when the viewer picked EN (localStorage nc_lang), swap the Thai interface text for English as the page
+   renders. Game names that have no official English (items, monsters) stay Thai. */
+(function () {
+  var lang = 'th';
+  try { lang = localStorage.getItem('nc_lang') || 'th'; } catch (e) {}
+  if (lang !== 'en') return;
+  // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
+  if (window.NC_I18N) return start(window.NC_I18N);
+  var sc = document.createElement('script');
+  sc.src = 'i18n.js?v=b0a9cc71'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  document.head.appendChild(sc);
+  function start(I) {
+  document.documentElement.lang = 'en';
+  // the English name beside a Thai name would say the same thing twice; and the "more/less" labels drawn by CSS
+  var st = document.createElement('style');
+  st.textContent = '.en2{display:none!important}' + (document.querySelector('nav.ch') ? ' details>summary::after{content:"More \\25BE"!important} details[open]>summary::after{content:"Hide \\25B4"!important}' : '');
+  document.head.appendChild(st);
+  var TH = /[฀-๿]/, NUM = /\d[\d,]*(?:\.\d+)?/g;
+  var R = I.r.map(function (x) { return [new RegExp(x[0]), x[1], !!x[2]]; });
+  var WK = Object.keys(I.w).sort(function (a, b) { return b.length - a.length; });
+  var memo = new Map();
+  function core(c) {
+    if (!TH.test(c)) return c;
+    if (I.x[c] != null) return I.x[c];
+    var nums = c.match(NUM) || [], n = c.replace(NUM, '{n}');
+    if (I.x[n] != null) { var i = 0; return I.x[n].replace(/\{n\}/g, function () { return nums[i++] != null ? nums[i - 1] : ''; }); }
+    // lists first: "a · b" and "a, b" are translated part by part (a repeated name like "Shinobi · Shinobi" collapses)
+    var sep = c.indexOf(' · ') >= 0 ? ' · ' : c.indexOf(', ') >= 0 && !/[()]/.test(c) ? ', ' : null;
+    if (sep) {
+      var parts = c.split(sep).map(function (p) { var t = core(p.trim()); return t == null ? p : t; });
+      if (sep === ' · ' && parts.length === 2 && parts[0] === parts[1]) return parts[0];
+      if (parts.some(function (p, i) { return p !== c.split(sep)[i]; })) return parts.join(sep);
+    }
+    for (var k = 0; k < R.length; k++) {
+      var g = c.match(R[k][0]);
+      if (!g) continue;
+      var ok = true, raw = R[k][2];
+      var res = R[k][1].replace(/\{(\d)\}/g, function (_, d) { var v = g[+d] || ''; var t = core(v); if (t == null) { if (!raw) ok = false; return v; } return t; });
+      if (ok) return res;
+    }
+    var w = c;
+    for (var j = 0; j < WK.length; j++) if (w.indexOf(WK[j]) >= 0) w = w.split(WK[j]).join(I.w[WK[j]]);
+    if (!TH.test(w)) return w;
+    return null;
+  }
+  function tr(s) {
+    if (!s || !TH.test(s)) return s;
+    if (memo.has(s)) return memo.get(s);
+    var m = s.match(/^(\s*)([\s\S]*?)(\s*)$/), out = core(m[2]);
+    var r = out == null ? s : m[1] + out + m[3];
+    memo.set(s, r);
+    return r;
+  }
+  var ATTR = ['placeholder', 'title', 'aria-label'];
+  function el(e) {
+    for (var a = 0; a < ATTR.length; a++) { var v = e.getAttribute && e.getAttribute(ATTR[a]); if (v && TH.test(v)) { var t = tr(v); if (t !== v) e.setAttribute(ATTR[a], t); } }
+  }
+  function walk(root) {
+    if (root.nodeType === 3) { text(root); return; }
+    if (root.nodeType !== 1 || /^(SCRIPT|STYLE|TEXTAREA)$/.test(root.tagName)) return;
+    el(root);
+    var it = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT), n;
+    while ((n = it.nextNode())) {
+      if (n.nodeType === 3) text(n);
+      else if (!/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.tagName)) el(n);
+    }
+  }
+  function text(n) {
+    var p = n.parentNode;
+    if (!p || /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.nodeName)) return;
+    var v = n.nodeValue, t = tr(v);
+    if (t !== v) n.nodeValue = t;
+  }
+  if (TH.test(document.title)) document.title = tr(document.title);
+  walk(document.body);
+  new MutationObserver(function (ms) {
+    for (var i = 0; i < ms.length; i++) {
+      var m = ms[i];
+      if (m.type === 'characterData') text(m.target);
+      else if (m.type === 'attributes') el(m.target);
+      else for (var j = 0; j < m.addedNodes.length; j++) walk(m.addedNodes[j]);
+    }
+  }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTR });
+  window.NC_TR = tr;
+  }
+})();
+</script></body></html>
