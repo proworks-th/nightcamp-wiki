@@ -37,6 +37,8 @@ header.top p{color:var(--muted);margin-top:6px}
 .go{font:500 13px var(--body);color:var(--moon);background:none;border:0;padding:0 0 0 6px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .go:focus-visible{outline:2px solid var(--moon);outline-offset:2px}
 footer{margin-top:24px;color:var(--muted);font-size:13px}
+@keyframes hitfade{0%{box-shadow:0 0 0 3px var(--ember)}100%{box-shadow:0 0 0 3px transparent}}
+.hit{animation:hitfade 2.4s ease-out 1;border-radius:8px}
 </style>
 
 <div class="wrap">
@@ -120,6 +122,12 @@ $('#list').innerHTML = PATCHES.map((P) => `<article class="card">
 </article>`).join('');
 const inShell = window.parent && window.parent !== window;
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (b && inShell) window.parent.postMessage({ nc: 'nav', tab: b.dataset.tab }, '*'); });
+// opened from the site search: scroll to the line
+window.addEventListener('message', (e) => {
+  if (e.source !== window.parent || (e.origin !== location.origin && e.origin !== 'null')) return;
+  const d = e.data || {}; if (d.nc !== 'find' || !d.text) return;
+  for (const li of document.querySelectorAll('#list li')) if ([].concat(d.text).some((s) => s && li.textContent.includes(s))) { li.scrollIntoView({ block: 'center' }); li.classList.remove('hit'); void li.offsetWidth; li.classList.add('hit'); break; }
+});
 </script>
 <script>/* English mode: when the viewer picked EN (localStorage nc_lang), swap the Thai interface text for English as the page
    renders. Game names that have no official English (items, monsters) stay Thai. */

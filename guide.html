@@ -114,6 +114,8 @@ td.num,th.num{text-align:right;font-family:var(--mono);white-space:nowrap}
 footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
 @media (max-width:640px){.me{grid-template-columns:84px 1fr}.me img{width:84px;height:105px}.jd{grid-template-columns:1fr}.jd img{width:140px;height:175px}}
 .bt{width:100%;border-collapse:collapse;font-size:14.5px}.bt th,.bt td{background:none;border:0;border-top:1px solid var(--line);white-space:normal;vertical-align:top}.bt th{font:600 14.5px/1.5 var(--display);color:var(--ember);text-align:left;padding:12px 16px 12px 0;width:30%}.bt td{padding:12px 0;color:var(--fg)}.bt tr:first-child th,.bt tr:first-child td{border-top:0}.bl{margin:0;padding-left:20px}.bl li{margin:6px 0}@media (max-width:640px){.bt,.bt tbody,.bt tr,.bt th,.bt td{display:block;width:auto}.bt tr{padding:10px 0;border-top:1px solid var(--line)}.bt tr:first-child{border-top:0}.bt th,.bt td{border:0;padding:0}.bt th{margin-bottom:2px}}
+@keyframes hitfade{0%{box-shadow:0 0 0 3px var(--ember);background-color:var(--ember-soft,rgba(196,86,26,.14))}100%{box-shadow:0 0 0 3px transparent}}
+.hit{animation:hitfade 2.4s ease-out 1;border-radius:10px}
 </style>
 
 <div class="wrap">
@@ -209,7 +211,26 @@ function setProfile(job, lv, from) {
 }
 window.addEventListener('message', (e) => {
   if (e.source !== window.parent || (e.origin !== location.origin && e.origin !== 'null')) return; // (only the NightCamp Tools top bar)
-  if (e.data && e.data.nc === 'profile' && e.data.profile) setProfile(e.data.profile.job, e.data.profile.lv, 'shell'); });
+  if (e.data && e.data.nc === 'profile' && e.data.profile) setProfile(e.data.profile.job, e.data.profile.lv, 'shell');
+  if (e.data && e.data.nc === 'find') find(e.data); });
+// opened from the site search: a job (and maybe one of its skills), or a section / a card in a section
+function find(d) {
+  let el = null;
+  if (d.job && J[d.job]) {
+    pickJob = d.job; renderFams(); renderJob(); el = $('#jobDetail');
+    if (d.skill) {
+      const det = el.querySelector('details'); if (det) det.open = true;
+      for (const row of el.querySelectorAll('tr, li, div > b')) if ([].concat(d.skill).some((s) => s && row.textContent.includes(s))) { el = row.closest('tr') || row.closest('li') || row.parentElement; break; }
+    }
+  } else if (d.sec && document.getElementById(d.sec)) {
+    el = document.getElementById(d.sec);
+    if (d.text) { const det = el.querySelector('details'); if (det && d.open) det.open = true;
+      for (const h of el.querySelectorAll('h3, summary, td:first-child')) if ([].concat(d.text).some((s) => s && h.textContent.includes(s))) { el = h.closest('.card, details, tr') || h; break; } }
+  }
+  if (!el) return;
+  el.scrollIntoView({ block: 'center' });
+  el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
+}
 const nav = (tab) => { if (inShell) window.parent.postMessage({ nc: 'nav', tab }, '*'); };
 // ---------- recommended builds (open in the Build Sim) ----------
 const BUILDS = {}; // (recommended builds: none listed for now; the card code stays for later)

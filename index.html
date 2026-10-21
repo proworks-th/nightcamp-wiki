@@ -62,6 +62,7 @@ html,body{overflow-x:hidden}
     <button role="tab" id="t-sim" aria-controls="f-sim">Build Sim</button>
     <button role="tab" id="t-patch" aria-controls="f-patch">อัปเดต</button>
   </nav>
+  <div class="sx" role="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="sq" type="search" autocomplete="off" spellcheck="false" aria-label="ค้นหาทั้งเว็บ" aria-controls="sres" data-src="search.json?v=ecef870b"><div class="sres" id="sres" role="listbox" hidden></div></div>
   <div class="me" role="group" aria-label="ตัวละครของฉัน">
     <label for="pJob">ตัวละคร</label><select id="pJob"><option value="priest">พระ · Priest</option><option value="knight">อัศวิน · Knight</option><option value="mage">จอมเวท · Mage</option><option value="archer">นักธนู · Archer</option><option value="rogue">โจร · Rogue</option><option value="ranger">เรนเจอร์ · Ranger</option><option value="wolfhunter">นักล่าหมาป่า · Wolf Hunter</option><option value="assassin">นักฆ่า · Assassin</option><option value="shinobi">นินจา · Shinobi</option><option value="bishop">บิชอป · Bishop</option><option value="monk">นักพรต · Monk</option><option value="paladin">พาลาดิน · Paladin</option><option value="dragonknight">อัศวินมังกร · Dragon Knight</option><option value="archmage">อาร์คเมจ · Archmage</option><option value="warlock">วอร์ล็อกตะเกียง · Lantern Warlock</option><option value="swordmaster">นักดาบ · Swordmaster</option><option value="berserker">เบอร์เซิร์กเกอร์ · Berserker</option><option value="firemage">จอมเวทไฟ · Fire Mage</option><option value="icemage">จอมเวทน้ำแข็ง · Ice Mage</option><option value="bard">นักกวี · Bard</option><option value="gunslinger">มือปืน · Gunslinger</option><option value="reaper">ยมทูต · Reaper</option><option value="puppeteer">นักเชิดหุ่น · Puppeteer</option><option value="lightkeeper">ผู้จุดตะเกียง · Lightkeeper</option><option value="wisp">ผู้เลี้ยงดวงไฟ · Wisp Shepherd</option><option value="dawnwarden">ผู้พิทักษ์รุ่งสาง · Dawn Warden</option><option value="dragonbound">อัศวินผสานมังกร · Dragonbound Knight</option><option value="starblade">นักดาบกลุ่มดาว · Starblade</option><option value="starcore">จอมเวทดาวฤกษ์ · Starcore Sorcerer</option><option value="winterlord">จ้าวเหมันต์ · Winter Lord</option><option value="astral">จอมเวทดาราจักร · Astral Magus</option><option value="hexlord">จ้าวคืนเดือนดับ · Hexlord of the New Moon</option><option value="bloodmoon">จอมคลั่งจันทร์เลือด · Blood Moon Berserker</option><option value="moonsniper">พรานจันทร์เงียบ · Moon Sniper</option><option value="packalpha">จ่าฝูงจันทร์เต็มดวง · Full Moon Alpha</option><option value="maestro">วาทยกรแห่งป่า · Forest Maestro</option><option value="outlaw">มือปืนเที่ยงคืน · Midnight Outlaw</option><option value="eclipse">นักฆ่าจันทรคราส · Eclipse Assassin</option><option value="shadowlord">จ้าวเงาร้อยร่าง · Lord of a Hundred Shadows</option><option value="harvester">ผู้เก็บเกี่ยวจันทรา · Moon Harvester</option><option value="showmaster">จ้าวโรงหุ่นราตรี · Night Theatre Master</option><option value="starsaint">นักบุญแสงดาว · Starlight Saint</option><option value="meteorfist">ปรมาจารย์หมัดดาวตก · Meteor Fist Master</option><option value="beacon">ผู้เฝ้าประภาคาร · Lighthouse Warden</option><option value="starshepherd">ผู้เลี้ยงดวงดาว · Star Shepherd</option></select>
     <label for="pLv">Lv</label><input type="number" id="pLv" min="1" max="99">
@@ -69,10 +70,10 @@ html,body{overflow-x:hidden}
   </div>
 </header>
 <div class="stage">
-<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=eb34f450"></iframe>
-<iframe id="f-equip" title="คลังอุปกรณ์" data-src="equip.html?v=5e882464" hidden></iframe>
+<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=44e6e3c6"></iframe>
+<iframe id="f-equip" title="คลังอุปกรณ์" data-src="equip.html?v=360c74c3" hidden></iframe>
 <iframe id="f-sim" title="Build Simulator" data-src="sim.html?v=c1b5941c" hidden></iframe>
-<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=43f5e8e2" hidden></iframe>
+<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=44bf1696" hidden></iframe>
 <div class="skel" id="skel" aria-hidden="true"><div class="in"><i style="height:150px"></i><i style="height:22px;width:55%"></i><i style="height:110px"></i><i style="height:110px"></i><i style="height:180px"></i></div></div>
 </div>
 <script>
@@ -124,6 +125,120 @@ const linkCode = (/^#sim\/(NCB1\.[A-Za-z0-9+/]+)$/.exec(location.hash) || [])[1]
 if (linkCode) whenReady('sim', () => F.sim.contentWindow.postMessage({ nc: 'build', code: linkCode, name: 'Build จากลิงก์' }, '*'));
 go(back || (linkCode ? 'sim' : location.hash.slice(1)));
 </script>
+<style>
+.sx{position:relative;flex:1 1 220px;max-width:420px;min-width:0}
+.sx input{width:100%;font:15px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:8px 14px 8px 36px;min-height:42px}
+.sx svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none}
+.sres{position:absolute;z-index:50;top:calc(100% + 6px);left:0;width:min(560px,calc(100vw - 32px));max-height:min(70vh,560px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 32px rgba(10,14,40,.22);padding:6px}
+.sres h4{margin:8px 10px 4px;font:600 12.5px var(--display);color:var(--muted);letter-spacing:.02em}
+.sres a{display:flex;flex-direction:column;gap:1px;padding:8px 10px;border-radius:9px;color:var(--fg);text-decoration:none;cursor:pointer}
+.sres a b{font-weight:500;font-size:15px}
+.sres a small{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sres a small.x{color:var(--fg);opacity:.8}
+.sres a.all b{color:var(--ember)}
+.sres a[aria-selected="true"],.sres a:hover{background:var(--bg)}
+.sres mark{background:none;color:var(--ember);font-weight:600}
+.sres .none{padding:14px 10px;color:var(--muted);font-size:14px}
+@media (max-width:720px){.brand{order:-2}.sx{flex:1 1 100%;max-width:none;order:-1}.sres{width:calc(100vw - 32px)}}
+</style>
+<script>
+// site-wide search: one box for items (and their stats: "crit"), monsters, options, jobs, skills, spots, guide tips, patch notes
+(function () {
+  const box = document.getElementById('sq'), res = document.getElementById('sres');
+  const EN = LANG === 'en';
+  box.placeholder = EN ? 'Search everything: crit, slime, a skill…' : 'ค้นทั้งเว็บ เช่น crit, สไลม์, ชื่อสกิล…';
+  const KIND = { job: ['อาชีพ', 'Jobs'], skill: ['สกิล', 'Skills'], item: ['อุปกรณ์', 'Equipment'], opt: ['ออปชั่นสุ่มบนอุปกรณ์', 'Random equipment options'],
+    mon: ['มอนสเตอร์ · กดเพื่อดูของที่ดรอป', 'Monsters · open what they drop'], spot: ['จุดเก็บเลเวล', 'Leveling spots'], sec: ['คู่มือ', 'Guide'], patch: ['อัปเดตเกม', 'Patch notes'] };
+  const ORDER = ['item', 'opt', 'job', 'skill', 'mon', 'spot', 'sec', 'patch'], MAX = { item: 6, mon: 4, skill: 5 };
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  let SYN = [], IDX = null, loading = null, hits = [], act = -1;
+  function load() {
+    if (IDX || loading) return loading;
+    loading = fetch(box.dataset.src).then((r) => r.json()).then((d) => {
+      SYN = d.syn;
+      IDX = d.rows.map((r) => { let h = (r[1] + ' ' + r[2] + ' ' + r[3]).toLowerCase(); const add = []; for (const g of d.syn) if (g.some((w) => h.includes(w))) add.push(...g); return { r, nm: (r[1] + ' ' + r[2]).toLowerCase(), h: h + ' ' + add.join(' ') }; });
+      if (box.value.trim()) find();
+    }).catch(() => { loading = null; res.innerHTML = `<div class="none">${EN ? 'Search could not load. Try again.' : 'โหลดข้อมูลค้นหาไม่ได้ ลองใหม่อีกครั้ง'}</div>`; res.hidden = false; });
+    return loading;
+  }
+  // highlight the words typed and their same-meaning words ("crit" lights up "คริ +5%")
+  const reEsc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  function mark(s, toks) {
+    const W = new Set(toks.filter((t) => t.length > 1));
+    for (const g of SYN) if (toks.some((t) => g.includes(t) || (t.length > 2 && g.some((w) => w.startsWith(t))))) g.forEach((w) => W.add(w));
+    if (!W.size) return esc(s);
+    const re = new RegExp([...W].sort((a, b) => b.length - a.length).map(reEsc).join('|'), 'gi');
+    let o = '', i = 0, m; const str = String(s);
+    while ((m = re.exec(str))) { o += esc(str.slice(i, m.index)) + '<mark>' + esc(m[0]) + '</mark>'; i = m.index + m[0].length; if (!m[0].length) re.lastIndex++; }
+    return o + esc(str.slice(i));
+  }
+  // English viewers: translate the small lines part by part (the page dictionary knows the parts, not the whole line)
+  const PRE = { 'เสื้อ+กางเกง': 'Top + pants', 'ครบ 3 ชิ้น': 'Full set', 'ติดได้ที่': 'Rolls on', 'สูงสุด': 'max', 'มอน': 'Monsters', 'คู่มือ': 'Guide' };
+  const TR = (s) => {
+    if (!EN || !s || !window.NC_TR) return s;
+    return String(s).split(' / ').map((part) => part.split(' · ').map((seg) => {
+      const m = /^([^:]+):\s*(.*)$/.exec(seg); if (m && PRE[m[1]]) return PRE[m[1]] + ': ' + TR(m[2]);
+      const w = /^(\S+)\s(.+)$/.exec(seg); if (w && PRE[w[1]]) return PRE[w[1]] + ' ' + TR(w[2]);
+      return window.NC_TR(seg);
+    }).join(' · ')).join(' / ');
+  };
+  function find() {
+    const q = box.value.trim().toLowerCase();
+    if (!q) { close(); return; }
+    if (!IDX) { load(); res.innerHTML = `<div class="none">${EN ? 'Loading…' : 'กำลังโหลด…'}</div>`; res.hidden = false; return; }
+    const toks = q.split(/\s+/);
+    const by = {};
+    for (const x of IDX) {
+      if (!toks.every((t) => x.h.includes(t))) continue;
+      const nm = x.nm, s = nm === q ? 100 : nm.startsWith(q) ? 70 : nm.includes(q) ? 50 : toks.every((t) => nm.includes(t)) ? 40 : 10;
+      (by[x.r[0]] = by[x.r[0]] || []).push([s, x.r]);
+    }
+    hits = []; let html = '';
+    // equipment first (the usual question: "which items have crit?"), unless another kind has that exact name
+    const exact = (k) => by[k].some((z) => z[0] === 100);
+    const kinds = ORDER.filter((k) => by[k]).sort((a, b) => exact(b) - exact(a) || ORDER.indexOf(a) - ORDER.indexOf(b));
+    for (const k of kinds) {
+      const L = by[k].sort((a, b) => b[0] - a[0] || a[1][1].length - b[1][1].length), n = MAX[k] || 4;
+      html += `<h4>${KIND[k][EN ? 1 : 0]} · ${L.length.toLocaleString()}</h4>`;
+      for (const [, r] of L.slice(0, n)) {
+        const name = EN && r[2] ? r[2] : r[1];
+        html += `<a role="option" data-i="${hits.length}"><b>${mark(name, toks)}</b>${r[5].sub ? `<small>${esc(TR(r[5].sub))}</small>` : ''}${r[5].x ? `<small class="x">${mark(TR(r[5].x), toks)}</small>` : ''}</a>`;
+        hits.push(r);
+      }
+      if (k === 'item' && L.length > n) { html += `<a role="option" class="all" data-i="${hits.length}"><b>${EN ? `See all ${L.length} matching items →` : `ดูอุปกรณ์ทั้ง ${L.length} ชิ้นที่ตรงกับ “${esc(q)}” →`}</b></a>`; hits.push(['all', q, '', '', 'equip', { q }]); }
+    }
+    res.innerHTML = html || `<div class="none">${EN ? `Nothing found for “${esc(q)}”` : `ไม่เจอ “${esc(q)}” ลองคำอื่น เช่น ชื่อไทย/อังกฤษ หรือค่าสถานะ (crit, ตีเร็ว, hp)`}</div>`;
+    res.hidden = false; act = hits.length ? 0 : -1; paint();
+  }
+  function paint() { for (const a of res.querySelectorAll('a')) a.setAttribute('aria-selected', +a.dataset.i === act); const a = res.querySelector(`a[data-i="${act}"]`); if (a) a.scrollIntoView({ block: 'nearest' }); }
+  function close() { res.hidden = true; act = -1; }
+  function open(r) {
+    if (!r) return;
+    const tab = r[4], msg = Object.assign({ nc: 'find' }, r[5]);
+    if (msg.q === 1) msg.q = r[1];
+    delete msg.sub; delete msg.x;
+    close(); box.blur();
+    go(tab);
+    whenReady(tab, () => F[tab].contentWindow.postMessage(msg, '*'));
+  }
+  let t = 0;
+  box.addEventListener('focus', load);
+  box.addEventListener('input', () => { clearTimeout(t); t = setTimeout(find, 120); });
+  box.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' && hits.length) { e.preventDefault(); if (res.hidden) find(); act = (act + 1) % hits.length; paint(); }
+    else if (e.key === 'ArrowUp' && hits.length) { e.preventDefault(); act = (act - 1 + hits.length) % hits.length; paint(); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (res.hidden) find(); else open(hits[Math.max(0, act)]); }
+    else if (e.key === 'Escape') { close(); }
+  });
+  res.addEventListener('mousedown', (e) => e.preventDefault()); // keep the focus in the box while clicking a result
+  res.addEventListener('click', (e) => { const a = e.target.closest('a[data-i]'); if (a) open(hits[+a.dataset.i]); });
+  box.addEventListener('blur', () => setTimeout(close, 120));
+  document.addEventListener('keydown', (e) => { if (e.key === '/' && document.activeElement !== box && !/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) { e.preventDefault(); box.focus(); } });
+  // pages ask for a search too (e.g. a "/" typed inside a page)
+  window.addEventListener('message', (e) => { const d = e.data || {}; if (d.nc === 'focusSearch' && TABS.some((x) => F[x].contentWindow === e.source)) box.focus(); });
+})();
+</script>
+
 <script>/* English mode: when the viewer picked EN (localStorage nc_lang), swap the Thai interface text for English as the page
    renders. Game names that have no official English (items, monsters) stay Thai. */
 (function () {
