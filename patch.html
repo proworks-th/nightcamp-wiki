@@ -228,8 +228,7 @@ function more(key) {
   return `<details class="more"><summary>${L === 'en' ? 'Details' : 'รายละเอียด'}</summary><ul>${lines.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>${tbl}</details>`;
 }
 $('#list').innerHTML = PATCHES.map((P) => { const b4 = P.build.slice(-4); return `<article class="card">
-  <div class="chead"><h2>${esc(when(P.build) || t(P.date))}</h2><span class="build">${esc(P.build)}</span></div>
-  ${filesTxt(P.build) ? `<p class="files">${esc(filesTxt(P.build))}</p>` : ''}
+  <div class="chead"><h2>${esc(when(P.build) || t(P.date))}</h2></div>
   <div class="hl">${esc(t(P.hl))}</div>
   ${P.secs.map((s) => `<section class="sec"><h3><span class="tag">${esc(t(SEC[s.k]))}</span>${s.link ? `<button class="go" data-tab="${s.link.tab}">${esc(t(s.link))} →</button>` : ''}</h3>
     <ul>${s.items.map((i, n) => `<li>${esc(t(i))}${more(`${b4}|${s.k}|${n}`)}</li>`).join('')}</ul></section>`).join('')}
