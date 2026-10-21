@@ -1,8 +1,8 @@
-# NightCamp Tools
+# NightCamp Wiki
 
 Live: https://proworks-th.github.io/nightcamp-wiki/
 
-Fan-made tools for the Thai MMORPG **NightCamp**, by KhumGameLab. `index.html` is the top bar; each page (`guide.html`, `equip.html`, `sim.html`) loads the first time its tab opens, pictures live in `img/`, and the English dictionary (`i18n.js`) loads only in English mode. Open it through the website (it needs a web server, not a double-click).
+Fan-made wiki and tools for the Thai MMORPG **NightCamp**, by KhumGameLab. `index.html` is the top bar; each page (`guide.html`, `equip.html`, `sim.html`) loads the first time its tab opens, pictures live in `img/`, and the English dictionary (`i18n.js`) loads only in English mode. Open it through the website (it needs a web server, not a double-click).
 
 - **คู่มือ / Guide** (`#guide`): your character at a glance, where to level by map and element, every job, and the game systems worth knowing.
 - **อุปกรณ์ / Equipment** (`#equip`): 1,396 weapons (including the starter weapons and the 20 root-possessed bosses' weapons), 80 armour sets, 80 hats, 28 glasses and 9 shields. Search by item, monster, map, material or ability; drop chance at your level; craft recipes; send an item to the Build Sim.

@@ -113,7 +113,7 @@ td.num,th.num{text-align:right;font-family:var(--mono);white-space:nowrap}
 .heat td{text-align:center;font-family:var(--mono)} .h0{color:var(--bad);font-weight:600} .hlow{color:var(--muted)} .hhi{color:var(--good)} .hvhi{color:var(--good);font-weight:700}
 footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
 @media (max-width:640px){.me{grid-template-columns:84px 1fr}.me img{width:84px;height:105px}.jd{grid-template-columns:1fr}.jd img{width:140px;height:175px}}
-.bt{width:100%;border-collapse:collapse;font-size:14.5px}.bt th{text-align:left;vertical-align:top;font:500 14.5px var(--display);padding:9px 12px 9px 0;width:32%;border-top:1px solid var(--line)}.bt td{padding:9px 0;border-top:1px solid var(--line)}.bt tr:first-child th,.bt tr:first-child td{border-top:0}.bl{margin:0;padding-left:20px}.bl li{margin:6px 0}@media (max-width:600px){.bt th,.bt td{display:block;width:auto;padding:4px 0}.bt td{padding-bottom:10px}}
+.bt{width:100%;border-collapse:collapse;font-size:14.5px}.bt th,.bt td{background:none;border:0;border-top:1px solid var(--line);white-space:normal;vertical-align:top}.bt th{font:600 14.5px/1.5 var(--display);color:var(--ember);text-align:left;padding:12px 16px 12px 0;width:30%}.bt td{padding:12px 0;color:var(--fg)}.bt tr:first-child th,.bt tr:first-child td{border-top:0}.bl{margin:0;padding-left:20px}.bl li{margin:6px 0}@media (max-width:640px){.bt,.bt tbody,.bt tr,.bt th,.bt td{display:block;width:auto}.bt tr{padding:10px 0;border-top:1px solid var(--line)}.bt tr:first-child{border-top:0}.bt th,.bt td{border:0;padding:0}.bt th{margin-bottom:2px}}
 </style>
 
 <div class="wrap">
@@ -386,7 +386,7 @@ if (!inShell) for (const b of document.querySelectorAll('[data-nav]')) b.hidden 
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=b0a9cc71'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=5984fce5'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
