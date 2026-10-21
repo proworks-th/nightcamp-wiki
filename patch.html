@@ -55,6 +55,50 @@ footer{margin-top:24px;color:var(--muted);font-size:13px}
 // Each build: what changed, in plain words. th / en side by side (the page picks by the viewer's language).
 // Kept to what players can see and use: nothing admin-only, nothing still hidden in the code.
 const PATCHES = [
+  { build: 'game-20261021-1537', date: { th: '21 ต.ค. 2026', en: '21 Oct 2026' },
+    hl: { th: 'ตัวติดซอกมีทางออกแล้ว (ปุ่มในเมนู ESC และ /ติด) ออโต้ฟาร์มไม่เรียกสัตว์ซ้ำและไม่ขยับระหว่างร่าย ดวงไฟติดศัตรูของผู้เลี้ยงดวงไฟแรงขึ้น และแก้บั๊กออนไลน์อีกเยอะ',
+          en: 'A way out when you get wedged (ESC menu button and /ติด), an auto farm that stops re-summoning and stands still while casting, a stronger Wisp Shepherd mark, and many online fixes.' },
+    secs: [
+      { k: 'new', items: [
+        { th: 'ปุ่ม "ติดอยู่? ช่วยพาออก" ในเมนู ESC และคำสั่งแชท /ติด ใช้ได้ทุกแมพ ออนไลน์จะพาออกเฉพาะตอนติดจริง', en: 'An "ติดอยู่? ช่วยพาออก" (stuck? get me out) button in the ESC menu and the chat command /ติด, on every map. Online it only moves you when you really are wedged.' },
+        { th: 'ปุ่ม "ออกจากราก" ในรากต้นไม้มืด และคำสั่ง /ออกราก ออกได้แม้ติดกำแพงหรือหมดแรง ชั้นที่ผ่านแล้วยังได้รางวัล', en: 'A "ออกจากราก" (leave root) button in the Dark Root and the command /ออกราก. Works even when stuck or down; floors already cleared still pay.' },
+        { th: 'สรุปบอทในสมุดบันทึกนับมอน EXP Job EXP วัสดุ และของดรอปตอนเล่นออนไลน์ได้แล้ว (เดิมเป็น 0)', en: 'The bot summary in the journal now counts kills, EXP, Job EXP, materials and drops online (they stayed at 0).' },
+      ] },
+      { k: 'bot', items: [
+        { th: 'ไม่เรียกหมาป่า วายเวิร์น โคมไฟ หรือหุ่นซ้ำระหว่างตัวเดิมยังอยู่ เรียกใหม่เมื่อ HP มันต่ำกว่า 35% เหลือเวลาไม่ถึง 2 วิ หรือหายไป', en: 'No more re-summoning a wolf, wyvern, lantern or puppet while the old one lives; it recasts under 35% summon HP, with under 2 s left, or when it is gone.' },
+        { th: 'ยืนนิ่งจนบาร์ร่ายเต็ม ฮีลและบัฟไม่หลุดเพราะเดินตามตี้หรือไปเก็บของแล้ว', en: 'Stands still until the cast bar fills, so heals and buffs are no longer cancelled by following the party or looting.' },
+        { th: 'ออนไลน์เลือกสกิลแม่นขึ้น นับจำนวนที่ตีโดนจริงจากเซิร์ฟเวอร์ ไม่กดวนแค่ 1–2 ปุ่ม', en: 'Online it now counts the hits each skill really lands, so the rotation no longer sticks to one or two keys.' },
+        { th: 'สกิลประชิดที่ไม่มีระยะของตัวเองใช้ได้ไกลตามระยะอาวุธ (เช่น ลวดของนักเชิดหุ่น) ไม่ต้องรอมอนเดินเข้ามา', en: 'Melee skills without their own range fire from the weapon\'s reach (e.g. the Puppeteer\'s wire) instead of waiting for the monster.' },
+        { th: 'โดนกระแทกเข้าซอกแล้วพาตัวออกเอง ไม่ยืนโดนตีอยู่ที่เดิม', en: 'Hops out when knocked into a wedge instead of standing there being hit.' },
+        { th: 'นั่งพักแล้วมีมอนวิ่งเข้ามาตอนเลือดต่ำ ถอยทันที · ปิดออโต้แล้วลุกขึ้นเอง · เหยี่ยวโฉบล่าของนักล่าหมาป่าถูกใช้คุ้มขึ้น', en: 'Backs off at once if a monster comes while it sits at low HP; switching AUTO off stands you up; the Wolf Hunter\'s falcon is valued properly.' },
+      ], link: { tab: 'guide', th: 'ดูคู่มือออโต้ฟาร์ม', en: 'Open the auto farm guide' } },
+      { k: 'balance', items: [
+        { th: 'ผู้เลี้ยงดวงไฟ · ดวงไฟติดศัตรู: ระเบิดเพิ่ม 40% → 60% ของ MATK ที่ Lv 5 (40/45/50/55/60%)', en: 'Wisp Shepherd · Wisp Tag: the extra burst goes from 40% to 60% of MATK at Lv 5 (40/45/50/55/60%).' },
+        { th: 'ผู้เลี้ยงดวงไฟ · ดวงไฟโอบกาย: โล่ดูดดาเมจให้เพื่อนที่มีดวงไฟเกาะด้วย ไม่ใช่แค่ตัวเอง', en: 'Wisp Shepherd · Wisp Embrace: the shield now soaks damage for a friend carrying the wisp, not only for you.' },
+        { th: 'เรนเจอร์ · ธนูใบไม้ทะลวง: วังวนใบไม้เปิดตรงมอนตัวแรกที่โดน (ไม่โดนใครถึงเปิดที่ปลายทาง)', en: 'Ranger · Piercing Leaf Arrow: the vortex opens on the first monster hit (at the end of the shot only if nothing is hit).' },
+        { th: 'ตายแล้วบัฟหายหมด ไม่ค้างกลับมาตอนฟื้น', en: 'All buffs end when you die instead of coming back on revive.' },
+        { th: 'ธนู เวท และสกิลยิงข้ามบ่อน้ำได้แล้ว (เดินข้ามยังไม่ได้)', en: 'Arrows, bolts and skill shots fly over ponds now (walking across still does not).' },
+      ] },
+      { k: 'items', items: [
+        { th: 'แร่ทองแดง เหล็ก เงิน เรืองแสงจาง ๆ หาง่ายขึ้น · ออนไลน์ขุดแร่ไม่ค้าง และไม่ขึ้นปุ่มที่เส้นแร่ที่คนอื่นกำลังขุด', en: 'Copper, iron and silver veins glow faintly; online mining no longer fails to start, and veins others are working show no prompt.' },
+        { th: 'การ์ดอุปกรณ์และหน้าเทียบของนับสเตตัสจากแถวออปชั่น (เช่น INT +3) แล้ว เดิมขึ้นเป็น 0', en: 'Item cards and the compare table now count stats from option rows (e.g. INT +3); they showed 0.' },
+        { th: 'ฝาก/เบิกของที่ลุงโกโก้มีปุ่มพาเดินไปและบอกวิธีชัดขึ้น', en: 'Coco\'s storage gets buttons that walk you there and clearer how-to text.' },
+        { th: 'อัตราตีบวก ขัดเกรด ยา และราคาร้านไม่เปลี่ยน ตัวคำนวณในหน้าอุปกรณ์ยังใช้ได้ตามเดิม', en: 'Refine, polish, potion and shop numbers are unchanged; the calculator on the Equipment page still holds.' },
+      ] },
+      { k: 'online', items: [
+        { th: 'สัตว์เรียก หุ่นเชิด และเหยี่ยวตอนออนไลน์เป็นของเซิร์ฟเวอร์จริง เห็นดาเมจตรงกับที่โดน', en: 'Online summons, puppets and falcons are the server\'s own now, with the hits you see matching the real ones.' },
+        { th: 'คูลดาวน์สกิลซิงก์กับเซิร์ฟเวอร์ ไม่ขึ้น "ใช้สกิลไม่ได้" · ยิงโดนมอนตรงที่เห็นบนจอมากขึ้นแม้เน็ตหน่วง', en: 'Skill cooldowns sync with the server (no more "ใช้สกิลไม่ได้"), and shots land where you see the monster even with some lag.' },
+        { th: 'รายชื่อกิลด์เห็นเพื่อนที่ออนไลน์อยู่แมพหรือแชนแนลอื่น และเวลาออนไลน์ล่าสุดไม่เป็นปี 1970 แล้ว', en: 'The guild roster shows mates online on other maps and channels, and "last seen" no longer says 1970.' },
+        { th: 'แอป PC: เมื่อต้องอัปเดตตัวติดตั้งจะมีหน้าจอแจ้งพร้อมปุ่มดาวน์โหลด · ย่อหน้าต่างแล้วออโต้ยังทำงานต่อ', en: 'PC app: a screen with a download button appears when an app update is required; AUTO keeps running while the window is minimised.' },
+        { th: 'เมนู ESC ไม่มี "ลองอาชีพ" แล้ว · หน้าเติมเพชรขึ้นว่ายังไม่เปิดรับชำระเงิน', en: 'The ESC menu no longer has "try a job"; the top-up page says payments are not open yet.' },
+      ] },
+      { k: 'fix', items: [
+        { th: 'ปิดออโต้ฟาร์ม (Z) ตอนออโต้เควสทำงาน หยุดทั้งคู่ ไม่เปิดกลับเอง', en: 'Turning farm AUTO off (Z) during quest AUTO stops both; it no longer turns itself back on.' },
+        { th: 'บทเรียนมือใหม่ขึ้นเควสเนื้อเรื่องที่รับไว้ก่อน และบอกให้รอเลเวลเมื่อขั้นนั้นต้องใช้แต้ม', en: 'The tutorial tracker shows your story quest first and says to wait for a level when a step needs a point.' },
+        { th: 'กดซื้อที่แผงร้านผู้เล่นไม่หลุด · กระซิบไม่ถึงบอกสาเหตุ · ไอคอนบัฟที่ต้องถืออาวุธอื่นจะจางและบอกว่าต้องถืออะไร', en: 'Stall buy clicks no longer get lost; failed whispers say why; buffs that need another weapon are dimmed and say which.' },
+        { th: 'หน้าสเตตัสแสดงตัวคูณ ATK และ % พลังโจมตี/พลังสกิลรวมทุกอย่าง · ชำนาญดาบเขียนชัดว่าไม่นับดาบคู่', en: 'The status window shows your ATK multiplier and total attack/skill %; Sword Mastery now says it does not count dual swords.' },
+      ] },
+    ] },
   { build: 'game-20261020-1409', date: { th: '20 ต.ค. 2026', en: '20 Oct 2026' },
     hl: { th: 'ออโต้ฟาร์มฉลาดขึ้นมาก โล่ดรอปได้แล้วพร้อมโล่ใหม่ 7 ชิ้น อัลติของนักเชิดหุ่นกับผู้เลี้ยงดวงไฟแรงขึ้น และเปลี่ยนเป็น Class 3 ได้ตั้งแต่ Base Lv 80',
           en: 'A much smarter auto farm, shields now drop (plus 7 new ones), stronger Puppeteer and Wisp Shepherd ultimates, and class 3 from Base Lv 80.' },
@@ -138,7 +182,7 @@ window.addEventListener('message', (e) => {
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=25d467ae'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=f3841934'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
