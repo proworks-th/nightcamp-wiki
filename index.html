@@ -77,16 +77,16 @@ details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-s
   <nav class="sub" aria-label="หน้า"><button id="t-guide" data-g="guide" aria-controls="f-guide">คู่มือ</button><button id="t-patch" data-g="guide" aria-controls="f-patch">อัปเดตเกม</button><button id="t-jobs" data-g="data" aria-controls="f-jobs">อาชีพและสกิล</button><button id="t-equip" data-g="data" aria-controls="f-equip">อุปกรณ์</button><button id="t-mon" data-g="data" aria-controls="f-mon">มอนสเตอร์และแมพ</button><button id="t-life" data-g="data" aria-controls="f-life">อาชีพเสริม</button><button id="t-me" data-g="tools" aria-controls="f-me">ตัวละครของฉัน</button><button id="t-sim" data-g="tools" aria-controls="f-sim">Build Sim</button><button id="t-plan" data-g="tools" aria-controls="f-plan">วางแผนฟาร์ม</button><button id="t-calc" data-g="tools" aria-controls="f-calc">ตีบวก / ขัดเกรด</button></nav>
 </header>
 <div class="stage">
-<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=c9ee316f#v=guide" hidden></iframe>
-<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=26904c92" hidden></iframe>
-<iframe id="f-jobs" title="อาชีพและสกิล" data-src="guide.html?v=c9ee316f#v=jobs" hidden></iframe>
-<iframe id="f-equip" title="อุปกรณ์" data-src="equip.html?v=78f4b5cd" hidden></iframe>
-<iframe id="f-mon" title="มอนสเตอร์และแมพ" data-src="mon.html?v=e80c4e2c" hidden></iframe>
-<iframe id="f-life" title="อาชีพเสริม" data-src="life.html?v=9eef9065" hidden></iframe>
-<iframe id="f-me" title="ตัวละครของฉัน" data-src="guide.html?v=c9ee316f#v=me" hidden></iframe>
-<iframe id="f-sim" title="Build Sim" data-src="sim.html?v=78e705f1" hidden></iframe>
-<iframe id="f-plan" title="วางแผนฟาร์ม" data-src="plan.html?v=f0d335d0" hidden></iframe>
-<iframe id="f-calc" title="ตีบวก / ขัดเกรด" data-src="equip.html?v=78f4b5cd#v=calc" hidden></iframe>
+<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=efa6f907#v=guide" hidden></iframe>
+<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=710c68fd" hidden></iframe>
+<iframe id="f-jobs" title="อาชีพและสกิล" data-src="guide.html?v=efa6f907#v=jobs" hidden></iframe>
+<iframe id="f-equip" title="อุปกรณ์" data-src="equip.html?v=e986c65b" hidden></iframe>
+<iframe id="f-mon" title="มอนสเตอร์และแมพ" data-src="mon.html?v=f8fac2f0" hidden></iframe>
+<iframe id="f-life" title="อาชีพเสริม" data-src="life.html?v=9ef14ded" hidden></iframe>
+<iframe id="f-me" title="ตัวละครของฉัน" data-src="guide.html?v=efa6f907#v=me" hidden></iframe>
+<iframe id="f-sim" title="Build Sim" data-src="sim.html?v=888e553c" hidden></iframe>
+<iframe id="f-plan" title="วางแผนฟาร์ม" data-src="plan.html?v=659a5324" hidden></iframe>
+<iframe id="f-calc" title="ตีบวก / ขัดเกรด" data-src="equip.html?v=e986c65b#v=calc" hidden></iframe>
 <div class="skel" id="skel" aria-hidden="true"><div class="in"><i style="height:150px"></i><i style="height:22px;width:55%"></i><i style="height:110px"></i><i style="height:110px"></i><i style="height:180px"></i></div></div>
 </div>
 <script>
@@ -270,7 +270,7 @@ document.addEventListener('error', (e) => { const w = e.target.closest && e.targ
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=7329f3a7'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=b1afc4aa'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';

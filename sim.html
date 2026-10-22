@@ -41,6 +41,7 @@ h3{font:500 16px var(--display);margin:0}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--moon);outline-offset:2px}
 .btn{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:7px 12px;font-size:14px}
+a.btn{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center}
 .btn:hover{border-color:var(--fg)}
 .btn.primary{background:var(--ember);border-color:var(--ember);color:var(--panel)}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
@@ -135,6 +136,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch}
     <button class="btn" id="saveBtn">บันทึก</button>
     <button class="btn" id="loadBtn">เปิดที่บันทึก</button>
     <button class="btn" id="shareBtn">แชร์โค้ด</button>
+    <button class="btn" id="cardBtn">รูปบิลด์</button>
     <button class="btn" id="importBtn">วางโค้ด</button>
     <button class="btn" id="resetBtn">ล้างสกิล</button>
   </div>
@@ -595,6 +597,63 @@ $('#shareBtn').onclick = () => {
   openDlg(`<h2>แชร์ Build</h2><p class="muted" style="margin:0">คัดลอกโค้ดนี้ไปวางให้คนอื่นกด "วางโค้ด"</p><textarea id="shareTxt" readonly>${esc(code)}</textarea><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ปิด</button><button class="btn primary" data-ok>คัดลอก</button></div>`,
     () => { const t = $('#shareTxt'); t.select(); (navigator.clipboard ? navigator.clipboard.writeText(code) : Promise.reject()).then(() => toast('คัดลอกแล้ว'), () => toast('เลือกข้อความไว้แล้ว กด Ctrl+C')); return false; });
 };
+// ---------- a picture of the build, to post (1200 × 675 PNG, drawn on a canvas from this page's own pictures) ----------
+async function buildCard() {
+  const b = bld(), d = derive(b), J = JOBS[b.job], g = b.gear || {};
+  const W = 1200, H = 675, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  const img = (src) => new Promise((ok) => { if (!src) return ok(null); const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+  try { await document.fonts.ready; } catch (e) {}
+  // cut a text to a width (whole Thai letters: a vowel or tone mark never stays without its consonant)
+  const fit = (t, w) => { if (x.measureText(t).width <= w) return t; const A = typeof Intl !== 'undefined' && Intl.Segmenter ? [...new Intl.Segmenter('th', { granularity: 'grapheme' }).segment(t)].map((g) => g.segment) : [...t]; while (A.length && x.measureText(A.join('') + '…').width > w) A.pop(); return A.join('') + '…'; };
+  const F = (w, s, f = 'Mitr') => `${w} ${s}px '${f}', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif`;
+  // background
+  const bg = x.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#141833'); bg.addColorStop(1, '#262d5c'); x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  x.fillStyle = 'rgba(245,154,76,.12)'; x.beginPath(); x.arc(W - 120, 90, 260, 0, 7); x.fill();
+  // portrait
+  const por = await img(D.img[b.job]);
+  x.fillStyle = 'rgba(255,255,255,.06)'; x.beginPath(); x.roundRect(40, 40, 300, 360, 24); x.fill();
+  if (por) { const k = Math.min(280 / por.width, 340 / por.height); x.drawImage(por, 40 + (300 - por.width * k) / 2, 50 + (340 - por.height * k) / 2, por.width * k, por.height * k); }
+  // name and levels
+  x.fillStyle = '#f59a4c'; x.font = F(600, 18, 'JetBrains Mono'); x.fillText(['', '1ST JOB', '2ND JOB', 'CLASS 3'][J.t] + ' · BUILD', 370, 70);
+  x.fillStyle = '#ffffff'; x.font = F(600, 54); x.fillText(J.n, 370, 128);
+  x.fillStyle = '#aab8ff'; x.font = F(500, 26); x.fillText(`${J.en} · Lv ${b.base} · Job Lv ${b.jlv}`, 370, 168);
+  // stats
+  const ST = [['ATK', d.atk], ['MATK', `${d.matk[0]}–${d.matk[1]}`], ['HP', d.hp], ['SP', d.sp], ['HIT', d.hit], ['FLEE', d.flee], ['คริ', d.crit + '%'], ['ตีเร็ว', '×' + d.aspd.toFixed(2)]];
+  ST.forEach(([k, v], i) => { const cx = 370 + (i % 4) * 200, cy = 200 + Math.floor(i / 4) * 92;
+    x.fillStyle = 'rgba(255,255,255,.07)'; x.beginPath(); x.roundRect(cx, cy, 186, 78, 14); x.fill();
+    x.fillStyle = '#a3a9cc'; x.font = F(500, 18); x.fillText(k, cx + 16, cy + 28); x.fillStyle = '#fff'; x.font = F(600, 30, 'JetBrains Mono'); x.fillText(String(v), cx + 16, cy + 64); });
+  x.fillStyle = '#e9ebf7'; x.font = F(500, 20, 'JetBrains Mono');
+  x.fillText(STATS.map((k) => `${k.toUpperCase()} ${b.st[k]}`).join('  '), 370, 410);
+  // gear
+  const gear = [g.weapon && `อาวุธ: ${g.weapon.n}${g.weapon.el && g.weapon.el !== 'neutral' ? ' (' + (EL[g.weapon.el] || g.weapon.el) + ')' : ''}`, g.set && `ชุด: ${g.set.n}`, g.hat && `หมวก: ${g.hat.n}`, g.glasses && `แว่น: ${g.glasses.n}`].filter(Boolean);
+  x.fillStyle = '#ffffff'; x.font = F(500, 21);
+  (gear.length ? gear : ['ยังไม่ได้ใส่อุปกรณ์']).slice(0, 4).forEach((t, i) => x.fillText(fit(t, 580), 40, 450 + i * 32));
+  // the skills with the most points
+  const sk = listOf(b.job).map((id) => [id, lvOf(b, id)]).filter(([, l]) => l > 0).sort((a, c) => c[1] - a[1]).slice(0, 8);
+  x.fillStyle = '#f59a4c'; x.font = F(600, 18, 'JetBrains Mono'); x.fillText('SKILLS', 660, 450);
+  for (let i = 0; i < sk.length; i++) {
+    const [id, l] = sk[i], cx = 660 + (i % 2) * 260, cy = 466 + Math.floor(i / 2) * 46;
+    const ic = await img(D.ic[SK[id].ic]); if (ic) x.drawImage(ic, cx, cy, 36, 36);
+    x.fillStyle = '#fff'; x.font = F(500, 19); x.fillText(fit(SK[id].n, 150), cx + 44, cy + 24);
+    x.fillStyle = '#aab8ff'; x.font = F(600, 17, 'JetBrains Mono'); x.fillText(`Lv ${l}`, cx + 200, cy + 24);
+  }
+  if (!sk.length) { x.fillStyle = '#a3a9cc'; x.font = F(500, 19); x.fillText('ยังไม่ได้ลงแต้มสกิล', 660, 490); }
+  // footer
+  x.fillStyle = 'rgba(255,255,255,.08)'; x.fillRect(0, H - 52, W, 52);
+  x.fillStyle = '#e9ebf7'; x.font = F(500, 19); x.fillText('NightCamp Wiki · proworks-th.github.io/nightcamp-wiki', 40, H - 20);
+  x.fillStyle = '#a3a9cc'; x.font = F(500, 17, 'JetBrains Mono'); const bt = 'game ' + D.build.replace('game-', ''); x.fillText(bt, W - 40 - x.measureText(bt).width, H - 20);
+  return cv;
+}
+$('#cardBtn').onclick = async () => {
+  openDlg(`<h2>รูปบิลด์สำหรับแชร์</h2><div id="cardWrap" class="muted">กำลังวาด…</div><p class="muted" style="margin:0;font-size:12.5px">รูปขนาด 1200 × 675 พอดีโพสต์ Facebook / ปกคลิป · ใส่คู่กับ "แชร์โค้ด" ให้คนเปิดบิลด์นี้ได้</p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ปิด</button><a class="btn primary" id="cardDl" download="nightcamp-build.png" href="#" hidden>บันทึกรูป</a></div>`);
+  try {
+    const cv = await buildCard(); cv.style.cssText = 'width:100%;height:auto;border-radius:10px;display:block';
+    const w = $('#cardWrap'); w.textContent = ''; w.appendChild(cv);
+    const a = $('#cardDl'); a.href = cv.toDataURL('image/png'); a.download = `nightcamp-${bld().job}-lv${bld().base}.png`; a.hidden = false;
+  } catch (e) { $('#cardWrap').textContent = 'วาดรูปไม่สำเร็จ: ' + e.message; }
+};
+
 $('#importBtn').onclick = () => openDlg(`<h2>วางโค้ดลง Build</h2><label for="impTxt" class="muted">โค้ดขึ้นต้นด้วย NCB1.</label><textarea id="impTxt"></textarea><p class="muted" id="impErr" style="margin:0"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ยกเลิก</button><button class="btn primary" data-ok>ใช้โค้ดนี้</button></div>`,
   () => { try { B[cur] = dec($('#impTxt').value); persist(); render(); toast('นำเข้าแล้ว'); } catch (e) { $('#impErr').textContent = e.message; return false; } });
 const saved = () => { try { return JSON.parse(store.get('ncsim_saved') || '[]'); } catch (e) { return []; } };
@@ -642,7 +701,7 @@ render();
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=7329f3a7'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=b1afc4aa'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
