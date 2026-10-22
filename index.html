@@ -30,9 +30,13 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:8px 1
 .brand{font:600 17px var(--display);white-space:nowrap;display:flex;align-items:center;gap:8px}
 .brand img{height:34px;width:auto;display:block}
 .brand span{color:var(--ember)}
-nav{display:flex;gap:6px}
-nav button{font:500 15px var(--display);min-height:42px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
-nav button[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+nav.grp{display:flex;gap:6px}
+nav.grp button{font:500 15px var(--display);min-height:42px;padding:6px 16px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
+nav.grp button[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+nav.sub{order:9;flex:1 0 100%;display:flex;gap:2px;margin:0 -16px -8px;padding:0 12px;border-top:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+nav.sub button{flex:0 0 auto;font:500 14.5px var(--display);min-height:44px;padding:6px 12px;border:0;border-bottom:3px solid transparent;background:none;color:var(--muted);cursor:pointer}
+nav.sub button[aria-current="page"]{color:var(--fg);border-bottom-color:var(--ember)}
+.lang{margin-left:auto}
 .me{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:14px}
 .me label{color:var(--muted)}
 .me select,.me input{font:15px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:6px 8px;min-height:40px}
@@ -50,51 +54,40 @@ iframe{flex:1;width:100%;border:0;display:block}
 @media (prefers-reduced-motion:reduce){.skel i{animation:none}}
 html,body{overflow-x:hidden}
 .me select{min-width:0}
-@media (max-width:720px){nav{max-width:100%;overflow-x:auto;scrollbar-width:none}nav button{flex:0 0 auto}.brand{width:100%}.me{margin-left:0;width:100%;min-width:0}.me select{flex:1 1 0;max-width:none;width:0}nav button{padding:6px 11px;font-size:14px}}
+@media (max-width:720px){.brand img{height:30px}nav.grp button{padding:6px 12px;font-size:14.5px}nav.sub button{padding:6px 10px;font-size:14px}}
 </style>
 </head>
 <body>
 <header>
   <div class="brand"><img src="data:image/webp;base64,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" alt="Night Camp"><span>Wiki</span></div>
-  <nav role="tablist" aria-label="เครื่องมือ">
-    <button role="tab" id="t-guide" aria-controls="f-guide">คู่มือ</button>
-    <button role="tab" id="t-equip" aria-controls="f-equip">อุปกรณ์</button>
-    <button role="tab" id="t-mon" aria-controls="f-mon">มอนสเตอร์</button>
-    <button role="tab" id="t-plan" aria-controls="f-plan">วางแผน</button>
-    <button role="tab" id="t-life" aria-controls="f-life">อาชีพเสริม</button>
-    <button role="tab" id="t-sim" aria-controls="f-sim">Build Sim</button>
-    <button role="tab" id="t-patch" aria-controls="f-patch">อัปเดต</button>
-  </nav>
-  <div class="sx" role="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="sq" type="search" autocomplete="off" spellcheck="false" aria-label="ค้นหาทั้งเว็บ" aria-controls="sres" data-src="search.json?v=3f3ebed1"><div class="sres" id="sres" role="listbox" hidden></div></div>
-  <div class="me" role="group" aria-label="ตัวละครของฉัน">
-    <label for="pJob">ตัวละคร</label><select id="pJob"><option value="priest">พระ · Priest</option><option value="knight">อัศวิน · Knight</option><option value="mage">จอมเวท · Mage</option><option value="archer">นักธนู · Archer</option><option value="rogue">โจร · Rogue</option><option value="ranger">เรนเจอร์ · Ranger</option><option value="wolfhunter">นักล่าหมาป่า · Wolf Hunter</option><option value="assassin">นักฆ่า · Assassin</option><option value="shinobi">นินจา · Shinobi</option><option value="bishop">บิชอป · Bishop</option><option value="monk">นักพรต · Monk</option><option value="paladin">พาลาดิน · Paladin</option><option value="dragonknight">อัศวินมังกร · Dragon Knight</option><option value="archmage">อาร์คเมจ · Archmage</option><option value="warlock">วอร์ล็อกตะเกียง · Lantern Warlock</option><option value="swordmaster">นักดาบ · Swordmaster</option><option value="berserker">เบอร์เซิร์กเกอร์ · Berserker</option><option value="firemage">จอมเวทไฟ · Fire Mage</option><option value="icemage">จอมเวทน้ำแข็ง · Ice Mage</option><option value="bard">นักกวี · Bard</option><option value="gunslinger">มือปืน · Gunslinger</option><option value="reaper">ยมทูต · Reaper</option><option value="puppeteer">นักเชิดหุ่น · Puppeteer</option><option value="lightkeeper">ผู้จุดตะเกียง · Lightkeeper</option><option value="wisp">ผู้เลี้ยงดวงไฟ · Wisp Shepherd</option><option value="dawnwarden">ผู้พิทักษ์รุ่งสาง · Dawn Warden</option><option value="dragonbound">อัศวินผสานมังกร · Dragonbound Knight</option><option value="starblade">นักดาบกลุ่มดาว · Starblade</option><option value="starcore">จอมเวทดาวฤกษ์ · Starcore Sorcerer</option><option value="winterlord">จ้าวเหมันต์ · Winter Lord</option><option value="astral">จอมเวทดาราจักร · Astral Magus</option><option value="hexlord">จ้าวคืนเดือนดับ · Hexlord of the New Moon</option><option value="bloodmoon">จอมคลั่งจันทร์เลือด · Blood Moon Berserker</option><option value="moonsniper">พรานจันทร์เงียบ · Moon Sniper</option><option value="packalpha">จ่าฝูงจันทร์เต็มดวง · Full Moon Alpha</option><option value="maestro">วาทยกรแห่งป่า · Forest Maestro</option><option value="outlaw">มือปืนเที่ยงคืน · Midnight Outlaw</option><option value="eclipse">นักฆ่าจันทรคราส · Eclipse Assassin</option><option value="shadowlord">จ้าวเงาร้อยร่าง · Lord of a Hundred Shadows</option><option value="harvester">ผู้เก็บเกี่ยวจันทรา · Moon Harvester</option><option value="showmaster">จ้าวโรงหุ่นราตรี · Night Theatre Master</option><option value="starsaint">นักบุญแสงดาว · Starlight Saint</option><option value="meteorfist">ปรมาจารย์หมัดดาวตก · Meteor Fist Master</option><option value="beacon">ผู้เฝ้าประภาคาร · Lighthouse Warden</option><option value="starshepherd">ผู้เลี้ยงดวงดาว · Star Shepherd</option></select>
-    <label for="pLv">Lv</label><input type="number" id="pLv" min="1" max="99">
-    <button id="langBtn" class="lang" aria-label="ภาษา / Language">EN</button>
-  </div>
+  <nav class="grp" role="tablist" aria-label="หมวด"><button role="tab" id="g-guide" data-g="guide">คู่มือ</button><button role="tab" id="g-data" data-g="data">ข้อมูล</button><button role="tab" id="g-tools" data-g="tools">เครื่องมือ</button></nav>
+  <div class="sx" role="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="sq" type="search" autocomplete="off" spellcheck="false" aria-label="ค้นหาทั้งเว็บ" aria-controls="sres" data-src="search.json?v=11d2fe30"><div class="sres" id="sres" role="listbox" hidden></div></div>
+  <button id="langBtn" class="lang" aria-label="ภาษา / Language">EN</button>
+  <nav class="sub" aria-label="หน้า"><button id="t-guide" data-g="guide" aria-controls="f-guide">คู่มือ</button><button id="t-patch" data-g="guide" aria-controls="f-patch">อัปเดตเกม</button><button id="t-jobs" data-g="data" aria-controls="f-jobs">อาชีพและสกิล</button><button id="t-equip" data-g="data" aria-controls="f-equip">อุปกรณ์</button><button id="t-mon" data-g="data" aria-controls="f-mon">มอนสเตอร์และแมพ</button><button id="t-life" data-g="data" aria-controls="f-life">อาชีพเสริม</button><button id="t-me" data-g="tools" aria-controls="f-me">ตัวละครของฉัน</button><button id="t-sim" data-g="tools" aria-controls="f-sim">Build Sim</button><button id="t-plan" data-g="tools" aria-controls="f-plan">วางแผนฟาร์ม</button><button id="t-calc" data-g="tools" aria-controls="f-calc">ตีบวก / ขัดเกรด</button></nav>
 </header>
 <div class="stage">
-<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=b53c4338"></iframe>
-<iframe id="f-equip" title="คลังอุปกรณ์" data-src="equip.html?v=a957f6f6" hidden></iframe>
-<iframe id="f-mon" title="มอนสเตอร์และแมพ" data-src="mon.html?v=c0115694" hidden></iframe>
-<iframe id="f-plan" title="วางแผนฟาร์ม" data-src="plan.html?v=f502dd30" hidden></iframe>
-<iframe id="f-life" title="อาชีพเสริม" data-src="life.html?v=6b509ab2" hidden></iframe>
-<iframe id="f-sim" title="Build Simulator" data-src="sim.html?v=1ac38e77" hidden></iframe>
-<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=056d64da" hidden></iframe>
+<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=54c04207#v=guide" hidden></iframe>
+<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=ca722783" hidden></iframe>
+<iframe id="f-jobs" title="อาชีพและสกิล" data-src="guide.html?v=54c04207#v=jobs" hidden></iframe>
+<iframe id="f-equip" title="อุปกรณ์" data-src="equip.html?v=f5436256" hidden></iframe>
+<iframe id="f-mon" title="มอนสเตอร์และแมพ" data-src="mon.html?v=57ca6992" hidden></iframe>
+<iframe id="f-life" title="อาชีพเสริม" data-src="life.html?v=d30c6ace" hidden></iframe>
+<iframe id="f-me" title="ตัวละครของฉัน" data-src="guide.html?v=54c04207#v=me" hidden></iframe>
+<iframe id="f-sim" title="Build Sim" data-src="sim.html?v=333dcc76" hidden></iframe>
+<iframe id="f-plan" title="วางแผนฟาร์ม" data-src="plan.html?v=5b567323" hidden></iframe>
+<iframe id="f-calc" title="ตีบวก / ขัดเกรด" data-src="equip.html?v=f5436256#v=calc" hidden></iframe>
 <div class="skel" id="skel" aria-hidden="true"><div class="in"><i style="height:150px"></i><i style="height:22px;width:55%"></i><i style="height:110px"></i><i style="height:110px"></i><i style="height:180px"></i></div></div>
 </div>
 <script>
-const TABS = ["guide", "equip", "mon", "plan", "life", "sim", "patch"], F = Object.fromEntries(TABS.map((x) => [x, document.getElementById('f-' + x)]));
+const TABS = ["guide", "patch", "jobs", "equip", "mon", "life", "me", "sim", "plan", "calc"], F = Object.fromEntries(TABS.map((x) => [x, document.getElementById('f-' + x)]));
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
 let P = (() => { try { return JSON.parse(store.get('nc_profile') || 'null'); } catch (e) { return null; } })() || { job: 'knight', lv: 10 };
-const pJob = document.getElementById('pJob'), pLv = document.getElementById('pLv');
 function send(x, extra) { try { F[x].contentWindow.postMessage(Object.assign({ nc: 'profile', profile: P }, extra || {}), '*'); } catch (e) {} }
 function setP(job, lv, except) {
   P = { job: job || P.job, lv: Math.max(1, Math.min(99, +lv || P.lv)) };
-  store.set('nc_profile', JSON.stringify(P)); pJob.value = P.job; pLv.value = P.lv;
+  store.set('nc_profile', JSON.stringify(P));
   for (const x of TABS) if (x !== except) send(x);
 }
-pJob.onchange = () => setP(pJob.value, P.lv);
-pLv.onchange = () => setP(P.job, pLv.value);
 const READY = {}, WAIT = {};
 // a page loads the first time it is needed; toSim runs once the frame is up
 function ensure(x) { if (!F[x].getAttribute('src')) F[x].setAttribute('src', F[x].dataset.src); }
@@ -103,14 +96,19 @@ const SK = document.getElementById('skel');
 const skel = () => SK.classList.toggle('done', !!READY[CUR]);
 for (const x of TABS) F[x].addEventListener('load', () => { READY[x] = true; skel(); send(x); for (const fn of WAIT[x] || []) setTimeout(fn, 30); WAIT[x] = []; });
 let CUR = 'guide';
+const VG = {"guide": "guide", "patch": "guide", "jobs": "data", "equip": "data", "mon": "data", "life": "data", "me": "tools", "sim": "tools", "plan": "tools", "calc": "tools"}, LASTG = (() => { try { return JSON.parse(store.get('nc_lastg') || '{}'); } catch (e) { return {}; } })();
 function go(t, force) {
   if (!TABS.includes(t)) t = 'guide';
   CUR = t; ensure(t); skel();
-  for (const x of TABS) { document.getElementById('t-' + x).setAttribute('aria-selected', x === t); F[x].hidden = x !== t; }
+  const g = VG[t]; LASTG[g] = t; store.set('nc_lastg', JSON.stringify(LASTG));
+  for (const b of document.querySelectorAll('nav.grp button')) b.setAttribute('aria-selected', b.dataset.g === g);
+  for (const x of TABS) { const b = document.getElementById('t-' + x); b.hidden = VG[x] !== g; if (x === t) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); F[x].hidden = x !== t; }
   if (force) send(t, { force: true });
   try { if (location.hash.slice(1).split('/')[0] !== t) history.replaceState(null, '', '#' + t); } catch (e) {}
 }
 for (const x of TABS) document.getElementById('t-' + x).onclick = () => go(x);
+window.addEventListener('hashchange', () => { const h = location.hash.slice(1).split('/')[0]; if (h && h !== CUR && TABS.includes(h)) go(h); });
+for (const b of document.querySelectorAll('nav.grp button')) b.onclick = () => go(LASTG[b.dataset.g] && VG[LASTG[b.dataset.g]] === b.dataset.g ? LASTG[b.dataset.g] : TABS.find((x) => VG[x] === b.dataset.g));
 window.addEventListener('message', (e) => {
   const d = e.data || {}, from = TABS.find((x) => F[x].contentWindow === e.source);
   if (!from) return;
@@ -118,9 +116,8 @@ window.addEventListener('message', (e) => {
   if (d.nc === 'nav' && TABS.includes(d.tab)) go(d.tab, d.tab === 'sim');
   if (d.nc === 'plan' && d.item && TABS.includes('plan')) { whenReady('plan', () => F.plan.contentWindow.postMessage({ nc: 'find', item: d.item }, '*')); go('plan'); }
   if (d.nc === 'gear' && from === 'equip') { whenReady('sim', () => F.sim.contentWindow.postMessage(d, '*')); setTimeout(() => go('sim'), 700); }
-  if (d.nc === 'build' && from === 'guide' && d.code) { whenReady('sim', () => F.sim.contentWindow.postMessage(d, '*')); go('sim'); try { history.replaceState(null, '', '#sim/' + d.code); } catch (e) {} }
+  if (d.nc === 'build' && ['guide', 'jobs', 'me'].includes(from) && d.code) { whenReady('sim', () => F.sim.contentWindow.postMessage(d, '*')); go('sim'); try { history.replaceState(null, '', '#sim/' + d.code); } catch (e) {} }
 });
-pJob.value = P.job; pLv.value = P.lv;
 const LANG = (() => { try { return localStorage.getItem('nc_lang') || 'th'; } catch (e) { return 'th'; } })();
 const lb = document.getElementById('langBtn'); lb.textContent = LANG === 'en' ? 'ไทย' : 'EN';
 // switching language reloads the page; come back to the tab you were on (the hash may not survive every viewer)
@@ -262,7 +259,7 @@ document.addEventListener('error', (e) => { const w = e.target.closest && e.targ
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=9fcb2c35'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=99153d4d'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
