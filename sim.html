@@ -179,6 +179,97 @@ function histBox(key) {
 }
 const histNew = (key) => (HIST[key] && HIST[key][0][0] === HIST.__latest ? (_HEN ? '<span class="hnew" title="Changed in the latest patch">new</span>' : '<span class="hnew" title="เปลี่ยนในแพตช์ล่าสุด">ใหม่</span>') : '');
 
+// Skill cards in plain words (Build Sim and the jobs page). The skill text of each level comes from the game files: the
+// damage figure is read from that text ("218% ของ ATK/MATK", "กลีบละ" = per petal), never from the internal multiplier,
+// which can mean something else (per tick, before a balance rule). "With your build" uses the Build Sim's ATK / MATK
+// and stays an estimate: no monster DEF, crits or element.
+const SX = (() => {
+  const TERM = { s: ['ตัวเดียว', 'โดนเป้าหมายตัวเดียว'], a: ['โดนหลายตัว', 'โดนทุกตัวในวง/แนว'], z: ['วางเป็นพื้นที่', 'วางลงพื้น ศัตรูที่อยู่ในวงโดนต่อเนื่อง'],
+    d: ['พุ่งเข้าหา', 'ตัวละครพุ่งไปพร้อมโจมตี'], m: ['อัญเชิญ', 'เรียกตัวช่วยออกมาสู้'], h: ['ฮีล', 'ฟื้น HP'], u: ['ช่วยเหลือ', 'เคลื่อนที่ ควบคุม หรือแก้สถานะ'],
+    B: ['ท่าใหญ่', 'สกิลใหญ่ คูลดาวน์ยาว'], buff: ['บัฟ', 'เพิ่มพลังชั่วคราว'], passive: ['ติดตัว', 'ทำงานเองตลอด ไม่ต้องกด'], active: ['ติดตัว', 'ทำงานเองตลอด ไม่ต้องกด'] };
+  const BASE = { 'ATK/MATK': 'ATK หรือ MATK (ใช้ค่าที่สูงกว่า)', ATK: 'ATK', MATK: 'MATK' };
+  const EN = (() => { try { return localStorage.getItem('nc_lang') === 'en'; } catch (e) { return false; } })();
+  const UNITS = 'ครั้ง|ตัว|ดอก|ดวง|เล่ม|รอบ|ลูก|นัด|วิ|กลีบ|ระลอก|รอย|ชั้น|เส้น';
+  const UEN = { ครั้ง: 'hit', ตัว: 'target', ดอก: 'shot', ดวง: 'orb', เล่ม: 'blade', รอบ: 'round', ลูก: 'ball', นัด: 'shot', วิ: 'second', กลีบ: 'petal', ระลอก: 'wave', รอย: 'mark', ชั้น: 'stack', เส้น: 'line' };
+  const per = (u) => (!u ? '' : EN ? ` per ${UEN[u] || u}` : ` ต่อ${u === 'วิ' ? 'วินาที' : u}`);
+  const he = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const NUM = /\d+(?:\.\d+)?/g;
+  // the first damage figure of a skill text: { pct, base, unit } (unit: "กลีบ" from "กลีบละ 218%")
+  function dmg(d) {
+    const m = new RegExp(`(${UNITS})ละ\\s*(\\d+(?:\\.\\d+)?)%\\s*ของ\\s*(ATK\\/MATK|ATK|MATK)|(\\d+(?:\\.\\d+)?)%\\s*ของ\\s*(ATK\\/MATK|ATK|MATK)`).exec(d || '');
+    if (!m) return null;
+    return m[2] ? { pct: +m[2], base: m[3], unit: m[1] || '' } : { pct: +m[4], base: m[5], unit: '' };
+  }
+  // the numbers that change between two texts (same wording, other numbers): [[a word or two before it, from, to], ...]
+  function diff(a, b) {
+    if (!a || !b || a === b) return [];
+    const sk = (s) => s.replace(NUM, '#');
+    if (sk(a) !== sk(b)) return null; // the wording changes too: show the next level's text as it is
+    const A = a.match(NUM) || [], B = b.match(NUM) || [], out = [];
+    let pos = 0;
+    for (let i = 0; i < A.length; i++) {
+      const at = a.indexOf(A[i], pos); pos = at + A[i].length;
+      if (A[i] === B[i]) continue;
+      let before = a.slice(0, at).split(/[·,:(]/).pop().trim().split(/\s+/).pop(); // (the last word: Thai marks never cut off)
+      if (EN || before.length > 10) before = ''; // (a long run of Thai text is not a label; English pages show the numbers alone)
+      const after = a.slice(pos, pos + 1) === '%' ? '%' : '';
+      out.push([before, A[i] + after, B[i] + after]);
+    }
+    return out;
+  }
+  const hitOf = (base, B) => (!B ? 0 : base === 'MATK' ? B.matk : base === 'ATK' ? B.atk : Math.max(B.atk, B.matk));
+  // chips: element, who it hits, SP, cooldown, free levels
+  function chips(S, L, EL) {
+    const c = [];
+    if (S.el) c.push(`<span class="sxc">${he(EL[S.el] || S.el)}</span>`);
+    const t = TERM[S.c]; if (t) c.push(`<span class="sxc" title="${he(t[1])}">${he(t[0])}</span>`);
+    if (L && L.sp) c.push(`<span class="sxc">SP ${L.sp}</span>`);
+    if (S.cd != null && S.c !== 'buff' && S.c !== 'passive' && S.c !== 'active') c.push(`<span class="sxc">${S.cd ? 'คูลดาวน์ ' + S.cd + ' วิ' : 'ไม่มีคูลดาวน์'}</span>`);
+    if (S.fr) c.push(`<span class="sxc" title="ได้เลเวลนี้ฟรีตอนเปลี่ยนอาชีพ ไม่ต้องใช้แต้ม">เลเวล ${S.fr} ได้ฟรี</span>`);
+    return c.join('');
+  }
+  // the damage line, and what my build makes of it
+  function power(L, B, short) {
+    const x = dmg(L && L.d); if (!x) return '';
+    const u = per(x.unit);
+    const v = hitOf(x.base, B), est = v ? Math.round((v * x.pct) / 100) : 0;
+    const base = EN ? (x.base === 'ATK/MATK' && !short ? 'ATK or MATK (the higher)' : x.base) : (short ? x.base : BASE[x.base]);
+    return `<div class="sxp">${EN ? 'Power' : 'แรง'} <b>${x.pct}%</b> ${EN ? 'of' : 'ของ'} ${he(base)}${he(u)}${est ? ` · ${EN ? 'your build' : 'บิลด์คุณ'} ≈ <b>${est.toLocaleString()}</b>${he(u)} <span class="src est">ประมาณ</span>` : ''}</div>`;
+  }
+  // what the next level changes
+  function next(S, lv) {
+    if (lv >= S.mx) return '<div class="sxn muted">เลเวลสูงสุดแล้ว</div>';
+    const a = S.L[Math.max(0, lv - 1)], b = S.L[lv]; if (!b) return '';
+    const parts = [];
+    const d = lv ? diff(a.d, b.d) : null;
+    if (d) for (const [w, x, y] of d.slice(0, 3)) parts.push(`${w ? he(w) + ' ' : ''}${x} → <b>${y}</b>`);
+    if (lv && a.sp != null && b.sp != null && a.sp !== b.sp) parts.push(`SP ${a.sp} → <b>${b.sp}</b>`);
+    if (!lv) return `<div class="sxn"><span class="muted">Lv 1:</span> ${he(b.d || '')}</div>`;
+    if (d === null) return `<div class="sxn"><span class="muted">Lv ${lv + 1}:</span> ${he(b.d || '')}</div>`;
+    return parts.length ? `<div class="sxn"><span class="muted">Lv ${lv + 1}:</span> ${parts.join(' · ')}</div>` : `<div class="sxn muted">Lv ${lv + 1}: ${EN ? 'same numbers' : 'ตัวเลขเท่าเดิม'}</div>`;
+  }
+  // value per SP, and per second when spammed (single-figure damage skills only)
+  function worth(S, L, B) {
+    const x = dmg(L && L.d); if (!x || x.unit || !B) return '';
+    const v = (hitOf(x.base, B) * x.pct) / 100; if (!v) return '';
+    const out = [];
+    if (L.sp) out.push(EN ? `${Math.round(v / L.sp).toLocaleString()} damage per SP` : `${Math.round(v / L.sp).toLocaleString()} ดาเมจต่อ 1 SP`);
+    const gap = Math.max(S.cd || 0, S.acd || 0); if (gap) out.push(EN ? `${Math.round(v / gap).toLocaleString()} damage a second if spammed` : `${Math.round(v / gap).toLocaleString()} ดาเมจต่อวินาทีถ้ากดรัว`);
+    return out.length ? `<div class="sxw">${EN ? 'Value' : 'ความคุ้ม'}: ${out.join(' · ')} <span class="src est">ประมาณ</span></div>` : '';
+  }
+  // every level in one table
+  function table(S) {
+    const rows = S.L.slice(0, S.mx).map((L, i) => { const x = dmg(L.d); return `<tr><td>${i + 1}</td><td class="num">${x ? x.pct + '%' : '—'}</td><td class="num">${L.sp ?? '—'}</td><td>${he(L.d || '')}</td></tr>`; }).join('');
+    return `<details class="sxt"><summary>ดูทุกเลเวล</summary><div class="tw"><table><thead><tr><th>Lv</th><th class="num">แรง</th><th class="num">SP</th><th>ผล</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
+  }
+  const css = '.sxc{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--panel2,#e3e7f1);margin:2px 4px 2px 0;white-space:nowrap}.sxc[title]{cursor:help;text-decoration:underline dotted;text-underline-offset:3px}'
+    + '.sxp,.sxn,.sxw{font-size:13px;margin-top:4px;line-height:1.45}.sxp b,.sxn b{font-family:var(--mono,monospace)}.sxt{margin-top:8px}.sxt summary{cursor:pointer;font-size:13px;color:var(--moon,#3c4fa8)}'
+    + '.sxt table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}.sxt th,.sxt td{padding:4px 6px;border-top:1px solid var(--line,#ccd);text-align:left;vertical-align:top}.sxt .num{text-align:right;white-space:nowrap}';
+  const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+  const label = (x) => (!x ? '—' : `${x.pct}% ${EN ? 'of' : 'ของ'} ${x.base}${per(x.unit)}`);
+  return { dmg, diff, chips, power, next, worth, table, TERM, label };
+})();
+
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const JOBS = D.jobs, SK = D.sk;
@@ -278,6 +369,9 @@ function skillMeta(S, lv) {
   if (S.c) bits.push(CLS[S.c] || '');
   return bits;
 }
+// my build's hit values for "with your build" (ATK, and MATK as the middle of its range)
+let _hit = null;
+const myHit = () => _hit || (_hit = (() => { const d = derive(bld()); return { atk: d.atk, matk: Math.round((d.matk[0] + d.matk[1]) / 2) }; })());
 function renderBoard() {
   const b = bld(), L = line(b.job);
   let h = '';
@@ -296,7 +390,7 @@ function renderBoard() {
         h += `<div class="sk${b.add[id] ? ' on' : ''}${locked ? ' locked' : ''}"><button class="nm" data-pick="${id}">${icon(id)}<span>${S.u ? '★ ' : ''}${esc(S.n)}</span></button>
           <div class="ctl"><button data-dn="${id}" aria-label="ลด ${esc(S.n)}"${b.add[id] ? '' : ' disabled'}>−</button><span class="lv">${lv}/${S.mx}</span><button data-up="${id}" aria-label="เพิ่ม ${esc(S.n)}"${why ? ' disabled' : ''}>+</button></div>
           <div class="pips">${Array.from({ length: S.mx }, (_, i) => `<i class="${i < (S.fr || 0) && i < lv ? 'f' : i < lv ? 'on' : ''}"></i>`).join('')}</div>
-          <div class="meta">${skillMeta(S, Math.max(1, lv)).map(esc).join(' · ')}${S.fr ? ' · ได้ฟรี Lv ' + S.fr : ''}</div>
+          <div class="meta">${SX.chips(S, S.L[Math.max(0, lv - 1)], EL)}${SX.power(S.L[Math.max(0, lv - 1)], myHit(), true)}${SX.next(S, lv)}</div>
           ${!rq.ok ? `<div class="why">ต้องมี ${esc(reqText(rq))}</div>` : ''}</div>`;
       }
       h += '</div>';
@@ -330,10 +424,11 @@ function renderDetail() {
   const b = bld(); if (!picked || !SK[picked] || !listOf(b.job).includes(picked)) picked = listOf(b.job)[0];
   const S = SK[picked], lv = lvOf(b, picked), cur1 = S.L[Math.max(0, lv - 1)], nxt = lv < S.mx ? S.L[lv] : null;
   const rq = (S.rq || []).map(([r, n]) => `${SK[r].n} Lv ${n}`).join(S.any ? ' หรือ ' : ' และ ');
-  $('#detailBox').innerHTML = `<div class="kicker">${esc(CLS[S.c] || 'สกิล')}${S.el ? ' · ธาตุ' + esc(EL[S.el] || S.el) : ''}</div><div style="display:flex;gap:10px;align-items:center">${icon(picked, 'lg')}<h3>${esc(S.n)} <span class="muted mono">Lv ${lv}/${S.mx}</span></h3></div>
-    <div class="vals">${skillMeta(S, Math.max(1, lv)).map(esc).join(' · ')}${S.acd ? ' · ดีเลย์ ' + S.acd + ' วิ' : ''}</div>
-    <p style="margin:0">${lv ? esc(cur1.d || 'ดูคำอธิบายในเกม') : '<span class="muted">ยังไม่ได้เรียน</span>'}</p>
-    ${nxt ? `<p class="muted" style="margin:8px 0 0"><b>Lv ${lv + 1}:</b> ${esc(nxt.d || '')}</p>` : ''}${histBox('s:' + picked)}
+  $('#detailBox').innerHTML = `<div class="kicker">${esc((SX.TERM[S.c] || [])[0] || CLS[S.c] || 'สกิล')}${S.el ? ' · ธาตุ' + esc(EL[S.el] || S.el) : ''}</div><div style="display:flex;gap:10px;align-items:center">${icon(picked, 'lg')}<h3>${esc(S.n)} <span class="muted mono">Lv ${lv}/${S.mx}</span></h3></div>
+    <div class="vals">${SX.chips(S, S.L[Math.max(0, lv - 1)], EL)}${S.acd ? `<span class="sxc" title="เวลาหยุดหลังกดก่อนกดสกิลถัดไปได้">ดีเลย์ ${S.acd} วิ</span>` : ''}</div>
+    ${lv ? SX.power(cur1, myHit()) + SX.worth(S, cur1, myHit()) : ''}
+    <p style="margin:6px 0 0">${lv ? esc(cur1.d || 'ดูคำอธิบายในเกม') : '<span class="muted">ยังไม่ได้เรียน</span>'}</p>
+    ${SX.next(S, lv)}${SX.table(S)}${histBox('s:' + picked)}
     ${S.g ? `<p class="muted" style="margin:8px 0 0">เติบโต: ${esc(S.g)}</p>` : ''}
     ${rq ? `<p class="muted" style="margin:8px 0 0">ต้องมี: ${esc(rq)}</p>` : ''}`;
 }
@@ -383,6 +478,7 @@ function gearHtml(b) {
 }
 function renderStats() {
   const b = bld(), d = derive(b), left = stLeft(b);
+  { const m = Math.round((d.matk[0] + d.matk[1]) / 2); if (_hit && (_hit.atk !== d.atk || _hit.matk !== m)) { _hit = { atk: d.atk, matk: m }; renderBoard(); renderDetail(); } } // (the skills' "with your build" numbers follow the stats)
   $('#statBox').innerHTML = `<div class="pts" style="justify-content:space-between"><h3>สเตตัส</h3><span><label for="baseLv" class="muted">Base Lv</label> <input type="number" id="baseLv" min="1" max="99" value="${b.base}"></span></div>
     <p class="muted mono" style="margin:4px 0 8px">เหลือ ${left} แต้ม${left < 0 ? ' · เกินแล้ว ลดสเตตัสลง' : ''}</p>
     <div class="stats">${STATS.map((k) => `<div class="srow"><span class="k">${k.toUpperCase()}</span><button data-sd="${k}" aria-label="ลด ${k}">−</button><b>${b.st[k]}</b><button data-su="${k}" aria-label="เพิ่ม ${k}">+</button><small>${statCost(b.st[k])}</small></div>`).join('')}</div>
@@ -546,7 +642,7 @@ render();
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=7492a4f9'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=1c572dbb'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
