@@ -107,6 +107,7 @@ details>summary::-webkit-details-marker{display:none}
 details>summary::after{content:"ดูเพิ่ม ▾";font:500 13px var(--body);color:var(--moon)}
 details[open]>summary::after{content:"ซ่อน ▴"}
 details>.in{padding:0 16px 16px}
+table.rx{min-width:600px}table.rx td:not(:last-child),table.rx th{white-space:nowrap}
 .tw{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{padding:7px 9px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
@@ -193,7 +194,31 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);color:v
     <div class="shead"><h2>ระบบเกมที่ควรรู้</h2></div>
     <div class="tips" id="sysTips"></div>
     <div class="card"><h3 style="margin-bottom:8px">ธาตุ: ตีอะไรแรง</h3><div class="elq" id="elQuick"></div>
-      <details style="margin-top:12px"><summary>ตารางธาตุเต็ม</summary><div class="in"><p class="muted" style="margin-bottom:8px">% ดาเมจของธาตุที่ตี (แถว) ใส่ศัตรูธาตุนั้น (คอลัมน์) · 0 คือตีไม่เข้า · ติดลบคือฮีลศัตรู</p><div class="tw"><table class="heat" id="elTbl"></table></div></div></details></div>
+      <details style="margin-top:12px"><summary>ตารางธาตุเต็ม</summary><div class="in"><p class="muted" style="margin-bottom:8px">% ดาเมจของธาตุที่ตี (แถว) ใส่ศัตรูธาตุนั้น (คอลัมน์) · 0 คือตีไม่เข้า</p><div class="tw"><table class="heat" id="elTbl"></table></div></div></details>
+      <details style="margin-top:8px" id="react"><summary>ปฏิกิริยาธาตุ: ติดสถานะ แล้วตีอีกธาตุใส่</summary><div class="in">
+        <p class="muted" style="margin-bottom:8px">สกิลที่มีธาตุมีโอกาสทำให้มอนติดสถานะของธาตุนั้น (ตีปกติด้วยอาวุธธาตุ โอกาสเหลือครึ่ง) แล้วถ้าตีอีกธาตุที่เข้าคู่ใส่มอนที่ติดสถานะอยู่ จะเกิดปฏิกิริยา ชื่อเด้งตัวใหญ่บนหัวมอน · ไม่มีธาตุ วิญญาณ และอมตะ ไม่ทำให้ติดสถานะและไม่เกิดปฏิกิริยา</p>
+        <h4 style="margin:4px 0 6px">สถานะของแต่ละธาตุ</h4>
+        <div class="tw"><table class="rx"><thead><tr><th>ธาตุ</th><th>สถานะ</th><th class="num">โอกาส</th><th class="num">นาน</th><th>ผล</th></tr></thead><tbody>
+          <tr><td>ไฟ</td><td>เผา</td><td class="num">15%</td><td class="num">4 วิ</td><td>โดนดาเมจทุก 0.5 วิ ซ้อนได้ 5 ชั้น</td></tr>
+          <tr><td>น้ำ</td><td>เย็นเฉียบ</td><td class="num">100%</td><td class="num">4 วิ</td><td>ช้าลง ซ้อนได้ 3 ชั้น (ชั้นที่ 3 แช่แข็งได้เฉพาะคนที่มี ใจน้ำแข็ง Lv5)</td></tr>
+          <tr><td>ลม</td><td>ช็อต</td><td class="num">12%</td><td class="num">3 วิ</td><td>โดนธาตุลมแรงขึ้น และมึนเป็นระยะ</td></tr>
+          <tr><td>ดิน</td><td>ร้าว</td><td class="num">20%</td><td class="num">5 วิ</td><td>DEF เหลือ 60%</td></tr>
+          <tr><td>มืด</td><td>คำสาป</td><td class="num">20%</td><td class="num">6 วิ</td><td>รับดาเมจ +15% และช้าลง</td></tr>
+          <tr><td>ศักดิ์สิทธิ์</td><td>ชำระ</td><td class="num">25%</td><td class="num">5 วิ</td><td>มอนอมตะหรือธาตุมืดรับดาเมจ +20%</td></tr>
+        </tbody></table></div>
+        <h4 style="margin:14px 0 6px">ปฏิกิริยา 6 แบบ</h4>
+        <div class="tw"><table class="rx"><thead><tr><th>ปฏิกิริยา</th><th>มอนมีอยู่</th><th>ตีด้วย</th><th>ผล</th></tr></thead><tbody>
+          <tr><td><b>ไอน้ำระเบิด!</b></td><td>ถูกแช่แข็ง</td><td>ไฟ</td><td>ดาเมจครั้งนั้น ×2 ทำให้หายแข็ง และตัวรอบ ๆ (รัศมี 130) โดน 60%</td></tr>
+          <tr><td><b>ไฟฟ้าช็อตน้ำแข็ง!</b></td><td>เย็นเฉียบหรือแข็ง</td><td>ลม</td><td>ไฟฟ้ากระโดดไปอีก 3 ตัว (ระยะ 240) ตัวละ 60% ทุกตัวมึน 0.8 วิ</td></tr>
+          <tr><td><b>โอเวอร์โหลด!</b></td><td>ช็อต</td><td>ไฟ</td><td>ระเบิดรัศมี 150 โดน 80% และกระเด็น</td></tr>
+          <tr><td><b>พิษลุกไหม้!</b></td><td>พิษ</td><td>ไฟ</td><td>ระเบิดรัศมี 140 แรง 8 เท่าของดาเมจพิษ และพิษลามไปตัวรอบ ๆ</td></tr>
+          <tr><td><b>ไฟลามทุ่ง!</b></td><td>เผา</td><td>ลม</td><td>ชั้นเผาทั้งหมดลามไปตัวรอบ ๆ (รัศมี 160)</td></tr>
+          <tr><td><b>ชำระล้าง!</b></td><td>คำสาป</td><td>ศักดิ์สิทธิ์</td><td>ดาเมจครั้งนั้น ×2 ล้างคำสาป และเราฟื้น HP 5%</td></tr>
+        </tbody></table></div>
+        <p class="muted" style="margin-top:8px">มอนแต่ละตัวเกิดปฏิกิริยาได้อย่างมากทุก 0.4 วิ · เกิดจากการตีของเราและสัตว์ที่เราเรียกเท่านั้น</p>
+        <p style="margin-top:6px"><b>สกิลที่ทำให้แรงขึ้น (สายจอมเวท):</b> ปฏิกิริยาลูกโซ่ (Lv1 แรงขึ้น 15% · Lv3 ลามไปตัวข้าง ๆ 3 ตัว · Lv5 เวทผสมเกิดปฏิกิริยาได้ทุกครั้ง) · หลอมรวมธาตุ (Lv3 แรงขึ้น 50% · Lv5 เกิดปฏิกิริยาแล้วได้ SP คืน) · ใจเพลิง Lv5 เผาซ้อนทีละ 2 ชั้น · ใจน้ำแข็ง Lv5 เย็นเฉียบชั้นที่ 3 กลายเป็นแช่แข็ง</p>
+        <p class="muted" style="margin-top:6px">อ่านจากโค้ดฝั่งผู้เล่น (statuses.js) ตอนเล่นออนไลน์เซิร์ฟเวอร์เป็นคนตัดสินผลจริง</p>
+      </div></details></div>
     <details><summary>สูตรสเตตัส (สำหรับสายคำนวณ)</summary><div class="in tips" id="formulas"></div></details>
   </section>
 
@@ -264,6 +289,7 @@ function find(d) {
       for (const h of el.querySelectorAll('h3, summary, td:first-child')) if ([].concat(d.text).some((s) => s && h.textContent.includes(s))) { el = h.closest('.card, details, tr') || h; break; } }
   }
   if (!el) return;
+  for (let x = el; x && x !== document.body; x = x.parentElement) if (x.tagName === 'DETAILS') x.open = true;
   el.scrollIntoView({ block: 'center' });
   el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
 }
@@ -446,7 +472,7 @@ if (!inShell) for (const b of document.querySelectorAll('[data-nav]')) b.hidden 
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=a4ad00a9'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=9fcb2c35'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
