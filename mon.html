@@ -74,6 +74,7 @@ tr.r[aria-expanded="true"] .chev{transform:rotate(180deg)}
 .pill{display:inline-block;font:500 12px var(--body);padding:1px 8px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);white-space:nowrap;margin:1px 3px 1px 0}
 .pill.boss{background:var(--ember-soft);border-color:transparent;color:var(--ember)}
 .pill.elite{background:var(--moon-soft);border-color:transparent;color:var(--moon)}
+.pill.onmap{cursor:pointer;color:var(--moon);border-color:currentColor;background:none}
 .pill.good{color:var(--good);border-color:currentColor;background:none}.pill.warn{color:var(--warn);border-color:currentColor;background:none}.pill.bad{color:var(--bad);border-color:currentColor;background:none;font-weight:600}
 a.pill,button.pill{cursor:pointer;color:var(--fg);font:500 12.5px var(--body)}
 a.pill:hover,button.pill:hover{border-color:var(--moon)}
@@ -248,7 +249,7 @@ function monCard(m) {
       <p style="margin:8px 0 0;font-size:13.5px">ธาตุ <b>${esc(ELN[m.e] || m.e)}</b>${m.k ? ` · ท่าโจมตี <b>${esc(m.k)}</b>` : ''}${m.r ? ` · เกิดใหม่ทุก <b>${Math.round(m.r / 60)} นาที</b>` : ''}</p>
       ${m.sk.length ? `<p style="margin:6px 0 0;font-size:13.5px">สกิล: ${m.sk.map((s) => `<span class="pill">${esc(s)}</span>`).join('')}</p>` : ''}</div>
     ${weakBox(m)}
-    <div class="box"><h3>เจอที่</h3><table>${m.w.map(([id, z, lo, hi]) => `<tr><td><button class="pill" data-map="${esc(id)}">${esc(mapName(id))}</button>${z ? ` <span class="muted" style="font-size:12.5px">${esc(z)}</span>` : ''}</td><td class="num">Lv ${lvTxt([lo, hi])} ${gapPill(lo, hi)}</td></tr>`).join('') || '<tr><td class="muted">—</td></tr>'}</table>
+    <div class="box"><h3>เจอที่</h3><table>${m.w.map(([id, z, lo, hi]) => `<tr><td><button class="pill" data-map="${esc(id)}">${esc(mapName(id))}</button>${z ? ` <span class="muted" style="font-size:12.5px">${esc(z)}</span>` : ''} <button class="pill onmap" data-onmap="${esc(id)}" title="ดูตำแหน่งและวิธีเดินไปบนแผนที่">📍 ดูบนแผนที่</button></td><td class="num">Lv ${lvTxt([lo, hi])} ${gapPill(lo, hi)}</td></tr>`).join('') || '<tr><td class="muted">—</td></tr>'}</table>
       ${base ? `<p style="margin:8px 0 0;font-size:13.5px">ร่างพิเศษของ <button class="pill" data-mon="${esc(base.id)}">${esc(base.n)}</button></p>` : ''}
       ${forms.length ? `<p style="margin:8px 0 0;font-size:13.5px">ร่างพิเศษ: ${forms.map((f) => `<button class="pill elite" data-mon="${esc(f.id)}">${esc(f.n.split(' · ').pop())}</button>`).join('')}</p>` : ''}</div>
     <div class="box"><h3>วัตถุดิบที่ดรอป</h3>${m.d.length ? `<table>${m.d.map(([n, p, a, b]) => `<tr><td>${esc(n)}${b > 1 ? ` <span class="muted">×${a === b ? a : a + '–' + b}</span>` : ''}</td><td class="num">${+p}%</td></tr>`).join('')}</table>` : '<p class="muted">—</p>'}</div>
@@ -268,7 +269,7 @@ function mapCard(p) {
   const subs = D.maps.filter((x) => x.p === p.id);
   return `<div class="dg">
     <div class="box"><h3>มอนในแมพ (${mons.length})</h3><table>${mons.map((m) => `<tr><td><button class="pill${m.b ? ' boss' : m.el ? ' elite' : ''}" data-mon="${esc(m.id)}">${esc(m.n)}</button></td><td class="num">Lv ${lvTxt(m.lv)}</td></tr>`).join('') || '<tr><td class="muted">ไม่มีมอน</td></tr>'}</table></div>
-    <div class="box"><h3>ข้อมูลแมพ</h3><p style="margin:0;font-size:14px">${esc(KT[p.k] || p.k)} · Lv ${lvTxt(p.lv)}</p>
+    <div class="box"><h3>ข้อมูลแมพ</h3><p style="margin:0;font-size:14px">${esc(KT[p.k] || p.k)} · Lv ${lvTxt(p.lv)} <button class="pill onmap" data-onmap="${esc(p.id)}">📍 ดูบนแผนที่และวิธีไป</button></p>
       ${p.z.length ? `<p style="margin:8px 0 0;font-size:13.5px">โซน: ${p.z.map((z) => `<span class="pill">${esc(z)}</span>`).join('')}</p>` : ''}
       ${p.ln.length ? `<p style="margin:8px 0 0;font-size:13.5px">เดินต่อไป: ${p.ln.map((id) => `<button class="pill" data-map="${esc(id)}">${esc(mapName(id))}</button>`).join('')}</p>` : ''}
       ${subs.length ? `<p style="margin:8px 0 0;font-size:13.5px">เขตย่อย: ${subs.map((x) => `<button class="pill" data-map="${esc(x.id)}">${esc(x.n)}</button>`).join('')}</p>` : ''}
@@ -299,6 +300,7 @@ function jump(kind, id) {
 }
 $('#list').addEventListener('click', (e) => {
   const s = e.target.closest('[data-sort]'); if (s) { F.sort = s.dataset.sort; $('#sort').value = F.sort; run(); return; }
+  const om = e.target.closest('[data-onmap]'); if (om) { if (window.parent !== window) window.parent.postMessage({ nc: 'open', tab: 'map', msg: { nc: 'find', map: om.dataset.onmap } }, '*'); return; }
   const mo = e.target.closest('[data-mon]'); if (mo) { jump('mon', mo.dataset.mon); return; }
   const mp = e.target.closest('[data-map]'); if (mp) { jump('map', mp.dataset.map); return; }
   if (e.target.closest('.box')) return;
@@ -332,7 +334,7 @@ syncUi(); run();
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=b1afc4aa'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=8f201302'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
