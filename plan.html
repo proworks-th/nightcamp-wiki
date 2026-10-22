@@ -1,4 +1,15 @@
-<!doctype html><html lang="th"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>[hidden]{display:none!important}</style></head><body><title>NightCamp Planner</title>
+<!doctype html><html lang="th"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>[hidden]{display:none!important}</style><style>/* shared by every page (site.py puts it in each head): where a number comes from, and "how to read this" */
+.src{display:inline-block;font:600 11px/1.6 var(--body,system-ui);padding:0 7px;border-radius:999px;vertical-align:middle;white-space:nowrap;letter-spacing:.2px}
+.src.game{background:color-mix(in srgb,var(--moon,#3c4fa8) 14%,transparent);color:var(--moon,#3c4fa8)}
+.src.est{background:color-mix(in srgb,var(--ember,#c4561a) 16%,transparent);color:var(--ember,#c4561a)}
+details.howto{margin:10px 0;border:1px solid var(--line,#c9cfdf);border-radius:12px;background:var(--panel,#fff);font-size:14px}
+details.howto>summary{cursor:pointer;padding:8px 12px;font-weight:600;list-style:none}
+details.howto>summary::-webkit-details-marker{display:none}
+details.howto>summary::before{content:"ⓘ ";color:var(--moon,#3c4fa8)}
+details.howto>ul{margin:0;padding:0 14px 6px 30px}
+details.howto li{margin:4px 0}
+details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-size:13px}
+</style></head><body><title>NightCamp Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -112,6 +123,13 @@ tr.best td{background:var(--moon-soft)}
     </div>
     <div class="row bstrip" id="bstrip"></div>
   </div>
+  <details class="howto" id="howto"><summary>อ่านผลยังไง</summary><ul>
+    <li><b>เวลา "ต่อ 1 เลเวล"</b> <span class="src est">ประมาณ</span> = ฆ่ามอนในแมพนั้นจน EXP ครบ 1 เลเวล ที่ความเร็ว "ฆ่าได้ (ตัว/นาที)" ไม่รวมเวลาเดิน ใช้เรียงว่าแมพไหนคุ้มกว่า</li>
+    <li><b>×1.5 / ×0.5</b> ข้างชื่อมอน <span class="src game">จากไฟล์เกม</span> = ธาตุที่เราตี แรงขึ้นหรือเบาลงกับมอนตัวนั้น</li>
+    <li><b>~N ที/ตัว</b> <span class="src est">ประมาณ</span> = ตีปกติด้วยบิลด์ใน Build Sim กี่ทีมอนตาย ไม่นับสกิล คริ และ DEF มอน</li>
+    <li><b>% ข้างอุปกรณ์</b> = โอกาสดรอปต่อการฆ่า 1 ตัว <span class="src game">จากไฟล์เกม</span> หักช่องว่างเลเวลแล้ว</li>
+    <li>ล่าของ: <b>ฟาร์มเร็วสุด</b> <span class="src est">ประมาณ</span> = เวลาเฉลี่ยกว่าจะได้ชิ้นนี้จากมอนตัวที่คุ้มสุด · <b>คราฟเอง</b> = เวลาเก็บวัตถุดิบครบ แล้วบอกว่าทางไหนเร็วกว่า</li>
+  </ul><p>ป้าย <span class="src game">จากไฟล์เกม</span> = ค่าที่อ่านตรงจากไฟล์เกม · <span class="src est">ประมาณ</span> = เว็บคำนวณเพิ่ม ใช้เทียบกัน ไม่ใช่ค่าที่เกมรับประกัน</p></details>
   <div id="out"><div class="grid"><div class="skc"></div><div class="skc"></div><div class="skc"></div><div class="skc"></div><div class="skc"></div><div class="skc"></div></div></div>
   <p class="note" id="foot">ตัวเลขเป็นการประมาณจากไฟล์เกม: EXP และ HP ของมอนตามเลเวล · ช่องว่างเลเวลกับมอน (≤3 = 100% · 4–8 = 70% · 9–14 = 40% · 15–20 = 20% · มากกว่า = 5%) · ธาตุที่เราตีกับธาตุของมอน · เวลาฆ่าตาม HP มอนเทียบกับมอนเลเวลเท่าเรา · ไม่รวมเวลาเดินหา โบนัสปาร์ตี้ และโบนัสกลางคืน · ออนไลน์เซิร์ฟเวอร์เป็นคนตัดสินค่าจริง</p>
 </div>
@@ -333,7 +351,7 @@ render();
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=ff3e5d65'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=7492a4f9'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
