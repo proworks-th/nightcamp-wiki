@@ -88,6 +88,11 @@ tr.best td{background:var(--moon-soft)}
 .stat small{color:var(--muted);font-size:12.5px}
 .empty{padding:30px;text-align:center;color:var(--muted)}
 @media (max-width:700px){.rail{position:static}}
+.bstrip{font-size:13.5px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.bstrip:empty{display:none}
+.bstrip b{font-weight:600}
+.lnk{all:unset;cursor:pointer;color:var(--moon);text-decoration:underline;text-underline-offset:2px}
+.hits{font-size:13px;color:var(--muted)}
 </style>
 
 <div class="wrap">
@@ -105,6 +110,7 @@ tr.best td{background:var(--moon-soft)}
       <label class="lab" for="rate" title="ฆ่ามอนเลเวลเท่าเราได้กี่ตัวต่อนาที ใช้แปลงเป็นเวลา">ฆ่าได้ (ตัว/นาที)</label><input type="number" id="rate" min="1" max="120" value="20" title="ฆ่ามอนเลเวลเท่าเราได้กี่ตัวต่อนาที ใช้แปลงเป็นเวลา">
       <label class="chk" id="dunWrap"><input type="checkbox" id="dun" checked> รวมดันเจี้ยน</label>
     </div>
+    <div class="row bstrip" id="bstrip"></div>
   </div>
   <div id="out"><div class="grid"><div class="skc"></div><div class="skc"></div><div class="skc"></div><div class="skc"></div><div class="skc"></div><div class="skc"></div></div></div>
   <p class="note" id="foot">ตัวเลขเป็นการประมาณจากไฟล์เกม: EXP และ HP ของมอนตามเลเวล · ช่องว่างเลเวลกับมอน (≤3 = 100% · 4–8 = 70% · 9–14 = 40% · 15–20 = 20% · มากกว่า = 5%) · ธาตุที่เราตีกับธาตุของมอน · เวลาฆ่าตาม HP มอนเทียบกับมอนเลเวลเท่าเรา · ไม่รวมเวลาเดินหา โบนัสปาร์ตี้ และโบนัสกลางคืน · ออนไลน์เซิร์ฟเวอร์เป็นคนตัดสินค่าจริง</p>
@@ -164,6 +170,21 @@ function sync() {
   $('#me').value = S.me; $('#el').value = S.el; $('#rate').value = S.rate; $('#dun').checked = S.dun; $('#dunWrap').hidden = S.t !== 'lv';
 }
 const save = () => store.set('nc_plan', JSON.stringify(S));
+// the build from the Build Sim (same browser): its weapon element is "my attack element" unless I pick one here, and its
+// hit (the better of ATK and MATK) gives "about how many plain hits a kill" on every map card
+let SB = null;
+const readBuild = () => { try { SB = JSON.parse(store.get('ncsim_summary') || 'null'); } catch (e) { SB = null; } if (SB && !S.elManual && D.el[SB.el]) S.el = SB.el; };
+readBuild();
+window.addEventListener('storage', (e) => { if (e.key === 'ncsim_summary') { readBuild(); render(); } });
+const toSim = () => { if (window.parent !== window) window.parent.postMessage({ nc: 'nav', tab: 'sim' }, '*'); };
+function strip() {
+  if (!SB) return `ยังไม่มีบิลด์ · <button class="lnk" data-sim>จัดบิลด์ใน Build Sim</button> แล้วธาตุอาวุธและพลังโจมตีจะถูกใช้ที่นี่`;
+  return `บิลด์จาก Build Sim: <b>${esc(SB.wn || 'อาวุธ ATK ' + SB.wa)}</b> · ธาตุ${esc(D.el[SB.el] || SB.el)} · ${SB.magic ? 'MATK' : 'ATK'} <b>${n0(SB.hit)}</b>`
+    + (S.elManual && S.el !== SB.el ? ` · <span class="warn">ตอนนี้ใช้ธาตุ${esc(D.el[S.el])} ที่เลือกเอง</span> <button class="lnk" data-elreset>ใช้ธาตุจากบิลด์</button>` : '')
+    + ` · <button class="lnk" data-sim>แก้ใน Build Sim</button>`;
+}
+// plain hits to kill one of a map's main monsters with the build's hit (no monster DEF, no skills, no crits: a rough feel)
+const hitsTo = (p) => { if (!SB || !SB.hit) return null; const hp = at(p.m[2], Math.round((p.lo + p.hi) / 2))[0]; return Math.max(1, Math.ceil(hp / (SB.hit * p.k))); };
 
 // ---------- where to level ----------
 // per map: EXP a minute = EXP of the kills / the time they take; a monster's time = its HP against the typical HP at my
@@ -212,6 +233,7 @@ function drawLv() {
     <div class="ch"><div><div class="rank">#${i + 1}${i === 0 ? ' · คุ้มสุด' : ''}</div><h2>${esc(r.mp[0])}</h2>
       <div style="margin-top:2px">${r.mp[3] ? `<span class="pill">${esc(r.mp[3])}</span>` : ''}<span class="pill">${esc(KT[r.mp[1]] || r.mp[1])}</span><span class="pill">Lv ${r.mp[2][0]}–${r.mp[2][1]}</span></div></div>
       <div class="big">${fmtT(6000 / r.pctH)}<small>ต่อ 1 เลเวล (ประมาณ)</small><small>${n0(r.xpm)} EXP/นาที</small></div></div>
+    ${SB && hitsTo(r.ms[0]) ? `<div class="hits">ตีปกติด้วยบิลด์นี้ ~${hitsTo(r.ms[0])} ที/ตัว (${esc(r.ms[0].m[0])}) · ประมาณ ไม่หัก DEF</div>` : ''}
     <div class="mons">${r.ms.slice(0, 6).map((p) => `<span class="mon">${icon(p.m[3])}<b>${esc(p.m[0])}</b><span class="muted">Lv ${p.lo}–${p.hi}</span>${kTag(p.k)}</span>`).join('')}</div>
     ${r.immune.length ? `<div class="bad" style="font-size:13px">ธาตุเราตีไม่เข้า: ${esc(r.immune.join(' · '))}</div>` : ''}
     <div class="drops">${mapDrops(r).map(([it, p]) => `<div class="drop">${icon(it[7])}<span>${esc(it[1])} <span class="muted" style="font-size:12.5px">${esc(it[2])} · Lv ${it[3]}</span></span><span class="p">${+p.toFixed(3)}%</span></div>`).join('') || '<span class="muted" style="font-size:13px">ไม่มีอุปกรณ์ที่ใส่ได้ตอนนี้</span>'}</div>
@@ -285,16 +307,18 @@ function huntCard(it) {
   </section>${craft}`;
 }
 
-function render() { save(); sync(); S.t === 'lv' ? drawLv() : drawHunt(); }
+function render() { save(); sync(); $('#bstrip').innerHTML = strip(); S.t === 'lv' ? drawLv() : drawHunt(); }
 for (const b of document.querySelectorAll('#tabs button')) b.onclick = () => { S.t = b.dataset.t; render(); };
-$('#me').onchange = (e) => { S.me = Math.max(1, Math.min(99, +e.target.value || 1)); S.meSet = true; render(); };
-$('#el').onchange = (e) => { S.el = e.target.value; render(); };
+// my level is the site's one profile: changing it here changes it everywhere
+$('#me').onchange = (e) => { S.me = Math.max(1, Math.min(99, +e.target.value || 1)); if (window.parent !== window) window.parent.postMessage({ nc: 'setProfile', profile: { lv: S.me } }, '*'); render(); };
+$('#el').onchange = (e) => { S.el = e.target.value; S.elManual = true; render(); };
+$('#bstrip').addEventListener('click', (e) => { if (e.target.closest('[data-sim]')) toSim(); if (e.target.closest('[data-elreset]')) { S.elManual = false; readBuild(); render(); } });
 $('#rate').onchange = (e) => { S.rate = Math.max(1, Math.min(120, +e.target.value || 20)); render(); };
 $('#dun').onchange = (e) => { S.dun = e.target.checked; render(); };
 window.addEventListener('message', (e) => {
   if (e.source !== window.parent || (e.origin !== location.origin && e.origin !== 'null')) return; // (only the NightCamp Wiki top bar)
   const d = e.data || {};
-  if (d.nc === 'profile' && d.profile && !S.meSet) { S.me = Math.max(1, Math.min(99, +d.profile.lv || S.me)); render(); }
+  if (d.nc === 'profile' && d.profile) { S.me = Math.max(1, Math.min(99, +d.profile.lv || S.me)); render(); }
   if (d.nc === 'find' && d.item && D.items.some((x) => x[0] === d.item)) { S.t = 'hunt'; S.item = d.item; render(); window.scrollTo(0, 0); }
 });
 render();
@@ -309,7 +333,7 @@ render();
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=99153d4d'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=ff3e5d65'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';

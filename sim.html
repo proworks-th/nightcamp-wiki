@@ -114,8 +114,6 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch}
   </header>
 
   <div class="bar">
-    <div class="seg" role="group" aria-label="build ที่กำลังแก้"><button id="bA" aria-pressed="true">Build A</button><button id="bB" aria-pressed="false">Build B</button></div>
-    <button class="btn" id="cmpBtn" aria-pressed="false">เทียบ A กับ B</button>
     <span class="spacer"></span>
     <button class="btn" id="saveBtn">บันทึก</button>
     <button class="btn" id="loadBtn">เปิดที่บันทึก</button>
@@ -305,7 +303,7 @@ const pointLabel = (b, k) => {
 };
 function renderSide() {
   const b = bld(), P = pool(b), U = spent(b);
-  $('#ptsBox').innerHTML = `<div class="kicker">แต้มสกิล · Build ${cur}</div><div class="pts"><b class="mono">${P - U}</b><span class="muted">เหลือ จาก ${P} (ใช้ ${U})</span></div><div class="meter"><i style="width:${P ? (U / P) * 100 : 0}%"></i></div>
+  $('#ptsBox').innerHTML = `<div class="kicker">แต้มสกิล · Build</div><div class="pts"><b class="mono">${P - U}</b><span class="muted">เหลือ จาก ${P} (ใช้ ${U})</span></div><div class="meter"><i style="width:${P ? (U / P) * 100 : 0}%"></i></div>
     <p class="muted" style="font-size:12.5px;margin:6px 0 0">แต้มทุกอาชีพในสายใช้ร่วมกัน: Job Lv − 1 + แต้มนักเดินทาง 9 + อาชีพก่อนหน้าอาชีพละ 49 · 2nd job ยังอัปสกิลของ 1st job ได้</p>`;
   const lvc = {};
   $('#orderBox').innerHTML = b.order.length ? b.order.map((id, i) => { lvc[id] = (lvc[id] || SK[id].fr || 0) + 1; return `<div><span class="mono muted">${esc(pointLabel(b, i + 1))}</span><span>${icon(id, 'sm')} ${esc(SK[id].n)} → ${lvc[id]}</span></div>`; }).join('') + '<p class="muted" style="font-size:11.5px;margin:6px 0 0">* แต้มนักเดินทาง 9 แต้มแรกใช้ได้ตั้งแต่เปลี่ยนเป็น 1st job</p>' : '<span class="muted">ยังไม่ได้ลงแต้ม กด + ที่สกิลเพื่อเริ่ม</span>';
@@ -383,18 +381,18 @@ function renderStats() {
       <div><span>ลดดาเมจ (VIT)</span><b>${d.vdef}</b></div><div><span>ตีเร็วจากสเตตัส</span><b>×${d.aspd.toFixed(3)}</b></div>
     </div>
     <div class="note" style="margin-top:10px">ปะทะมอนเลเวลเท่ากัน (ค่าหลบ/แม่นมาตรฐาน): <b>ตีโดน ${d.hitPct}%</b> · <b>หลบได้ ${d.dodgePct}%</b><br><span class="muted" style="font-size:12px">มอนบางชนิดหลบหรือแม่นกว่านี้ ตีคริไม่สนการหลบ · ATK ใช้ค่าอาวุธที่กรอก ส่วน HP/SP รวมเลเวลสกิล ร่างกายแข็งแกร่ง/สมาธิแน่วแน่ แล้ว</span></div>`;
-  for (const x of document.querySelectorAll('[data-unequip]')) x.onclick = () => { const k = x.dataset.unequip; delete b.gear[k]; if (k === 'weapon') b.w = { atk: 31, kind: b.w.kind }; persist(); renderStats(); };
-  const sa = $('#setAcc'); if (sa) sa.onchange = (e) => { b.gear.setAcc = e.target.checked; persist(); renderStats(); };
-  $('#baseLv').onchange = (e) => { b.base = Math.max(1, Math.min(99, +e.target.value || 1)); persist(); renderStats(); };
-  $('#wAtk').onchange = (e) => { b.w.atk = Math.max(0, +e.target.value || 0); persist(); renderStats(); };
-  $('#wKind').onchange = (e) => { b.w.kind = e.target.value; persist(); renderStats(); };
+  for (const x of document.querySelectorAll('[data-unequip]')) x.onclick = () => { const k = x.dataset.unequip; delete b.gear[k]; if (k === 'weapon') b.w = { atk: 31, kind: b.w.kind }; persist(); renderStats(); publish(); };
+  const sa = $('#setAcc'); if (sa) sa.onchange = (e) => { b.gear.setAcc = e.target.checked; persist(); renderStats(); publish(); };
+  $('#baseLv').onchange = (e) => { b.base = Math.max(1, Math.min(99, +e.target.value || 1)); persist(); renderStats(); publish(); };
+  $('#wAtk').onchange = (e) => { b.w.atk = Math.max(0, +e.target.value || 0); persist(); renderStats(); publish(); };
+  $('#wKind').onchange = (e) => { b.w.kind = e.target.value; persist(); renderStats(); publish(); };
 }
 $('#statBox').addEventListener('click', (e) => {
   const t = e.target.closest('button'); if (!t) return; const b = bld();
   if (t.dataset.su) { const k = t.dataset.su; if (b.st[k] >= 99) return; if (stLeft(b) < statCost(b.st[k])) return toast('แต้มสเตตัสไม่พอ'); b.st[k]++; }
   else if (t.dataset.sd) { const k = t.dataset.sd; if (b.st[k] <= 1) return; b.st[k]--; }
   else return;
-  persist(); renderStats();
+  persist(); renderStats(); publish();
 });
 
 // ---------- compare ----------
@@ -440,7 +438,7 @@ function applyGear(it) {
   else if (it.slot === 'set' && it.P) { b.gear.set = cleanGear({ set: it }).set; }
   else if (it.slot === 'hat' || it.slot === 'glasses') b.gear[it.slot] = cleanGear({ [it.slot]: it })[it.slot];
   else return;
-  persist(); render(); toast(`ใส่ "${it.n}" ใน Build ${cur} แล้ว`);
+  persist(); render(); toast(`ใส่ "${it.n}" ใน Build แล้ว`);
 }
 window.addEventListener('message', (e) => {
   if (e.source !== window.parent || (e.origin !== location.origin && e.origin !== 'null')) return; // (only the NightCamp Tools top bar)
@@ -449,9 +447,10 @@ window.addEventListener('message', (e) => {
   // a recommended build from the guide (or a #sim/NCB1. link): into an empty slot, else Build B, so Build A stays
   if (d.nc === 'build' && d.code) {
     try {
-      const nb = dec(d.code), slot = !spent(B.A) ? 'A' : !spent(B.B) ? 'B' : 'B';
-      B[slot] = nb; persist(); if (compare) $('#cmpBtn').click(); setCur(slot);
-      toast(`เปิด "${d.name || 'Build ที่แชร์'}" ใน Build ${slot} แล้ว`);
+      const nb = dec(d.code);
+      if (spent(B.A)) keep(B.A, 'เก็บอัตโนมัติก่อนเปิด ' + (d.name || 'build ใหม่')); // (one build now: the one you had goes to "saved" first)
+      B.A = nb; persist(); render();
+      toast(spent(nb) ? `เปิด "${d.name || 'Build ที่แชร์'}" แล้ว · บิลด์เดิมอยู่ใน "เปิดที่บันทึก"` : `เปิด "${d.name || 'Build ที่แชร์'}" แล้ว`);
     } catch (err) { toast('โค้ด Build ไม่ถูกต้อง'); }
     return;
   }
@@ -480,13 +479,13 @@ const dlg = $('#dlg'), form = $('#dlgForm');
 function openDlg(html, onOk) { form.innerHTML = html; dlg.showModal(); const ok = form.querySelector('[data-ok]'); if (ok) ok.onclick = (e) => { e.preventDefault(); if (onOk() !== false) dlg.close(); }; }
 $('#shareBtn').onclick = () => {
   const code = enc(bld());
-  openDlg(`<h2>แชร์ Build ${cur}</h2><p class="muted" style="margin:0">คัดลอกโค้ดนี้ไปวางให้คนอื่นกด "วางโค้ด"</p><textarea id="shareTxt" readonly>${esc(code)}</textarea><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ปิด</button><button class="btn primary" data-ok>คัดลอก</button></div>`,
+  openDlg(`<h2>แชร์ Build</h2><p class="muted" style="margin:0">คัดลอกโค้ดนี้ไปวางให้คนอื่นกด "วางโค้ด"</p><textarea id="shareTxt" readonly>${esc(code)}</textarea><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ปิด</button><button class="btn primary" data-ok>คัดลอก</button></div>`,
     () => { const t = $('#shareTxt'); t.select(); (navigator.clipboard ? navigator.clipboard.writeText(code) : Promise.reject()).then(() => toast('คัดลอกแล้ว'), () => toast('เลือกข้อความไว้แล้ว กด Ctrl+C')); return false; });
 };
-$('#importBtn').onclick = () => openDlg(`<h2>วางโค้ดลง Build ${cur}</h2><label for="impTxt" class="muted">โค้ดขึ้นต้นด้วย NCB1.</label><textarea id="impTxt"></textarea><p class="muted" id="impErr" style="margin:0"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ยกเลิก</button><button class="btn primary" data-ok>ใช้โค้ดนี้</button></div>`,
+$('#importBtn').onclick = () => openDlg(`<h2>วางโค้ดลง Build</h2><label for="impTxt" class="muted">โค้ดขึ้นต้นด้วย NCB1.</label><textarea id="impTxt"></textarea><p class="muted" id="impErr" style="margin:0"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ยกเลิก</button><button class="btn primary" data-ok>ใช้โค้ดนี้</button></div>`,
   () => { try { B[cur] = dec($('#impTxt').value); persist(); render(); toast('นำเข้าแล้ว'); } catch (e) { $('#impErr').textContent = e.message; return false; } });
 const saved = () => { try { return JSON.parse(store.get('ncsim_saved') || '[]'); } catch (e) { return []; } };
-$('#saveBtn').onclick = () => openDlg(`<h2>บันทึก Build ${cur}</h2><label for="svName">ชื่อ</label><input id="svName" type="text" value="${esc(JOBS[bld().job].en)} Job ${bld().jlv}" style="font:14px var(--body);padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg)"><p class="muted" style="margin:0;font-size:12.5px">บันทึกไว้ในเบราว์เซอร์นี้เท่านั้น ถ้าจะเปิดที่เครื่องอื่นให้ใช้แชร์โค้ด</p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ยกเลิก</button><button class="btn primary" data-ok>บันทึก</button></div>`,
+$('#saveBtn').onclick = () => openDlg(`<h2>บันทึก Build</h2><label for="svName">ชื่อ</label><input id="svName" type="text" value="${esc(JOBS[bld().job].en)} Job ${bld().jlv}" style="font:14px var(--body);padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg)"><p class="muted" style="margin:0;font-size:12.5px">บันทึกไว้ในเบราว์เซอร์นี้เท่านั้น ถ้าจะเปิดที่เครื่องอื่นให้ใช้แชร์โค้ด</p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ยกเลิก</button><button class="btn primary" data-ok>บันทึก</button></div>`,
   () => { const list = saved(); list.unshift({ name: $('#svName').value || 'build', code: enc(bld()), at: Date.now() }); store.set('ncsim_saved', JSON.stringify(list.slice(0, 30))); toast('บันทึกแล้ว'); });
 $('#loadBtn').onclick = () => {
   const list = saved();
@@ -497,19 +496,27 @@ $('#loadBtn').onclick = () => {
     if (t.dataset.rm) { e.preventDefault(); list.splice(+t.dataset.rm, 1); store.set('ncsim_saved', JSON.stringify(list)); dlg.close(); $('#loadBtn').click(); }
   };
 };
-$('#resetBtn').onclick = () => openDlg(`<h2>ล้างแต้มสกิลของ Build ${cur}?</h2><p class="muted" style="margin:0">สเตตัสและอาชีพยังอยู่</p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ยกเลิก</button><button class="btn primary" data-ok>ล้าง</button></div>`,
+$('#resetBtn').onclick = () => openDlg(`<h2>ล้างแต้มสกิลของ Build?</h2><p class="muted" style="margin:0">สเตตัสและอาชีพยังอยู่</p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="close">ยกเลิก</button><button class="btn primary" data-ok>ล้าง</button></div>`,
   () => { bld().add = {}; bld().order = []; persist(); render(); });
 
-// ---------- top controls ----------
-function setCur(k) { cur = k; $('#bA').setAttribute('aria-pressed', k === 'A'); $('#bB').setAttribute('aria-pressed', k === 'B'); render(); }
-$('#bA').onclick = () => setCur('A'); $('#bB').onclick = () => setCur('B');
-$('#cmpBtn').onclick = () => { compare = !compare; $('#cmpBtn').setAttribute('aria-pressed', compare); $('#cmpBtn').classList.toggle('primary', compare); render(); };
+// ---------- one build (Build A); to compare, players save or share codes and open them side by side themselves ----------
+function keep(b, name) { const list = saved(); list.unshift({ name, code: enc(b), at: Date.now() }); store.set('ncsim_saved', JSON.stringify(list.slice(0, 30))); }
+if (spent(B.B)) { try { keep(B.B, 'Build B (เก็บอัตโนมัติ)'); } catch (e) {} B.B = blank(B.B.job || 'rogue'); persist(); }
+cur = 'A';
 let tt; function toast(m) { let t = $('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); } t.textContent = m; clearTimeout(tt); tt = setTimeout(() => t.remove(), 2200); }
 
 function render() {
   $('#cmpView').hidden = !compare; $('#mainView').hidden = compare; $('#pathBox').hidden = compare;
   if (compare) return renderCompare();
-  renderPath(); renderBoard(); renderSide(); renderStats();
+  renderPath(); renderBoard(); renderSide(); renderStats(); publish();
+}
+// the build in short, for the other tools (my character, the farming planner): same browser, read from storage
+function publish() {
+  try {
+    const b = bld(), d = derive(b), w = b.gear.weapon, mat = Math.round((d.matk[0] + d.matk[1]) / 2);
+    store.set('ncsim_summary', JSON.stringify({ job: b.job, jlv: b.jlv, base: b.base, atk: d.atk, matk: mat, hit: Math.max(d.atk, mat), magic: mat > d.atk,
+      aspd: +d.aspd.toFixed(3), crit: d.crit, hp: d.hp, sp: d.sp, el: (w && w.el) || 'neutral', wn: (w && w.n) || '', wa: (w && w.atk) || b.w.atk, pts: spent(b), pool: pool(b), at: Date.now() }));
+  } catch (e) {}
 }
 render();
 </script>
@@ -522,7 +529,7 @@ render();
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=99153d4d'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=ff3e5d65'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
