@@ -60,6 +60,7 @@ html,body{overflow-x:hidden}
     <button role="tab" id="t-guide" aria-controls="f-guide">คู่มือ</button>
     <button role="tab" id="t-equip" aria-controls="f-equip">อุปกรณ์</button>
     <button role="tab" id="t-mon" aria-controls="f-mon">มอนสเตอร์</button>
+    <button role="tab" id="t-plan" aria-controls="f-plan">วางแผน</button>
     <button role="tab" id="t-life" aria-controls="f-life">อาชีพเสริม</button>
     <button role="tab" id="t-sim" aria-controls="f-sim">Build Sim</button>
     <button role="tab" id="t-patch" aria-controls="f-patch">อัปเดต</button>
@@ -72,16 +73,17 @@ html,body{overflow-x:hidden}
   </div>
 </header>
 <div class="stage">
-<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=f9c44ce1"></iframe>
-<iframe id="f-equip" title="คลังอุปกรณ์" data-src="equip.html?v=b56fb6ea" hidden></iframe>
-<iframe id="f-mon" title="มอนสเตอร์และแมพ" data-src="mon.html?v=236a8467" hidden></iframe>
-<iframe id="f-life" title="อาชีพเสริม" data-src="life.html?v=e660ec4e" hidden></iframe>
-<iframe id="f-sim" title="Build Simulator" data-src="sim.html?v=58378d94" hidden></iframe>
-<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=a3ac6cd7" hidden></iframe>
+<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=9c412b62"></iframe>
+<iframe id="f-equip" title="คลังอุปกรณ์" data-src="equip.html?v=6f7de48d" hidden></iframe>
+<iframe id="f-mon" title="มอนสเตอร์และแมพ" data-src="mon.html?v=c09c38d5" hidden></iframe>
+<iframe id="f-plan" title="วางแผนฟาร์ม" data-src="plan.html?v=04eaef6b" hidden></iframe>
+<iframe id="f-life" title="อาชีพเสริม" data-src="life.html?v=8636fa08" hidden></iframe>
+<iframe id="f-sim" title="Build Simulator" data-src="sim.html?v=88c4aefa" hidden></iframe>
+<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=cb8a5b6b" hidden></iframe>
 <div class="skel" id="skel" aria-hidden="true"><div class="in"><i style="height:150px"></i><i style="height:22px;width:55%"></i><i style="height:110px"></i><i style="height:110px"></i><i style="height:180px"></i></div></div>
 </div>
 <script>
-const TABS = ["guide", "equip", "mon", "life", "sim", "patch"], F = Object.fromEntries(TABS.map((x) => [x, document.getElementById('f-' + x)]));
+const TABS = ["guide", "equip", "mon", "plan", "life", "sim", "patch"], F = Object.fromEntries(TABS.map((x) => [x, document.getElementById('f-' + x)]));
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
 let P = (() => { try { return JSON.parse(store.get('nc_profile') || 'null'); } catch (e) { return null; } })() || { job: 'knight', lv: 10 };
 const pJob = document.getElementById('pJob'), pLv = document.getElementById('pLv');
@@ -114,6 +116,7 @@ window.addEventListener('message', (e) => {
   if (!from) return;
   if (d.nc === 'setProfile' && d.profile) setP(d.profile.job, d.profile.lv, from);
   if (d.nc === 'nav' && TABS.includes(d.tab)) go(d.tab, d.tab === 'sim');
+  if (d.nc === 'plan' && d.item && TABS.includes('plan')) { whenReady('plan', () => F.plan.contentWindow.postMessage({ nc: 'find', item: d.item }, '*')); go('plan'); }
   if (d.nc === 'gear' && from === 'equip') { whenReady('sim', () => F.sim.contentWindow.postMessage(d, '*')); setTimeout(() => go('sim'), 700); }
   if (d.nc === 'build' && from === 'guide' && d.code) { whenReady('sim', () => F.sim.contentWindow.postMessage(d, '*')); go('sim'); try { history.replaceState(null, '', '#sim/' + d.code); } catch (e) {} }
 });
@@ -252,7 +255,7 @@ go(back || (linkCode ? 'sim' : location.hash.slice(1)));
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=961c6642'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=a4ad00a9'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
