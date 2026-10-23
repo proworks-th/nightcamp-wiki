@@ -5,7 +5,32 @@
   window.NC_WIKI_I18N = ROOT + 'i18n.js';
   var b = document.getElementById('lang'), en = false;
   try { en = localStorage.getItem('nc_lang') === 'en'; } catch (e) {}
+  // English site: the texts written with their English beside them (data-en) switch before the dictionary runs
+  if (en) (function () {
+    var L = document.querySelectorAll('[data-en]'); for (var i = 0; i < L.length; i++) L[i].textContent = L[i].getAttribute('data-en');
+    var P = document.querySelectorAll('[data-en-ph]'); for (var j = 0; j < P.length; j++) P[j].placeholder = P[j].getAttribute('data-en-ph');
+    document.documentElement.lang = 'en';
+  })();
   if (b) { b.textContent = en ? 'ไทย' : 'EN'; b.onclick = function () { try { localStorage.setItem('nc_lang', en ? 'th' : 'en'); } catch (e) {} location.reload(); }; }
+})();
+// inside the site's frame (the main page is the site's first tab): hide our own header and footer; a link to one of the
+// site's tabs switches the tab, any other link opens on its own (not inside the frame)
+(function () {
+  var embed = false; try { embed = window.top !== window; } catch (e) { embed = true; }
+  if (embed) document.documentElement.classList.add('embed');
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href]'); if (!a || !embed || e.ctrlKey || e.metaKey) return;
+    var m = /\/index\.html#([a-z]+)$/.exec(a.href);
+    if (m && !/\/w\/index\.html/.test(a.href)) { e.preventDefault(); parent.postMessage({ nc: 'nav', tab: m[1] }, '*'); return; }
+    a.target = '_top';
+  });
+  // the main page's search box: the site's own search (it knows every item, monster, map, skill and page)
+  var f = document.getElementById('hs');
+  if (f) f.addEventListener('submit', function (e) {
+    e.preventDefault(); var q = document.getElementById('hq').value.trim(); if (!q) return;
+    if (embed) parent.postMessage({ nc: 'search', q: q }, '*');
+    else location.href = new URL('../index.html', location.href).href + '#search/' + encodeURIComponent(q);
+  });
 })();
 /* English mode: when the viewer picked EN (localStorage nc_lang), swap the Thai interface text for English as the page
    renders. Game names that have no official English (items, monsters) stay Thai. */

@@ -75,9 +75,10 @@ details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-s
   <nav class="grp" role="tablist" aria-label="หมวด"><button role="tab" id="g-guide" data-g="guide">คู่มือ</button><button role="tab" id="g-data" data-g="data">ข้อมูล</button><button role="tab" id="g-tools" data-g="tools">เครื่องมือ</button></nav>
   <div class="sx" role="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="sq" type="search" autocomplete="off" spellcheck="false" aria-label="ค้นหาทั้งเว็บ" aria-controls="sres" data-src="search.json?v=6cf4066a"><div class="sres" id="sres" role="listbox" hidden></div></div>
   <button id="langBtn" class="lang" aria-label="ภาษา / Language">EN</button>
-  <nav class="sub" aria-label="หน้า"><button id="t-guide" data-g="guide" aria-controls="f-guide">คู่มือ</button><button id="t-patch" data-g="guide" aria-controls="f-patch">อัปเดตเกม</button><button id="t-jobs" data-g="data" aria-controls="f-jobs">อาชีพและสกิล</button><button id="t-equip" data-g="data" aria-controls="f-equip">อุปกรณ์</button><button id="t-mon" data-g="data" aria-controls="f-mon">มอนสเตอร์และแมพ</button><button id="t-map" data-g="data" aria-controls="f-map">แผนที่</button><button id="t-life" data-g="data" aria-controls="f-life">อาชีพเสริม</button><button id="t-me" data-g="tools" aria-controls="f-me">ตัวละครของฉัน</button><button id="t-sim" data-g="tools" aria-controls="f-sim">Build Sim</button><button id="t-plan" data-g="tools" aria-controls="f-plan">วางแผนฟาร์ม</button><button id="t-calc" data-g="tools" aria-controls="f-calc">ตีบวก / ขัดเกรด</button></nav>
+  <nav class="sub" aria-label="หน้า"><button id="t-home" data-g="guide" aria-controls="f-home">หน้าแรก</button><button id="t-guide" data-g="guide" aria-controls="f-guide">คู่มือ</button><button id="t-patch" data-g="guide" aria-controls="f-patch">อัปเดตเกม</button><button id="t-jobs" data-g="data" aria-controls="f-jobs">อาชีพและสกิล</button><button id="t-equip" data-g="data" aria-controls="f-equip">อุปกรณ์</button><button id="t-mon" data-g="data" aria-controls="f-mon">มอนสเตอร์และแมพ</button><button id="t-map" data-g="data" aria-controls="f-map">แผนที่</button><button id="t-life" data-g="data" aria-controls="f-life">อาชีพเสริม</button><button id="t-me" data-g="tools" aria-controls="f-me">ตัวละครของฉัน</button><button id="t-sim" data-g="tools" aria-controls="f-sim">Build Sim</button><button id="t-plan" data-g="tools" aria-controls="f-plan">วางแผนฟาร์ม</button><button id="t-calc" data-g="tools" aria-controls="f-calc">ตีบวก / ขัดเกรด</button></nav>
 </header>
 <div class="stage">
+<iframe id="f-home" title="หน้าแรก" data-src="w/index.html?v=a7284783" hidden></iframe>
 <iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=37132b49#v=guide" hidden></iframe>
 <iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=986b2163" hidden></iframe>
 <iframe id="f-jobs" title="อาชีพและสกิล" data-src="guide.html?v=37132b49#v=jobs" hidden></iframe>
@@ -92,7 +93,7 @@ details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-s
 <div class="skel" id="skel" aria-hidden="true"><div class="in"><i style="height:150px"></i><i style="height:22px;width:55%"></i><i style="height:110px"></i><i style="height:110px"></i><i style="height:180px"></i></div></div>
 </div>
 <script>
-const TABS = ["guide", "patch", "jobs", "equip", "mon", "map", "life", "me", "sim", "plan", "calc"], F = Object.fromEntries(TABS.map((x) => [x, document.getElementById('f-' + x)]));
+const TABS = ["home", "guide", "patch", "jobs", "equip", "mon", "map", "life", "me", "sim", "plan", "calc"], F = Object.fromEntries(TABS.map((x) => [x, document.getElementById('f-' + x)]));
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
 let P = (() => { try { return JSON.parse(store.get('nc_profile') || 'null'); } catch (e) { return null; } })() || { job: 'knight', lv: 10 };
 function send(x, extra) { try { F[x].contentWindow.postMessage(Object.assign({ nc: 'profile', profile: P }, extra || {}), '*'); } catch (e) {} }
@@ -108,10 +109,10 @@ function whenReady(x, fn) { ensure(x); if (READY[x]) fn(); else (WAIT[x] = WAIT[
 const SK = document.getElementById('skel');
 const skel = () => SK.classList.toggle('done', !!READY[CUR]);
 for (const x of TABS) F[x].addEventListener('load', () => { READY[x] = true; skel(); send(x); for (const fn of WAIT[x] || []) setTimeout(fn, 30); WAIT[x] = []; });
-let CUR = 'guide';
-const VG = {"guide": "guide", "patch": "guide", "jobs": "data", "equip": "data", "mon": "data", "map": "data", "life": "data", "me": "tools", "sim": "tools", "plan": "tools", "calc": "tools"}, LASTG = (() => { try { return JSON.parse(store.get('nc_lastg') || '{}'); } catch (e) { return {}; } })();
+let CUR = 'home';
+const VG = {"home": "guide", "guide": "guide", "patch": "guide", "jobs": "data", "equip": "data", "mon": "data", "map": "data", "life": "data", "me": "tools", "sim": "tools", "plan": "tools", "calc": "tools"}, LASTG = (() => { try { return JSON.parse(store.get('nc_lastg') || '{}'); } catch (e) { return {}; } })();
 function go(t, force) {
-  if (!TABS.includes(t)) t = 'guide';
+  if (!TABS.includes(t)) t = 'home';
   CUR = t; ensure(t); skel();
   const g = VG[t]; LASTG[g] = t; store.set('nc_lastg', JSON.stringify(LASTG));
   for (const b of document.querySelectorAll('nav.grp button')) b.setAttribute('aria-selected', b.dataset.g === g);
@@ -127,6 +128,7 @@ window.addEventListener('message', (e) => {
   if (!from) return;
   if (d.nc === 'setProfile' && d.profile) setP(d.profile.job, d.profile.lv, from);
   if (d.nc === 'nav' && TABS.includes(d.tab)) go(d.tab, d.tab === 'sim');
+  if (d.nc === 'search' && d.q) search(d.q);
   if (d.nc === 'open' && TABS.includes(d.tab) && d.msg) { whenReady(d.tab, () => F[d.tab].contentWindow.postMessage(d.msg, '*')); go(d.tab); }
   if (d.nc === 'plan' && d.item && TABS.includes('plan')) { whenReady('plan', () => F.plan.contentWindow.postMessage({ nc: 'find', item: d.item }, '*')); go('plan'); }
   if (d.nc === 'gear' && from === 'equip') { whenReady('sim', () => F.sim.contentWindow.postMessage(d, '*')); setTimeout(() => go('sim'), 700); }
@@ -142,6 +144,10 @@ try { back = localStorage.getItem('nc_tab_once') || ''; localStorage.removeItem(
 const linkCode = (/^#sim\/(NCB1\.[A-Za-z0-9+/]+)$/.exec(location.hash) || [])[1];
 if (linkCode) whenReady('sim', () => F.sim.contentWindow.postMessage({ nc: 'build', code: linkCode, name: 'Build จากลิงก์' }, '*'));
 // a map from a wiki page: #map/<id> opens the map with that place picked
+// a search from the main page (or a #search/<words> link): fill the box and show the results
+function search(q) { const i = document.getElementById('sq'); i.value = String(q).slice(0, 80); i.focus(); i.dispatchEvent(new Event('input', { bubbles: true })); }
+const sLink = (/^#search\/(.+)$/.exec(location.hash) || [])[1];
+if (sLink) setTimeout(() => search(decodeURIComponent(sLink)), 50);
 const mapLink = (/^#map\/([a-z0-9_]+)$/.exec(location.hash) || [])[1];
 if (mapLink && TABS.includes('map')) whenReady('map', () => F.map.contentWindow.postMessage({ nc: 'find', map: mapLink }, '*'));
 go(back || (linkCode ? 'sim' : mapLink ? 'map' : location.hash.slice(1)));
