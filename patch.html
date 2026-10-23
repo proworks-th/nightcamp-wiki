@@ -9,6 +9,7 @@ details.howto>summary::before{content:"ⓘ ";color:var(--moon,#3c4fa8)}
 details.howto>ul{margin:0;padding:0 14px 6px 30px}
 details.howto li{margin:4px 0}
 details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-size:13px}
+.wk{white-space:nowrap}
 </style></head><body><title>NightCamp Patch Notes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -271,7 +272,7 @@ window.addEventListener('message', (e) => {
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=2e7b81fb'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=1a30db9c'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
