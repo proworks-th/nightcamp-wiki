@@ -39,7 +39,7 @@ nav.grp{display:flex;gap:4px;position:relative;z-index:20}
 .ddm{position:absolute;left:0;top:100%;min-width:210px;margin-top:4px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px rgba(0,0,0,.28);display:none;flex-direction:column}
 .ddm::before{content:"";position:absolute;left:0;right:0;top:-8px;height:8px}
 .dd.open .ddm{display:flex}
-@media (hover:hover){.dd:hover .ddm{display:flex}.dd:hover .ddb svg{transform:rotate(180deg)}.ddb:hover{background:var(--bg)}}
+@media (hover:hover) and (pointer:fine){.dd:hover:not(.shut) .ddm{display:flex}.dd:hover:not(.shut) .ddb svg{transform:rotate(180deg)}.ddb:hover{background:var(--bg)}.ddb{cursor:default}}
 .ddm button{text-align:left;font:500 15px var(--display);min-height:42px;padding:8px 12px;border:0;border-radius:8px;background:none;color:var(--fg);cursor:pointer;white-space:nowrap}
 .ddm button:hover{background:var(--bg)}
 .ddm button[aria-current="page"]{color:var(--ember);background:var(--bg)}
@@ -129,11 +129,14 @@ function go(t, force) {
   if (force) send(t, { force: true });
   try { if (location.hash.slice(1).split('/')[0] !== t) history.replaceState(null, '', '#' + t); } catch (e) {}
 }
-for (const x of TABS) document.getElementById('t-' + x).onclick = () => go(x);
+for (const x of TABS) document.getElementById('t-' + x).onclick = (e) => { const d = e.currentTarget.closest('.dd'); go(x); if (d) { d.classList.add('shut'); e.currentTarget.blur(); } };
 window.addEventListener('hashchange', () => { const h = location.hash.slice(1).split('/')[0]; if (h && h !== CUR && TABS.includes(h)) go(h); });
 // the drop-downs: hover opens them on a computer (CSS); a tap or a click toggles; a click elsewhere or Esc closes
 function closeMenus(except) { for (const d of document.querySelectorAll('.dd')) if (d !== except) { d.classList.remove('open'); d.querySelector('.ddb').setAttribute('aria-expanded', 'false'); } }
-for (const b of document.querySelectorAll('.ddb')) b.onclick = (e) => { e.stopPropagation(); const d = b.parentElement, o = !d.classList.contains('open'); closeMenus(d); d.classList.toggle('open', o); b.setAttribute('aria-expanded', o); if (o) d.querySelector('[aria-current="page"], .ddm button').focus({ preventScroll: true }); };
+// a mouse: the menu opens on hover, so a click on the group name does nothing; a phone (no hover): a tap opens it
+const HOVER = matchMedia('(hover: hover) and (pointer: fine)');
+for (const d of document.querySelectorAll('.dd')) d.addEventListener('mouseleave', () => d.classList.remove('shut'));
+for (const b of document.querySelectorAll('.ddb')) b.onclick = (e) => { e.stopPropagation(); if (HOVER.matches) return; const d = b.parentElement, o = !d.classList.contains('open'); closeMenus(d); d.classList.toggle('open', o); b.setAttribute('aria-expanded', o); if (o) d.querySelector('[aria-current="page"], .ddm button').focus({ preventScroll: true }); };
 document.addEventListener('click', () => closeMenus());
 window.addEventListener('blur', () => setTimeout(() => { if (document.activeElement && document.activeElement.tagName === 'IFRAME') closeMenus(); }, 0));
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenus(); });
