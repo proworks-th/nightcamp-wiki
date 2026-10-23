@@ -1,7 +1,7 @@
-// the wiki pages' own script: the language button, the English dictionary (shared with the rest of the site), the
-// game-term tooltips. Loaded from w/wiki.js; the site's files are one folder up.
+// the wiki pages' own script: the language button, the menu's drop-downs, the search box, the English texts, and (inside
+// the site's frame) handing links to the site. Loaded from w/wiki.js; the site's files are one folder up.
 (function () {
-  var me = document.currentScript, ROOT = new URL('../', me.src).href;
+  var me = document.currentScript, ROOT = new URL('../', me.src).href, W = new URL('./', me.src).href;
   window.NC_WIKI_I18N = ROOT + 'i18n.js';
   var b = document.getElementById('lang'), en = false;
   try { en = localStorage.getItem('nc_lang') === 'en'; } catch (e) {}
@@ -11,17 +11,42 @@
     var P = document.querySelectorAll('[data-en-ph]'); for (var j = 0; j < P.length; j++) P[j].placeholder = P[j].getAttribute('data-en-ph');
     document.documentElement.lang = 'en';
   })();
+  // the site's menu (same groups and pages as the site's header) and the footer: written here once for every page
+  var T = function (th, e) { return en ? e : th; }, X = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var MENU = [['คู่มือ', 'Guide', [['หน้าแรก', 'Home', ''], ['คู่มือ', 'Guide', 'guide'], ['อัปเดตเกม', 'Game updates', 'patch'], ['เกี่ยวกับเว็บ', 'About', 'about']]],
+    ['ข้อมูล', 'Data', [['อาชีพและสกิล', 'Jobs & skills', 'jobs'], ['อุปกรณ์', 'Equipment', 'equip'], ['มอนสเตอร์และแมพ', 'Monsters & maps', 'mon'], ['แผนที่', 'Map', 'map'], ['อาชีพเสริม', 'Life skills', 'life']]],
+    ['เครื่องมือ', 'Tools', [['ตัวละครของฉัน', 'My character', 'me'], ['Build Sim', 'Build Sim', 'sim'], ['วางแผนฟาร์ม', 'Farm planner', 'plan'], ['ตีบวก / ขัดเกรด', 'Refine / polish', 'calc']]]];
+  var u = function (t) { return t === '' ? W + 'index.html' : t === 'about' ? W + 'about.html' : ROOT + 'index.html#' + t; };
+  var nav = document.querySelector('nav.grp[data-up]');
+  if (nav) nav.innerHTML = MENU.map(function (g) {
+    return '<div class="dd"><button class="ddb" type="button" aria-haspopup="true" aria-expanded="false">' + X(T(g[0], g[1])) + '<svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button><div class="ddm" role="menu">'
+      + g[2].map(function (v) { return '<a role="menuitem" href="' + u(v[2]) + '">' + X(T(v[0], v[1])) + '</a>'; }).join('') + '</div></div>';
+  }).join('');
+  var sxi = document.querySelector('form.sx input'); if (sxi && en) sxi.placeholder = 'Search the site';
+  var ft = document.querySelector('footer.ft[data-build]');
+  if (ft) ft.innerHTML = '<div class="fti"><div><b class="ftb">NightCamp Wiki</b><p>' + X(T('วิกิแฟนเกม NightCamp โดย KhumGameLab · ข้อมูลอ่านจากไฟล์เกมโดยตรง', 'A NightCamp fan wiki by KhumGameLab · data read straight from the game files')) + '</p><p class="muted">'
+    + X(T('ไฟล์เกมรุ่น ' + ft.dataset.build + ' · ภาพและชื่อในเกมเป็นของทีม Night Camp ใช้โดยได้รับอนุญาต · ไม่ใช่เว็บทางการของเกม', 'Game files ' + ft.dataset.build + ' · in-game art and names belong to the Night Camp team, used with permission · not an official site')) + '</p></div><nav class="ftl">'
+    + [[W + 'index.html', 'หน้าแรก', 'Home'], [W + 'about.html', 'เกี่ยวกับเว็บ', 'About'], [ROOT + 'index.html#patch', 'อัปเดตเกม', 'Game updates'], [ROOT + 'sitemap.xml', 'แผนผังเว็บ', 'Sitemap']].map(function (l) { return '<a href="' + l[0] + '">' + X(T(l[1], l[2])) + '</a>'; }).join('') + '</nav></div>';
   if (b) { b.textContent = en ? 'ไทย' : 'EN'; b.onclick = function () { try { localStorage.setItem('nc_lang', en ? 'th' : 'en'); } catch (e) {} location.reload(); }; }
+  // the menu: pointing opens a group (CSS); a click or tap opens it too and keeps it open until a click elsewhere or Esc
+  function close(x) { var D = document.querySelectorAll('.dd'); for (var i = 0; i < D.length; i++) if (D[i] !== x) { D[i].classList.remove('open'); D[i].querySelector('.ddb').setAttribute('aria-expanded', 'false'); } }
+  var B = document.querySelectorAll('.ddb');
+  for (var i = 0; i < B.length; i++) B[i].onclick = function (e) { e.stopPropagation(); var d = this.parentElement, o = !d.classList.contains('open'); close(d); d.classList.toggle('open', o); this.setAttribute('aria-expanded', o); };
+  document.addEventListener('click', function () { close(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  // the header's search: the site's own search, on the site's page
+  var sx = document.querySelector('form.sx');
+  if (sx) sx.addEventListener('submit', function (e) { e.preventDefault(); var q = sx.q.value.trim(); if (q) location.href = sx.getAttribute('data-go') + '#search/' + encodeURIComponent(q); });
 })();
-// inside the site's frame (the main page is the site's first tab): hide our own header and footer; a link to one of the
-// site's tabs switches the tab, any other link opens on its own (not inside the frame)
+// inside the site's frame (the main page and the about page are tabs of the site): hide our own header and footer; a link
+// to one of the site's tabs switches the tab, any other link opens on its own (not inside the frame)
 (function () {
   var embed = false; try { embed = window.top !== window; } catch (e) { embed = true; }
   if (embed) document.documentElement.classList.add('embed');
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('a[href]'); if (!a || !embed || e.ctrlKey || e.metaKey) return;
-    var m = /\/index\.html#([a-z]+)$/.exec(a.href);
-    if (m && !/\/w\/index\.html/.test(a.href)) { e.preventDefault(); parent.postMessage({ nc: 'nav', tab: m[1] }, '*'); return; }
+    var m = /\/index\.html#([a-z]+)$/.exec(a.href), tab = m && !/\/w\/index\.html/.test(a.href) ? m[1] : /\/w\/about\.html$/.test(a.href) ? 'about' : /\/w\/index\.html$/.test(a.href) ? 'home' : '';
+    if (tab) { e.preventDefault(); parent.postMessage({ nc: 'nav', tab: tab }, '*'); return; }
     a.target = '_top';
   });
   // the main page's search box: the site's own search (it knows every item, monster, map, skill and page)
