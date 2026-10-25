@@ -15,7 +15,7 @@
   var T = function (th, e) { return en ? e : th; }, X = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var MENU = [['คู่มือ', 'Guide', [['หน้าแรก', 'Home', ''], ['คู่มือ', 'Guide', 'guide'], ['อัปเดตเกม', 'Game updates', 'patch'], ['เกี่ยวกับเว็บ', 'About', 'about']]],
     ['ข้อมูล', 'Data', [['อาชีพและสกิล', 'Jobs & skills', 'jobs'], ['อุปกรณ์', 'Equipment', 'equip'], ['มอนสเตอร์และแมพ', 'Monsters & maps', 'mon'], ['แผนที่', 'Map', 'map'], ['อาชีพเสริม', 'Life skills', 'life'], ['รูน', 'Runes', 'rune']]],
-    ['เครื่องมือ', 'Tools', [['ตัวละครของฉัน', 'My character', 'me'], ['Build Sim', 'Build Sim', 'sim'], ['วางแผนฟาร์ม', 'Farm planner', 'plan'], ['ตีบวก / ขัดเกรด', 'Refine / polish', 'calc']]]];
+    ['เครื่องมือ', 'Tools', [['ตัวละครของฉัน', 'My character', 'me'], ['Build Sim', 'Build Sim', 'sim'], ['วางแผนฟาร์ม', 'Farm planner', 'plan'], ['ตีบวก / ขัดเกรด', 'Refine / polish', 'calc'], ['จับเวลาบอส', 'Boss timer', 'boss']]]];
   var u = function (t) { return t === '' ? W + 'index.html' : t === 'about' ? W + 'about.html' : ROOT + 'index.html#' + t; };
   var nav = document.querySelector('nav.grp[data-up]');
   if (nav) nav.innerHTML = MENU.map(function (g) {

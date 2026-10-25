@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="th">
+<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NightCamp จับเวลาบอส</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* จับเวลาบอส: press "ตายแล้ว" when a boss falls; the page counts down to its respawn (the time in the game files) and tells
+   you when it is near. Kept on this device only (no server of ours, nothing read from the game's server). */
+:root{
+  --bg:#eef0f6; --panel:#ffffff; --panel2:#e3e7f1; --line:#c9cfdf; --fg:#18203a; --muted:#56607c;
+  --ember:#c4561a; --moon:#3c4fa8; --good:#2f8a55; --warn:#b26a00; --bad:#b33a3a;
+  --display:'Mitr','Noto Sans Thai',system-ui,sans-serif; --body:'IBM Plex Sans Thai','Noto Sans Thai',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10132a; --panel:#181c38; --panel2:#20254a; --line:#2f3563; --fg:#e9ebf7; --muted:#a3a9cc;
+  --ember:#f59a4c; --moon:#aab8ff; --good:#6fd39a; --warn:#f2b552; --bad:#ff8a8a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10132a; --panel:#181c38; --panel2:#20254a; --line:#2f3563; --fg:#e9ebf7; --muted:#a3a9cc;
+  --ember:#f59a4c; --moon:#aab8ff; --good:#6fd39a; --warn:#f2b552; --bad:#ff8a8a; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding:0 16px 40px}
+header.top{padding-block:18px 6px}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,4vw,34px);line-height:1.1;margin:0}
+h1 span{color:var(--ember)}
+h2{font-family:var(--display);font-weight:500;font-size:19px;margin:18px 0 8px}
+.lead{margin:6px 0 0;max-width:860px}
+.muted{color:var(--muted)}
+a{color:var(--moon)}
+.how{margin:12px 0;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:14px}
+.bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:10px 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 14px var(--body);border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:999px;padding:5px 12px;cursor:pointer;min-height:36px}
+.chip[aria-pressed="true"]{border-color:var(--ember);background:color-mix(in srgb,var(--ember) 12%,var(--panel));color:var(--ember);font-weight:600}
+input[type=search],select{font:15px var(--body);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 12px;min-height:40px}
+input[type=search]{width:220px;min-width:0}
+.btn{font:500 14px var(--display);border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:10px;padding:6px 12px;cursor:pointer;min-height:38px}
+.btn.main{background:linear-gradient(#e8813a,var(--ember));color:#fff;border-color:transparent}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.card h3{font:500 17px var(--display);margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .where{font-size:13.5px}
+.tag{font:500 12px var(--body);padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.clock{font:600 28px var(--mono);letter-spacing:.5px}
+.state{font:500 13px var(--display);padding:2px 10px;border-radius:999px;white-space:nowrap}
+.st-wait{background:color-mix(in srgb,var(--warn) 15%,transparent);color:var(--warn)}
+.st-soon{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad);animation:pulse 1s ease-in-out infinite}
+.st-up{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
+@keyframes pulse{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.st-soon{animation:none}}
+.card.run{border-color:var(--warn)}.card.soon{border-color:var(--bad)}.card.up{border-color:var(--good)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.meter{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden}.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--warn),var(--good))}
+.empty{padding:16px;color:var(--muted);border:1px dashed var(--line);border-radius:12px;text-align:center}
+.set{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:14px}
+@media (max-width:640px){input[type=search]{width:100%}.bar label{width:100%}}
+</style>
+<style>/* shared by every page (site.py puts it in each head): where a number comes from, and "how to read this" */
+.src{display:inline-block;font:600 11px/1.6 var(--body,system-ui);padding:0 7px;border-radius:999px;vertical-align:middle;white-space:nowrap;letter-spacing:.2px}
+.src.game{background:color-mix(in srgb,var(--moon,#3c4fa8) 14%,transparent);color:var(--moon,#3c4fa8)}
+.src.est{background:color-mix(in srgb,var(--ember,#c4561a) 16%,transparent);color:var(--ember,#c4561a)}
+details.howto{margin:10px 0;border:1px solid var(--line,#c9cfdf);border-radius:12px;background:var(--panel,#fff);font-size:14px}
+details.howto>summary{cursor:pointer;padding:8px 12px;font-weight:600;list-style:none}
+details.howto>summary::-webkit-details-marker{display:none}
+details.howto>summary::before{content:"ⓘ ";color:var(--moon,#3c4fa8)}
+details.howto>ul{margin:0;padding:0 14px 6px 30px}
+details.howto li{margin:4px 0}
+details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-size:13px}
+.wk{white-space:nowrap}
+</style></head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>จับเวลา<span>บอส</span></h1>
+    <p class="lead muted">ตีบอสตายแล้วกด "ตายแล้ว" เว็บจะนับถอยหลังถึงเวลาเกิดใหม่ และเตือนก่อนบอสเกิด · เวลาเกิดใหม่อ่านจากไฟล์เกม (<span id="build"></span>)</p>
+  </header>
+  <div class="how"><b>ควรรู้</b> เวลาเกิดใหม่เป็นค่าจากไฟล์เกม ตอนเล่นออนไลน์เซิร์ฟเวอร์เป็นคนคุมจริง เวลาอาจคลาดได้ · เวลาที่จับไว้เก็บในเครื่องนี้เท่านั้น ไม่แชร์กับคนอื่น · แจ้งเตือนทำงานเมื่อเปิดหน้าเว็บนี้ค้างไว้ (สลับไปแท็บอื่นของเว็บได้)</div>
+  <div class="set">
+    <label>เตือนก่อนเกิด <select id="lead"><option value="0">ตอนเกิด</option><option value="60">1 นาที</option><option value="120">2 นาที</option><option value="300">5 นาที</option></select></label>
+    <label><input type="checkbox" id="sound"> มีเสียง</label>
+    <button class="btn" id="notif" type="button">เปิดแจ้งเตือนของเบราว์เซอร์</button>
+    <span class="muted" id="notifState"></span>
+  </div>
+
+  <h2>กำลังจับเวลา <span class="muted" id="runCount"></span></h2>
+  <div class="grid" id="running"></div>
+
+  <h2>บอสทั้งหมด</h2>
+  <div class="bar">
+    <div class="chips" id="kinds" role="group" aria-label="ประเภทบอส"></div>
+    <label><input type="search" id="q" placeholder="ค้นชื่อบอสหรือแมพ" aria-label="ค้นบอส"></label>
+  </div>
+  <div class="grid" id="all"></div>
+</div>
+<script>
+const D = {"build":"20261022-1641","bosses":[{"id":"bat_king","n":"ราชาค้างคาว","k":"dungeon","lv":22,"r":480,"w":"w/mon/ราชาค้างคาว.html","maps":[{"n":"รังราชาค้างคาว","w":"w/map/รังราชาค้างคาว.html"}]},{"id":"mushking","n":"ราชาเห็ดเรืองแสง","k":"dungeon","lv":50,"r":300,"w":"w/mon/ราชาเห็ดเรืองแสง.html","maps":[{"n":"ป่าเห็ดเรืองแสง","w":"w/map/ป่าเห็ดเรืองแสง.html"}]},{"id":"ant_queen","n":"นางพญามด","k":"dungeon","lv":50,"r":480,"w":"w/mon/นางพญามด.html","maps":[{"n":"เหมืองมด ชั้น B3 · รังนางพญา","w":"w/map/เหมืองมด_ชั้น_B3_·_รังนางพญา.html"}]},{"id":"crypt_lord","n":"ราชาสุสาน","k":"dungeon","lv":55,"r":480,"w":"w/mon/ราชาสุสาน.html","maps":[{"n":"สุสานใต้ดิน ชั้น 2 · ห้องราชา","w":"w/map/สุสานใต้ดิน_ชั้น_2_·_ห้องราชา.html"}]},{"id":"aurelion","n":"ออเรเลียน ดาวที่ตกลงมา","k":"dungeon","lv":80,"r":3600,"w":"w/mon/ออเรเลียน_ดาวที่ตกลงมา.html","maps":[{"n":"หอรากมืด (Dark Root)","w":"w/map/หอรากมืด_(Dark_Root).html"}]},{"id":"lava_dragon","n":"มังกรลาวา","k":"dungeon","lv":99,"r":480,"w":"w/mon/มังกรลาวา.html","maps":[{"n":"ปล่องภูเขาไฟ ชั้น 2 · ถ้ำมังกร","w":"w/map/ปล่องภูเขาไฟ_ชั้น_2_·_ถ้ำมังกร.html"}]},{"id":"hundred_string","n":"หุ่นร้อยเชือก","k":"dungeon","lv":99,"r":900,"w":"w/mon/หุ่นร้อยเชือก.html","maps":[{"n":"หอระฆัง ชั้น 7 · ยอดหอ","w":"w/map/หอระฆัง_ชั้น_7_·_ยอดหอ.html"}]},{"id":"frog_queen","n":"ราชินีกบน้ำตก","k":"zone","lv":34,"r":900,"w":"w/mon/ราชินีกบน้ำตก.html","maps":[{"n":"น้ำตกหิ่งห้อย","w":"w/map/น้ำตกหิ่งห้อย.html"}]},{"id":"poison_heart","n":"หัวใจต้นแม่พิษ","k":"zone","lv":75,"r":900,"w":"w/mon/หัวใจต้นแม่พิษ.html","maps":[{"n":"ถ้ำรากแม่พิษ B2 · หัวใจ","w":"w/map/ถ้ำรากแม่พิษ_B2_·_หัวใจ.html"}]},{"id":"scorpion_king","n":"ราชาแมงป่องทราย","k":"zone","lv":80,"r":900,"w":"w/mon/ราชาแมงป่องทราย.html","maps":[{"n":"ใจกลางหุบผา","w":"w/map/ใจกลางหุบผา.html"}]},{"id":"dragon_mother","n":"แม่มังกรไพร","k":"zone","lv":98,"r":900,"w":"w/mon/แม่มังกรไพร.html","maps":[{"n":"ทะเลสาบไข่มังกร","w":"w/map/ทะเลสาบไข่มังกร.html"}]},{"id":"harlock","n":"ฮาร์เวน ผู้เก็บเกี่ยวยามดึก","k":"root","lv":20,"r":3600,"w":"w/mon/ฮาร์เวน_ผู้เก็บเกี่ยวยามดึก.html","maps":[{"n":"ไร่ร้างหลังเขา","w":"w/map/ไร่ร้างหลังเขา.html"},{"n":"เขาวงกตข้าวโพด","w":"w/map/เขาวงกตข้าวโพด.html"},{"n":"คอกสัตว์ร้าง","w":"w/map/คอกสัตว์ร้าง.html"}]},{"id":"selene","n":"เซลีน นักธนูใต้เงาจันทร์","k":"root","lv":24,"r":3600,"w":"w/mon/เซลีน_นักธนูใต้เงาจันทร์.html","maps":[{"n":"ทุ่งหญ้าแสงจันทร์","w":"w/map/ทุ่งหญ้าแสงจันทร์.html"},{"n":"เนินดอกไม้กลางคืน","w":"w/map/เนินดอกไม้กลางคืน.html"},{"n":"ทุ่งหญ้าสูงท่วมหัว","w":"w/map/ทุ่งหญ้าสูงท่วมหัว.html"}]},{"id":"merrick","n":"เมอร์ริก ทวนแห่งบึงลึก","k":"root","lv":36,"r":3600,"w":"w/mon/เมอร์ริก_ทวนแห่งบึงลึก.html","maps":[{"n":"บึงกบลำธารใส","w":"w/map/บึงกบลำธารใส.html"},{"n":"ต้นลำธาร","w":"w/map/ต้นลำธาร.html"},{"n":"น้ำตกหิ่งห้อย","w":"w/map/น้ำตกหิ่งห้อย.html"}]},{"id":"victor","n":"วิกเตอร์ นักดาบหลุมศพ","k":"root","lv":40,"r":3600,"w":"w/mon/วิกเตอร์_นักดาบหลุมศพ.html","maps":[{"n":"เนินสุสานโบสถ์ร้าง","w":"w/map/เนินสุสานโบสถ์ร้าง.html"},{"n":"สุสานเก่าหลังเนิน","w":"w/map/สุสานเก่าหลังเนิน.html"},{"n":"สวนรูปปั้นร้องไห้","w":"w/map/สวนรูปปั้นร้องไห้.html"}]},{"id":"rowan","n":"โรวัน คนนำทางที่หลงเอง","k":"root","lv":44,"r":3600,"w":"w/mon/โรวัน_คนนำทางที่หลงเอง.html","maps":[{"n":"ถนนผู้อพยพ","w":"w/map/ถนนผู้อพยพ.html"},{"n":"ค่ายผู้อพยพร้าง","w":"w/map/ค่ายผู้อพยพร้าง.html"},{"n":"สะพานไม้ข้ามแม่น้ำ","w":"w/map/สะพานไม้ข้ามแม่น้ำ.html"}]},{"id":"cassian","n":"แคสเซียน อัศวินถ่านคุ","k":"root","lv":47,"r":3600,"w":"w/mon/แคสเซียน_อัศวินถ่านคุ.html","maps":[{"n":"ป่าไหม้ถ่านคุ","w":"w/map/ป่าไหม้ถ่านคุ.html"},{"n":"ทุ่งตอไม้ควันขาว","w":"w/map/ทุ่งตอไม้ควันขาว.html"},{"n":"หุบเถ้าลอย","w":"w/map/หุบเถ้าลอย.html"}]},{"id":"silas","n":"ซิลาส จอมเวทสปอร์","k":"root","lv":48,"r":3600,"w":"w/mon/ซิลาส_จอมเวทสปอร์.html","maps":[{"n":"ป่าเห็ดเรืองแสง","w":"w/map/ป่าเห็ดเรืองแสง.html"},{"n":"ป่าเห็ดชั้นใน","w":"w/map/ป่าเห็ดชั้นใน.html"},{"n":"หุบสปอร์ม่วง","w":"w/map/หุบสปอร์ม่วง.html"}]},{"id":"iris","n":"ไอริส ดาบคู่แห่งด่านเกลือ","k":"root","lv":50,"r":3600,"w":"w/mon/ไอริส_ดาบคู่แห่งด่านเกลือ.html","maps":[{"n":"ด่านสะพานเกลือ","w":"w/map/ด่านสะพานเกลือ.html"},{"n":"นาเกลือขาว","w":"w/map/นาเกลือขาว.html"},{"n":"ท่าเรือเกลือร้าง","w":"w/map/ท่าเรือเกลือร้าง.html"}]},{"id":"falk","n":"ฟัลค์ นักล่าลมหวีด","k":"root","lv":56,"r":3600,"w":"w/mon/ฟัลค์_นักล่าลมหวีด.html","maps":[{"n":"ทุ่งลมหวีดหน้าผา","w":"w/map/ทุ่งลมหวีดหน้าผา.html"},{"n":"เกาะหินลอยลม","w":"w/map/เกาะหินลอยลม.html"},{"n":"สะพานเชือกข้ามผา","w":"w/map/สะพานเชือกข้ามผา.html"}]},{"id":"inga","n":"อิงกา แม่มดน้ำแข็งเหนือ","k":"root","lv":60,"r":3600,"w":"w/mon/อิงกา_แม่มดน้ำแข็งเหนือ.html","maps":[{"n":"ยอดเขาหมอกเหนือ","w":"w/map/ยอดเขาหมอกเหนือ.html"},{"n":"ป่าสนหิมะ","w":"w/map/ป่าสนหิมะ.html"},{"n":"ธารน้ำแข็งแตก","w":"w/map/ธารน้ำแข็งแตก.html"}]},{"id":"oswin","n":"ออสวิน ช่างผสมยาพิษ","k":"root","lv":68,"r":3600,"w":"w/mon/ออสวิน_ช่างผสมยาพิษ.html","maps":[{"n":"หนองพิษป่าชายเลน","w":"w/map/หนองพิษป่าชายเลน.html"},{"n":"รากต้นแม่พิษ","w":"w/map/รากต้นแม่พิษ.html"},{"n":"ป่าชายเลนน้ำขึ้น","w":"w/map/ป่าชายเลนน้ำขึ้น.html"}]},{"id":"elwin","n":"เอลวิน คนเลี้ยงหมาป่าทางเหนือ","k":"root","lv":74,"r":3600,"w":"w/mon/เอลวิน_คนเลี้ยงหมาป่าทางเหนือ.html","maps":[{"n":"เส้นทางขึ้นเหนือ","w":"w/map/เส้นทางขึ้นเหนือ.html"},{"n":"ไร่เงียบงัน","w":"w/map/ไร่เงียบงัน.html"},{"n":"โรงเตี๊ยมกลางทาง","w":"w/map/โรงเตี๊ยมกลางทาง.html"}]},{"id":"bartho","n":"บาร์โธ มือปืนเหมืองร้าง","k":"root","lv":82,"r":3600,"w":"w/mon/บาร์โธ_มือปืนเหมืองร้าง.html","maps":[{"n":"ผาหินแดง","w":"w/map/ผาหินแดง.html"},{"n":"เหมืองลึกผลึกส้ม","w":"w/map/เหมืองลึกผลึกส้ม.html"},{"n":"ใจกลางหุบผา","w":"w/map/ใจกลางหุบผา.html"}]},{"id":"rook","n":"ร็อค ยามประตูที่ไม่เคยเปลี่ยนเวร","k":"root","lv":84,"r":3600,"w":"w/mon/ร็อค_ยามประตูที่ไม่เคยเปลี่ยนเวร.html","maps":[{"n":"ย่านนอกกำแพง","w":"w/map/ย่านนอกกำแพง.html"},{"n":"ตลาดเช้าที่ไม่มีเช้า","w":"w/map/ตลาดเช้าที่ไม่มีเช้า.html"},{"n":"ย่านโรงฟอกหนัง","w":"w/map/ย่านโรงฟอกหนัง.html"}]},{"id":"drakos","n":"ดราโกส นักรบคลั่งลาวา","k":"root","lv":86,"r":3600,"w":"w/mon/ดราโกส_นักรบคลั่งลาวา.html","maps":[{"n":"ภูเขาไฟหลับ","w":"w/map/ภูเขาไฟหลับ.html"},{"n":"ลานหินออบซิเดียน","w":"w/map/ลานหินออบซิเดียน.html"},{"n":"ทะเลสาบลาวาเย็น","w":"w/map/ทะเลสาบลาวาเย็น.html"}]},{"id":"pip","n":"พิพ เงาใต้สะพาน","k":"root","lv":88,"r":3600,"w":"w/mon/พิพ_เงาใต้สะพาน.html","maps":[{"n":"ย่านริมคลอง","w":"w/map/ย่านริมคลอง.html"},{"n":"ประตูน้ำเก่า","w":"w/map/ประตูน้ำเก่า.html"},{"n":"ย่านโกดังริมน้ำ","w":"w/map/ย่านโกดังริมน้ำ.html"}]},{"id":"lyria","n":"ลิเรีย นักร้องในหมอก","k":"root","lv":90,"r":3600,"w":"w/mon/ลิเรีย_นักร้องในหมอก.html","maps":[{"n":"ทะเลสาบหมอกเงา","w":"w/map/ทะเลสาบหมอกเงา.html"},{"n":"หมู่บ้านลอยน้ำร้าง","w":"w/map/หมู่บ้านลอยน้ำร้าง.html"},{"n":"ป่าต้นหลิวจมน้ำ","w":"w/map/ป่าต้นหลิวจมน้ำ.html"}]},{"id":"orla","n":"ออร์ลา ผู้จุดไฟบนเกาะ","k":"root","lv":94,"r":3600,"w":"w/mon/ออร์ลา_ผู้จุดไฟบนเกาะ.html","maps":[{"n":"เกาะกลางทะเลสาบ","w":"w/map/เกาะกลางทะเลสาบ.html"},{"n":"แนวหินโสโครก","w":"w/map/แนวหินโสโครก.html"},{"n":"เกาะประภาคารดับ","w":"w/map/เกาะประภาคารดับ.html"}]},{"id":"nyx","n":"นิกซ์ คนเลี้ยงภูตดวงไฟ","k":"root","lv":98,"r":3600,"w":"w/mon/นิกซ์_คนเลี้ยงภูตดวงไฟ.html","maps":[{"n":"ป่าใต้ที่มืดสนิท","w":"w/map/ป่าใต้ที่มืดสนิท.html"},{"n":"ป่ารากดำ","w":"w/map/ป่ารากดำ.html"},{"n":"ทางเดินเงาไร้เสียง","w":"w/map/ทางเดินเงาไร้เสียง.html"}]},{"id":"talon","n":"ทาลอน อัศวินมังกรรากดำ","k":"root","lv":99,"r":3600,"w":"w/mon/ทาลอน_อัศวินมังกรรากดำ.html","maps":[{"n":"ป่าดึกดำบรรพ์","w":"w/map/ป่าดึกดำบรรพ์.html"},{"n":"ทะเลสาบไข่มังกร","w":"w/map/ทะเลสาบไข่มังกร.html"},{"n":"หนองน้ำมันดิน","w":"w/map/หนองน้ำมันดิน.html"}]},{"id":"casper","n":"แคสเปอร์ คนเชิดหุ่น","k":"root","lv":99,"r":3600,"w":"w/mon/แคสเปอร์_คนเชิดหุ่น.html","maps":[{"n":"ย่านวิหาร","w":"w/map/ย่านวิหาร.html"},{"n":"สวนรูปปั้นขาว","w":"w/map/สวนรูปปั้นขาว.html"},{"n":"ลานหอนาฬิกา","w":"w/map/ลานหอนาฬิกา.html"}]},{"id":"sb_ivy","n":"ไอวี่ ผู้ขโมยไฟ","k":"story","lv":20,"r":3600,"w":"w/mon/ไอวี่_ผู้ขโมยไฟ.html","maps":[{"n":"ทุ่งหญ้าแสงจันทร์","w":"w/map/ทุ่งหญ้าแสงจันทร์.html"}]},{"id":"sb_morrow","n":"หมอมอร์โรว์","k":"story","lv":38,"r":3600,"w":"w/mon/หมอมอร์โรว์.html","maps":[{"n":"เนินสุสานโบสถ์ร้าง","w":"w/map/เนินสุสานโบสถ์ร้าง.html"}]},{"id":"sb_raven","n":"ไรเวน พี่ชายในเงา","k":"story","lv":40,"r":3600,"w":"w/mon/ไรเวน_พี่ชายในเงา.html","maps":[{"n":"ป่าเห็ดเรืองแสง","w":"w/map/ป่าเห็ดเรืองแสง.html"}]},{"id":"sb_halvard","n":"ลอร์ดฮัลวาร์ด เจ้าด่านเกลือ","k":"story","lv":46,"r":3600,"w":"w/mon/ลอร์ดฮัลวาร์ด_เจ้าด่านเกลือ.html","maps":[{"n":"ด่านสะพานเกลือ","w":"w/map/ด่านสะพานเกลือ.html"}]},{"id":"sb_ignis","n":"อิกนิส ผู้ป้อนไฟ","k":"story","lv":50,"r":3600,"w":"w/mon/อิกนิส_ผู้ป้อนไฟ.html","maps":[{"n":"ป่าไหม้ถ่านคุ","w":"w/map/ป่าไหม้ถ่านคุ.html"}]},{"id":"sb_vosse","n":"มาจิสเตอร์วอสส์","k":"story","lv":58,"r":3600,"w":"w/mon/มาจิสเตอร์วอสส์.html","maps":[{"n":"หอดูดาวนกฮูก ชั้น 3 · โดมดาว","w":"w/map/หอดูดาวนกฮูก_ชั้น_3_·_โดมดาว.html"}]},{"id":"sb_gareth","n":"กาเรธ คำสาบานที่แตก","k":"story","lv":68,"r":3600,"w":"w/mon/กาเรธ_คำสาบานที่แตก.html","maps":[{"n":"ผาหินแดง","w":"w/map/ผาหินแดง.html"}]},{"id":"sb_aldric","n":"กัปตันอัลดริก","k":"story","lv":80,"r":3600,"w":"w/mon/กัปตันอัลดริก.html","maps":[{"n":"ย่านนอกกำแพง","w":"w/map/ย่านนอกกำแพง.html"}]},{"id":"sb_gorm","n":"กอร์ม ราชาเขาอสูร","k":"story","lv":82,"r":3600,"w":"w/mon/กอร์ม_ราชาเขาอสูร.html","maps":[{"n":"ป่าดึกดำบรรพ์","w":"w/map/ป่าดึกดำบรรพ์.html"}]},{"id":"sb_candle","n":"มาดามแคนเดิล","k":"story","lv":84,"r":3600,"w":"w/mon/มาดามแคนเดิล.html","maps":[{"n":"ย่านริมคลอง","w":"w/map/ย่านริมคลอง.html"}]},{"id":"sb_quill","n":"บราเดอร์ควิลล์","k":"story","lv":88,"r":3600,"w":"w/mon/บราเดอร์ควิลล์.html","maps":[{"n":"หอบัญชีใต้วิหาร ชั้น 2 · ห้องบัญชี","w":"w/map/หอบัญชีใต้วิหาร_ชั้น_2_·_ห้องบัญชี.html"}]},{"id":"sb_puppet2","n":"หุ่นที่ 2","k":"story","lv":89,"r":3600,"w":"w/mon/หุ่นที่_2.html","maps":[{"n":"โรงหุ่นใต้วิหาร ชั้น 1 · ห้องขัง","w":"w/map/โรงหุ่นใต้วิหาร_ชั้น_1_·_ห้องขัง.html"}]},{"id":"sb_nocturne","n":"อาร์ชบิชอปโนคเทิร์น","k":"story","lv":90,"r":3600,"w":"w/mon/อาร์ชบิชอปโนคเทิร์น.html","maps":[{"n":"เกาะกลางทะเลสาบ","w":"w/map/เกาะกลางทะเลสาบ.html"}]},{"id":"sb_puppet3","n":"หุ่นที่ 3","k":"story","lv":90,"r":3600,"w":"w/mon/หุ่นที่_3.html","maps":[{"n":"โรงหุ่นใต้วิหาร ชั้น 1 · ห้องขัง","w":"w/map/โรงหุ่นใต้วิหาร_ชั้น_1_·_ห้องขัง.html"}]},{"id":"sb_puppet4","n":"หุ่นที่ 4","k":"story","lv":91,"r":3600,"w":"w/mon/หุ่นที่_4.html","maps":[{"n":"โรงหุ่นใต้วิหาร ชั้น 2 · โต๊ะช่าง","w":"w/map/โรงหุ่นใต้วิหาร_ชั้น_2_·_โต๊ะช่าง.html"}]},{"id":"sb_puppet1","n":"หุ่นหมายเลขหนึ่ง","k":"story","lv":92,"r":3600,"w":"w/mon/หุ่นหมายเลขหนึ่ง.html","maps":[{"n":"ป่าใต้ที่มืดสนิท","w":"w/map/ป่าใต้ที่มืดสนิท.html"}]},{"id":"sb_puppet5","n":"หุ่นที่ 5","k":"story","lv":92,"r":3600,"w":"w/mon/หุ่นที่_5.html","maps":[{"n":"โรงหุ่นใต้วิหาร ชั้น 2 · โต๊ะช่าง","w":"w/map/โรงหุ่นใต้วิหาร_ชั้น_2_·_โต๊ะช่าง.html"}]},{"id":"sb_puppet6","n":"หุ่นที่ 6","k":"story","lv":93,"r":3600,"w":"w/mon/หุ่นที่_6.html","maps":[{"n":"โรงหุ่นใต้วิหาร ชั้น 2 · โต๊ะช่าง","w":"w/map/โรงหุ่นใต้วิหาร_ชั้น_2_·_โต๊ะช่าง.html"}]},{"id":"sb_severin","n":"คาร์ดินัลเซเวริน","k":"story","lv":99,"r":3600,"w":"w/mon/คาร์ดินัลเซเวริน.html","maps":[{"n":"ย่านวิหาร","w":"w/map/ย่านวิหาร.html"}]},{"id":"sb_lumen","n":"ตาลูเมน ผู้จุดตะเกียงคนสุดท้าย","k":"story","lv":99,"r":3600,"w":"w/mon/ตาลูเมน_ผู้จุดตะเกียงคนสุดท้าย.html","maps":[{"n":"ทุ่งลมหวีดหน้าผา","w":"w/map/ทุ่งลมหวีดหน้าผา.html"}]},{"id":"sb_aurel","n":"นักบุญออเรล","k":"story","lv":99,"r":3600,"w":"w/mon/นักบุญออเรล.html","maps":[{"n":"หลุมดาว ชั้น 2 · ใจกลางดาว","w":"w/map/หลุมดาว_ชั้น_2_·_ใจกลางดาว.html"}]}]};
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+const load = (k, d) => { try { return JSON.parse(store.get(k) || 'null') ?? d; } catch (e) { return d; } };
+const BY = Object.fromEntries(D.bosses.map((b) => [b.id, b]));
+$('#build').textContent = D.build;
+// timers: { bossId: killed-at (ms) }, settings
+let T = load('nc_boss_t', {}); for (const k in T) if (!BY[k] || typeof T[k] !== 'number') delete T[k];
+const S = Object.assign({ lead: 60, sound: false, kind: '', q: '' }, load('nc_boss_s', {}));
+const saveT = () => store.set('nc_boss_t', JSON.stringify(T)), saveS = () => store.set('nc_boss_s', JSON.stringify(S));
+const told = {}; // bossId -> which alert was shown ('soon' / 'up') for this kill
+const mmss = (s) => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); };
+const mins = (s) => (s >= 3600 ? (s / 3600) + ' ชม.' : Math.round(s / 60) + ' นาที');
+const KIND = { dungeon: 'บอสดันเจี้ยน', zone: 'บอสโซน', root: 'บอสผู้ถูกรากสิง', story: 'บอสเนื้อเรื่อง' };
+const left = (b) => (T[b.id] ? (T[b.id] + b.r * 1000 - Date.now()) / 1000 : null);
+const stateOf = (b) => { const l = left(b); if (l === null) return ''; if (l <= 0) return 'up'; if (l <= S.lead) return 'soon'; return 'run'; };
+
+function card(b) {
+  const l = left(b), st = stateOf(b), where = b.maps.map((m) => (m.w ? `<a href="${esc(m.w)}" target="_top">${esc(m.n)}</a>` : esc(m.n))).join(' · ');
+  const head = `<h3>${b.w ? `<a href="${esc(b.w)}" target="_top">${esc(b.n)}</a>` : esc(b.n)}<span class="tag">${esc(KIND[b.k] || b.k)}</span><span class="tag">Lv ${b.lv}</span></h3><div class="where muted">${where || '—'}</div>`;
+  if (l === null) return `<article class="card" data-id="${b.id}">${head}<div class="row muted" style="font-size:13.5px">เกิดใหม่ทุก ${mins(b.r)} หลังตาย</div>
+    <div class="row"><button class="btn main" data-kill="${b.id}" type="button">ตายแล้ว</button><select data-ago="${b.id}" aria-label="ตายเมื่อไร"><option value="0">ตอนนี้</option><option value="1">1 นาทีก่อน</option><option value="2">2 นาทีก่อน</option><option value="5">5 นาทีก่อน</option><option value="10">10 นาทีก่อน</option><option value="30">30 นาทีก่อน</option></select></div></article>`;
+  const pct = Math.min(100, Math.max(0, 100 - (l / b.r) * 100));
+  const at = new Date(T[b.id] + b.r * 1000).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  const lab = st === 'up' ? '<span class="state st-up">เกิดแล้ว</span>' : st === 'soon' ? '<span class="state st-soon">ใกล้เกิด</span>' : '<span class="state st-wait">รอเกิด</span>';
+  return `<article class="card ${st}" data-id="${b.id}">${head}
+    <div class="row" style="justify-content:space-between"><span class="clock" data-clock="${b.id}">${st === 'up' ? '+' + mmss(-l) : mmss(l)}</span>${lab}</div>
+    <div class="meter"><i style="width:${pct}%"></i></div>
+    <div class="row muted" style="font-size:13px">${st === 'up' ? `เกิดตอน ${at} น. (ตามไฟล์เกม)` : `เกิดประมาณ ${at} น.`}</div>
+    <div class="row"><button class="btn main" data-kill="${b.id}" type="button">ตายอีกรอบ</button><button class="btn" data-adj="${b.id}" data-d="-60" type="button" title="เลื่อนเวลาตายเร็วขึ้น 1 นาที">−1 นาที</button><button class="btn" data-adj="${b.id}" data-d="60" type="button" title="เลื่อนเวลาตายช้าลง 1 นาที">+1 นาที</button><button class="btn" data-stop="${b.id}" type="button">เลิกจับ</button></div></article>`;
+}
+function render() {
+  const run = D.bosses.filter((b) => T[b.id]).sort((a, c) => left(a) - left(c));
+  $('#running').innerHTML = run.length ? run.map(card).join('') : '<div class="empty">ยังไม่ได้จับเวลาบอสตัวไหน · กด "ตายแล้ว" ที่บอสด้านล่าง</div>';
+  $('#runCount').textContent = run.length ? `(${run.length})` : '';
+  $('#kinds').innerHTML = [['', 'ทั้งหมด']].concat(Object.entries(KIND)).map(([k, n]) => `<button class="chip" data-kind="${k}" aria-pressed="${S.kind === k}">${esc(n)}</button>`).join('');
+  const q = S.q.trim().toLowerCase();
+  const list = D.bosses.filter((b) => !T[b.id] && (!S.kind || b.k === S.kind) && (!q || (b.n + ' ' + b.maps.map((m) => m.n).join(' ')).toLowerCase().includes(q)));
+  $('#all').innerHTML = list.length ? list.map(card).join('') : '<div class="empty">ไม่เจอบอสที่ตรงกับตัวกรอง</div>';
+}
+// every second: the clocks, and the alerts
+function tick() {
+  let redraw = false;
+  for (const id in T) {
+    const b = BY[id], l = left(b), el = document.querySelector(`[data-clock="${id}"]`);
+    if (el) el.textContent = l <= 0 ? '+' + mmss(-l) : mmss(l);
+    const st = stateOf(b), key = T[id] + ':' + st;
+    if ((st === 'soon' || st === 'up') && told[id] !== key) { told[id] = key; redraw = true; if (S.lead > 0 || st === 'up') alertBoss(b, st); }
+    const card = document.querySelector(`#running [data-id="${id}"]`); if (card && !card.classList.contains(st)) redraw = true;
+  }
+  if (redraw) render();
+}
+function alertBoss(b, st) {
+  if (st === 'soon' && S.lead === 0) return;
+  const msg = st === 'up' ? `${b.n} เกิดแล้ว (ตามเวลาในไฟล์เกม)` : `${b.n} ใกล้เกิด อีก ${mmss(left(b))}`;
+  try { if ('Notification' in window && Notification.permission === 'granted') new Notification('NightCamp · ' + msg, { tag: 'nc-boss-' + b.id }); } catch (e) {}
+  if (S.sound) beep(st === 'up' ? 2 : 1);
+  // the browser tab's own title (the site's page when this one is inside it)
+  let doc = document; try { if (parent !== window && parent.document) doc = parent.document; } catch (e) {}
+  const t0 = doc.title.replace(/^🔔 .*? · /, ''); doc.title = '🔔 ' + msg + ' · ' + t0; setTimeout(() => (doc.title = t0), 8000);
+}
+let AC = null;
+function beep(n) {
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < n; i++) { const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + i * 0.35; o.frequency.value = 880; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3); o.connect(g).connect(AC.destination); o.start(t); o.stop(t + 0.32); }
+  } catch (e) {}
+}
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.kill) { const sel = document.querySelector(`[data-ago="${t.dataset.kill}"]`), ago = sel ? +sel.value : 0; T[t.dataset.kill] = Date.now() - ago * 60000; delete told[t.dataset.kill]; saveT(); render(); }
+  else if (t.dataset.adj) { T[t.dataset.adj] += +t.dataset.d * 1000; delete told[t.dataset.adj]; saveT(); render(); }
+  else if (t.dataset.stop) { delete T[t.dataset.stop]; saveT(); render(); }
+  else if (t.dataset.kind !== undefined && t.classList.contains('chip')) { S.kind = t.dataset.kind; saveS(); render(); }
+});
+$('#q').value = S.q; $('#q').oninput = (e) => { S.q = e.target.value; saveS(); render(); };
+$('#lead').value = String(S.lead); $('#lead').onchange = (e) => { S.lead = +e.target.value; saveS(); render(); };
+$('#sound').checked = !!S.sound; $('#sound').onchange = (e) => { S.sound = e.target.checked; saveS(); if (S.sound) beep(1); };
+function notifUi() {
+  const ok = 'Notification' in window;
+  $('#notif').hidden = !ok || Notification.permission !== 'default';
+  $('#notifState').textContent = !ok ? 'เบราว์เซอร์นี้ไม่รองรับแจ้งเตือน (ยังมีเสียงและชื่อแท็บกระพริบ)' : Notification.permission === 'granted' ? 'แจ้งเตือนของเบราว์เซอร์: เปิดแล้ว' : Notification.permission === 'denied' ? 'แจ้งเตือนถูกปิดในเบราว์เซอร์ (เปิดได้ที่การตั้งค่าเว็บไซต์)' : '';
+}
+$('#notif').onclick = () => { try { Notification.requestPermission().then(notifUi); } catch (e) { notifUi(); } };
+// (a timer that ended long ago is not news: no alert on load for bosses up for more than 10 minutes)
+for (const id in T) { const b = BY[id], l = left(b); if (l < -600) told[id] = T[id] + ':up'; }
+notifUi(); render(); setInterval(tick, 1000);
+</script>
+<script>// Words players trip over, explained where they appear: a table header, a label or a tag whose whole text is one of these
+// gets a dotted underline; hover (or tap on a phone) shows what it means. site.py puts this in every page.
+(function () {
+  const EN = (() => { try { return localStorage.getItem('nc_lang') === 'en'; } catch (e) { return false; } })();
+  // [Thai explanation, English explanation]; keys are the words as pages show them (Thai or English)
+  const G = {
+    ATK: ['พลังโจมตีกายภาพ: STR (อาวุธระยะไกลใช้ DEX) + ATK ของอาวุธ · สกิลส่วนใหญ่แรงเป็น % ของค่านี้', 'Physical attack: STR (DEX for ranged weapons) + weapon ATK · most skills hit for a % of it'],
+    MATK: ['พลังเวท มาจาก INT · สกิลเวทแรงเป็น % ของค่านี้', 'Magic attack, from INT · spells hit for a % of it'],
+    DEF: ['ป้องกันกายภาพ ลดดาเมจที่รับจากการตีธรรมดาและสกิลกายภาพ', 'Physical defence: lowers physical damage taken'],
+    MDEF: ['ป้องกันเวท ลดดาเมจเวทที่รับ', 'Magic defence: lowers magic damage taken'],
+    HIT: ['ความแม่น = เลเวล + DEX (+ อุปกรณ์) ยิ่งสูงยิ่งตีโดน', 'Accuracy = level + DEX (+ gear): higher hits more often'],
+    FLEE: ['การหลบ = เลเวล + AGI (+ อุปกรณ์) ยิ่งสูงมอนยิ่งตีพลาด', 'Evasion = level + AGI (+ gear): monsters miss more'],
+    SP: ['พลังที่ใช้ร่ายสกิล ฟื้นด้วยยาฟ้าหรือรอเวลา', 'What skills cost; restored by blue potions or over time'],
+    HP: ['พลังชีวิต หมดแล้วตาย', 'Health; at zero you fall'],
+    EXP: ['ค่าประสบการณ์ เต็มแล้วเลเวลขึ้น', 'Experience; fill it to level up'],
+    Job: ['Job EXP ค่าประสบการณ์อาชีพ ใช้ขึ้น Job Lv ได้แต้มสกิล', 'Job EXP: raises Job Lv, which gives skill points'],
+    'Job Lv': ['เลเวลอาชีพ ขึ้นแล้วได้แต้มสกิล 1 แต้ม', 'Job level: each one gives a skill point'],
+    คริ: ['โอกาสคริติคอล (ตีแรงพิเศษ) มาจาก LUK และอุปกรณ์', 'Critical chance (an extra-hard hit), from LUK and gear'],
+    คริติคอล: ['โอกาสตีแรงพิเศษ มาจาก LUK และอุปกรณ์', 'Chance of an extra-hard hit, from LUK and gear'],
+    ตีเร็ว: ['ความเร็วตีปกติ มาจาก AGI และ DEX เล็กน้อย', 'Basic attack speed, from AGI (and a little DEX)'],
+    คูลดาวน์: ['เวลารอก่อนใช้สกิลเดิมซ้ำได้', 'Wait before the same skill can be used again'],
+    ดีเลย์: ['เวลาหยุดหลังกดสกิล ก่อนกดสกิลถัดไปได้', 'The pause after a skill before the next one'],
+    เกรด: ['ระดับของไอเทม 1–4 (ตามเลเวลไอเทม) ใช้คิดราคาและโอกาสตีบวก', 'Item grade 1–4 (by item level); sets refine prices and odds'],
+    'เลเวลฉัน': ['เลเวลตัวละครของคุณ ใช้คิดช่องว่างเลเวลกับมอน: ห่างไม่เกิน 3 ได้ EXP และของเต็ม', 'Your level, for the level gap: within 3 levels of a monster you get full EXP and drops'],
+    'ช่องว่างเลเวล': ['ต่างจากมอน ≤3 เลเวล = 100% · 4–8 = 70% · 9–14 = 40% · 15–20 = 20% · มากกว่า = 5% (ทั้ง EXP และดรอป)', 'Level gap to a monster: ≤3 = 100% · 4–8 = 70% · 9–14 = 40% · 15–20 = 20% · more = 5% (EXP and drops)'],
+    'ร่างพิเศษ': ['มอนร่างสีพิเศษ เกิดน้อยกว่า แข็งกว่า และดรอปดีกว่าร่างปกติ', 'A rare colour form: tougher, with better drops'],
+    ธาตุ: ['ธาตุที่ตีใส่ธาตุของมอน แรงขึ้นหรือเบาลงตามตารางธาตุ (เช่น ไฟตีดิน ×1.5)', 'Your element against the monster\'s: stronger or weaker by the element table (e.g. fire on earth ×1.5)'],
+  };
+  const KEY = {}; for (const k of Object.keys(G)) KEY[k.toLowerCase()] = k;
+  // the English pages show English words for some Thai keys
+  const ALIAS = { crit: 'คริ', 'attack speed': 'ตีเร็ว', cooldown: 'คูลดาวน์', delay: 'ดีเลย์', grade: 'เกรด', 'my level': 'เลเวลฉัน', 'special form': 'ร่างพิเศษ', element: 'ธาตุ', 'level gap': 'ช่องว่างเลเวล' };
+  const one = (s) => KEY[s.toLowerCase()] || ALIAS[s.toLowerCase()] || null;
+  // the whole text, or a short label that starts with a term ("ATK สเตตัส", "HIT / FLEE")
+  const find = (t) => { const s = t.trim().replace(/[:：]$/, '').trim(); return one(s) || (s.length <= 16 ? one(s.split(/[\s/]+/)[0]) : null); };
+  const st = document.createElement('style');
+  st.textContent = '.gl{text-decoration:underline dotted;text-underline-offset:3px;cursor:help}.glpop{position:fixed;z-index:99;max-width:min(320px,90vw);background:var(--fg,#18203a);color:var(--bg,#fff);font:13px/1.45 var(--body,system-ui);padding:8px 10px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25)}';
+  document.head.appendChild(st);
+  function mark(root) {
+    for (const el of (root || document).querySelectorAll('th, label, .lab, .tag, .chip, .sxc, small, .muted, h3, span')) {
+      if (el.dataset.gl || el.children.length > 1) continue;
+      const k = find(el.textContent || ''); if (!k) continue;
+      el.dataset.gl = k; el.classList.add('gl'); el.title = G[k][EN ? 1 : 0];
+    }
+  }
+  let pop = null;
+  document.addEventListener('click', (e) => {
+    const g = e.target.closest && e.target.closest('[data-gl]');
+    if (pop) { pop.remove(); pop = null; }
+    if (!g || g.closest('button, a, select')) return;
+    pop = document.createElement('div'); pop.className = 'glpop'; pop.textContent = G[g.dataset.gl][EN ? 1 : 0]; document.body.appendChild(pop);
+    const r = g.getBoundingClientRect(); pop.style.left = Math.max(8, Math.min(innerWidth - pop.offsetWidth - 8, r.left)) + 'px'; pop.style.top = (r.bottom + 6 + pop.offsetHeight > innerHeight ? r.top - pop.offsetHeight - 6 : r.bottom + 6) + 'px';
+  });
+  let t = 0; new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => mark(), 120); }).observe(document.body, { childList: true, subtree: true });
+  mark();
+  window.NC_GLOSS = G;
+  // the guide's word list (game systems)
+  const L = document.getElementById('glossList');
+  if (L) L.innerHTML = '<dl style="margin:0;display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;font-size:14px">' + Object.entries(G).map(([k, v]) => `<dt style="font-weight:600">${k}</dt><dd style="margin:0">${v[EN ? 1 : 0].replace(/[<>&]/g, '')}</dd>`).join('') + '</dl>';
+})();
+</script></body>
+</html>
