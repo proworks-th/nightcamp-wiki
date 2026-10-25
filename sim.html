@@ -473,7 +473,7 @@ function runeBox(b, id, cur1) {
   const base = x ? (x.base === 'MATK' ? hit.matk : x.base === 'ATK' ? hit.atk : Math.max(hit.atk, hit.matk)) : 0;
   const est = x && base ? Math.round((base * x.pct) / 100 * m.k) : 0;
   const cond = m.when.map((w) => `<label class="rck"><input type="checkbox" data-rc="${w}"${RCOND[w] ? ' checked' : ''}> ${{ night: 'ตอนกลางคืน', low: 'เป้าเลือดต่ำ', first: 'ตีแรกใส่ตัวที่ยังไม่สู้' }[w]}</label>`).join('');
-  return `<div class="runes"><div class="kicker">รูนจารึก <a href="w/cat/รูนจารึกสกิล.html" target="_top" style="font-size:12px">ดูรูนทั้งหมด ↗</a></div>${sel(0)}${slots[1] ? sel(1) : ''}
+  return `<div class="runes"><div class="kicker">รูนจารึก <a href="index.html#rune" target="_top" onclick="if (parent !== window) { event.preventDefault(); parent.postMessage({ nc: 'nav', tab: 'rune' }, '*'); }" style="font-size:12px">ดูรูนทั้งหมด ↗</a></div>${sel(0)}${slots[1] ? sel(1) : ''}
     ${runesOf(b, id).length ? `<div class="sxp">ต่อการโดน <b>×${m.k.toFixed(2)}</b>${est ? ` · บิลด์คุณ ≈ <b>${est.toLocaleString()}</b> ต่อการโดน` : ''} <span class="src est">ประมาณ</span></div>${cond ? `<div>${cond}</div>` : ''}${m.extra.length ? `<ul class="rx">${m.extra.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}` : '<p class="muted" style="margin:4px 0 0;font-size:13px">เลือกรูนเพื่อดูว่าแรงขึ้นหรือลดลงเท่าไร</p>'}</div>`;
 }
 $('#detailBox').addEventListener('change', (e) => {
