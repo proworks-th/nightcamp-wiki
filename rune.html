@@ -47,7 +47,6 @@ input[type=search]{min-width:0;width:220px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
 .card h3{font:500 17px var(--display);margin:0;display:flex;align-items:center;gap:8px}
-.gem{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:9px;color:#fff;font-size:15px;background:radial-gradient(circle at 35% 30%,#9d86f0,#4b3596 70%)}
 .k{display:inline-block;font:500 12px var(--body);padding:1px 9px;border-radius:999px;color:var(--kc);border:1px solid color-mix(in srgb,var(--kc) 50%,transparent);background:color-mix(in srgb,var(--kc) 12%,transparent);white-space:nowrap}
 .fx{font-size:15px;margin:0}
 .tiers{margin:0;padding:0;list-style:none;font-size:13px;color:var(--muted)}
@@ -118,8 +117,8 @@ const ktag = (on) => `<span class="k" style="--kc:var(--k-${on})">${esc(on === '
 const wl = (path, label) => path ? `<a href="${esc(path)}" target="_top">${esc(label)}</a>` : esc(label);
 // (a rune's page and a skill's page: the wiki, opened over the site)
 
-$('#lead').textContent = `รูน ${Object.keys(D.runes).length} แบบ ใส่ในช่องรูนของสกิล ไม่ได้ใส่ในอุปกรณ์ · สกิลเดียวกันเล่นต่างไปตามรูนที่ใส่ · ผลและสกิลที่ใส่ได้อ่านจากไฟล์เกม (${D.build})`;
-$('#how').innerHTML = `<b>ใส่ยังไง</b> ${esc(D.inGame.note)}<br><b>ได้จากไหน</b> ${esc(D.inGame.src)} (ข้อความในเกม) · ขั้น II และ III: รวมรูนขั้นก่อนหน้า 3 อันที่ป๋าหมูหริ่ง`;
+$('#lead').textContent = `รูน ${Object.keys(D.runes).length} แบบ ใส่ในช่องรูนของสกิล ไม่ได้ใส่ในอุปกรณ์ (ไฟล์เกมรุ่น ${D.build})`;
+$('#how').innerHTML = `<b>ใส่ยังไง</b> ${esc(D.inGame.note)}<br><b>ได้จากไหน</b> ${esc(D.inGame.src)} (ข้อความในเกม)<br><b>ขั้น II และ III</b> รวมรูนขั้นก่อนหน้า 3 อันที่ป๋าหมูหริ่ง`;
 
 // ---------- every rune ----------
 const F = { kind: '', tier: 1, q: '' };
@@ -138,7 +137,7 @@ function renderAll() {
   const q = F.q.trim().toLowerCase();
   const list = Object.entries(D.runes).filter(([k, r]) => (!F.kind || r.on === F.kind) && (!q || (r.n + ' ' + r.t.join(' ')).toLowerCase().includes(q)))
     .sort((a, b) => KORDER.indexOf(a[1].on) - KORDER.indexOf(b[1].on));
-  $('#grid').innerHTML = list.length ? list.map(([k, r]) => `<article class="card"><h3><span class="gem" aria-hidden="true">✦</span>${esc(r.n)} ${ROM[F.tier]}</h3>
+  $('#grid').innerHTML = list.length ? list.map(([k, r]) => `<article class="card"><h3>${esc(r.n)} ${ROM[F.tier]}</h3>
     <div>${ktag(r.on)}</div>
     <p class="fx">${esc(r.t[F.tier - 1])}</p>
     <ul class="tiers">${[1, 2, 3].map((t) => `<li class="${t === F.tier ? 'on' : ''}"><b>${ROM[t]}</b>${esc(r.t[t - 1])}</li>`).join('')}</ul>

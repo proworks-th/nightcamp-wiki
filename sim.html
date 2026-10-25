@@ -126,7 +126,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .kt-proj{--kc:#7fc0ff}:root:not([data-theme="light"]) .kt-area{--kc:#5ad19a}:root:not([data-theme="light"]) .kt-melee{--kc:#f59a4c}:root:not([data-theme="light"]) .kt-attack{--kc:#ff8a8a}:root:not([data-theme="light"]) .kt-buff{--kc:#f2cc4d}:root:not([data-theme="light"]) .kt-pet{--kc:#c9a2ff}}
 .gear{margin:10px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
 .gslot{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px dashed var(--line);font-size:13.5px}.gslot:first-of-type{border-top:0}
-.gic{flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:8px;background:var(--panel2);font-size:16px}.gtx{flex:1;min-width:0}.gbt{display:flex;gap:4px;flex:none}.gbt .btn{padding:4px 10px;min-height:34px}
+.gtx{flex:1;min-width:0}.gbt{display:flex;gap:4px;flex:none}.gbt .btn{padding:4px 10px;min-height:34px}
 .gpList{display:flex;flex-direction:column;gap:6px;max-height:min(60vh,520px);overflow:auto}
 .gpi{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;font:13.5px/1.45 var(--body);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer}.gpi:hover{border-color:var(--ember)}.gpi:disabled{opacity:.5;cursor:not-allowed}.gpi.on{border-color:var(--ember);background:color-mix(in srgb,var(--ember) 8%,var(--panel))}
 .gpl{flex:none;min-width:48px;font-size:12.5px;color:var(--muted)}.gpn b{font-weight:600}
@@ -549,7 +549,7 @@ const gstTxt = (o) => Object.entries(o || {}).map(([k, v]) => `${GST[k] || k} +$
 const EQ = D.eq;
 const wieldable = (job) => new Set(line(job).flatMap((j) => EQ.jobsW[j] || []));
 const shieldOk = (job) => !line(job).some((j) => EQ.noShield.includes(j)) && EQ.oneH.some((t) => wieldable(job).has(t));
-const SLOTS = [['weapon', 'อาวุธ', '🗡️'], ['set', 'ชุด', '🛡'], ['hat', 'หมวก', '🎩'], ['glasses', 'แว่น', '👓'], ['shield', 'โล่', '🔰']];
+const SLOTS = [['weapon', 'อาวุธ'], ['set', 'ชุด'], ['hat', 'หมวก'], ['glasses', 'แว่น'], ['shield', 'โล่']];
 function gearHtml(b) {
   const G = b.gear || (b.gear = {}), sh = shieldOk(b.job);
   const body = (k) => {
@@ -559,7 +559,7 @@ function gearHtml(b) {
     if (k === 'set') return `<b>${esc(x.n)}</b><br><label style="font-size:12.5px"><input type="checkbox" id="setAcc"${G.setAcc !== false ? ' checked' : ''}> ใส่เครื่องประดับของเซ็ตด้วย (ครบ 3 ชิ้น)</label>${x.fx && G.setAcc !== false ? `<br><span class="muted" style="font-size:12.5px">◆ ${esc(x.fx)}</span>` : ''}`;
     return `<b>${esc(x.n)}</b> <span class="muted" style="font-size:12.5px">${esc(gstTxt(x.st))}</span>${k === 'shield' && twoH(G) ? '<br><span class="muted" style="font-size:12px">ถืออาวุธสองมืออยู่ โล่ไม่นับ</span>' : ''}`;
   };
-  const rows = SLOTS.map(([k, label, ic]) => k === 'shield' && !sh && !G.shield ? '' : `<div class="gslot"><span class="gic" aria-hidden="true">${ic}</span><div class="gtx"><span class="muted">${label}</span> ${body(k)}</div>
+  const rows = SLOTS.map(([k, label]) => k === 'shield' && !sh && !G.shield ? '' : `<div class="gslot"><div class="gtx"><span class="muted">${label}</span> ${body(k)}</div>
     <div class="gbt"><button type="button" class="btn" data-gpick="${k}">${G[k] ? 'เปลี่ยน' : 'เลือก'}</button>${G[k] ? `<button type="button" class="btn" data-unequip="${k}" aria-label="ถอด ${label}">✕</button>` : ''}</div></div>`).join('');
   const sum = gstTxt(gearSum(b));
   return `<div class="gear"><div class="kicker">อุปกรณ์</div>${rows}${sum ? `<div class="muted" style="font-size:12.5px;margin-top:6px">รวมจากชุด หมวก แว่น โล่: ${esc(sum)}</div>` : ''}${!sh ? '<div class="muted" style="font-size:12px;margin-top:4px">อาชีพสายนี้ถือโล่ไม่ได้</div>' : ''}</div>`;

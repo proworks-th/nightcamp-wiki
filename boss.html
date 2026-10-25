@@ -36,8 +36,8 @@ a{color:var(--moon)}
 .mono{font-family:var(--mono)}
 section.block{margin-top:22px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-.next{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:12px;padding:12px 16px;border-radius:14px;background:linear-gradient(135deg,#1b2048,#3a2a5c);color:#fff}
-.next .k{font:500 13px var(--display);opacity:.8}.next b{font:500 18px var(--display)}.next .clock{font:600 22px var(--mono)}.next a{color:#d9dfff}
+.next{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:12px;padding:12px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--ember)}
+.next .k{font:500 13px var(--display);color:var(--muted)}.next b{font:500 18px var(--display)}.next .clock{font:600 22px var(--mono)}
 details.how{margin-top:12px}
 details.how summary{cursor:pointer;font:500 15px var(--display);list-style:none;display:flex;align-items:center;gap:8px}
 details.how summary::-webkit-details-marker{display:none}
@@ -53,7 +53,7 @@ details.how summary::before{content:"▸";transition:transform .15s}details.how[
 select,input[type=search]{font:15px var(--body);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 12px;min-height:40px}
 input[type=search]{width:240px;min-width:0}
 .btn{font:500 14px var(--display);border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:10px;padding:6px 12px;cursor:pointer;min-height:38px;white-space:nowrap}
-.btn.main{background:linear-gradient(#e8813a,var(--ember));color:#fff;border-color:transparent}
+.btn.main{background:var(--ember);color:#fff;border-color:transparent}
 .btn.sm{min-height:34px;padding:3px 10px;font-size:13px}
 .btn[aria-pressed="true"]{border-color:var(--good);color:var(--good);background:color-mix(in srgb,var(--good) 10%,var(--panel))}
 .btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--moon);outline-offset:2px}
@@ -76,7 +76,7 @@ input[type=search]{width:240px;min-width:0}
 .card.run{border-color:var(--warn)}.card.soon{border-color:var(--bad)}.card.up{border-color:var(--good)}
 .card h3{font:500 17px var(--display);margin:0}
 .clock{font:600 30px var(--mono);letter-spacing:.5px}
-.meter{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden}.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--warn),var(--good))}
+.meter{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden}.meter i{display:block;height:100%;background:var(--good)}
 .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .empty{padding:16px;color:var(--muted);border:1px dashed var(--line);border-radius:12px;text-align:center;font-size:14px}
 .bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:4px 0 10px}
@@ -115,7 +115,7 @@ details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-s
 <div class="wrap">
   <header class="top">
     <h1>จับเวลา<span>บอส</span></h1>
-    <div class="sub">บอสโลกตามตารางเวลา + จับเวลาบอสที่เกิดใหม่หลังตาย · ข้อมูลจากไฟล์เกม <span id="build" class="mono"></span></div>
+    <div class="sub">บอสโลกตามตารางเวลา และจับเวลาบอสที่เกิดใหม่หลังตาย (ไฟล์เกมรุ่น <span id="build" class="mono"></span>)</div>
   </header>
 
   <div class="next" id="next" aria-live="polite"></div>
@@ -123,15 +123,14 @@ details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-s
   <details class="how panel" id="how">
     <summary>วิธีใช้หน้านี้</summary>
     <ol class="steps">
-      <li><b>บอสโลก (เกิดตามเวลา)</b><br>ดูตารางวันนี้ได้เลย ไม่ต้องกดอะไร ตารางบอกเวลา บอสตัวไหน แมพไหน · กด <b>เตือนฉัน</b> ที่รอบที่อยากไป</li>
-      <li><b>บอสแมพ (เกิดใหม่หลังตาย)</b><br>ตีบอสตายแล้วหาชื่อในรายการล่างสุด กด <b>ตายแล้ว</b> · ถ้ากดช้า เลือก "ตายเมื่อ" ก่อนกด</li>
-      <li><b>รอเกิด</b><br>บอสที่จับเวลาไว้ขึ้นไปอยู่ใน <b>กำลังจับเวลา</b> พร้อมนับถอยหลัง · เวลาคลาด กด −1 / +1 นาที</li>
-      <li><b>แจ้งเตือน</b><br>ตั้งว่าเตือนก่อนกี่นาที แล้วกด <b>เปิดแจ้งเตือน</b> 1 ครั้ง · ต้องเปิดเว็บนี้ค้างไว้ (สลับไปแท็บอื่นของเว็บได้)</li>
+      <li><b>บอสโลก (เกิดตามเวลา)</b><br>ดูตารางของวันนี้ได้เลย ตารางบอกเวลา บอสตัวไหน และแมพไหน กด <b>เตือนฉัน</b> ที่รอบที่อยากไป</li>
+      <li><b>บอสแมพ (เกิดใหม่หลังตาย)</b><br>ตีบอสตายแล้วหาชื่อในรายการล่างสุด กด <b>ตายแล้ว</b> ถ้ากดช้า เลือก "ตายเมื่อ" ก่อนกด</li>
+      <li><b>รอเกิด</b><br>บอสที่จับเวลาไว้ขึ้นไปอยู่ใน <b>กำลังจับเวลา</b> พร้อมนับถอยหลัง ถ้าเวลาคลาด กด −1 หรือ +1 นาที</li>
+      <li><b>แจ้งเตือน</b><br>ตั้งว่าเตือนก่อนกี่นาที แล้วกด <b>เปิดแจ้งเตือน</b> 1 ครั้ง ต้องเปิดเว็บนี้ค้างไว้ (สลับไปแท็บอื่นของเว็บได้)</li>
     </ol>
     <ul class="notes">
-      <li>เวลาทั้งหมดอ่านจากไฟล์เกม ตอนเล่นออนไลน์เซิร์ฟเวอร์เป็นคนคุมเวลาจริง อาจคลาดได้ · เช็กเวลาบอสโลกจริงได้ที่หน้าบอสโลกในเกม</li>
-      <li>เวลาที่จับไว้เก็บในเครื่องนี้เท่านั้น ไม่แชร์กับคนอื่น ปิดเว็บแล้วเปิดใหม่ก็ยังอยู่</li>
-      <li>ปิดเว็บแล้วจะไม่มีแจ้งเตือน (เว็บนี้ไม่มีเซิร์ฟเวอร์ของตัวเอง)</li>
+      <li>เวลาทั้งหมดมาจากไฟล์เกม ตอนเล่นออนไลน์เซิร์ฟเวอร์เป็นคนคุมเวลาจริง จึงอาจคลาดได้ เวลาบอสโลกจริงดูได้ที่หน้าบอสโลกในเกม</li>
+      <li>เวลาที่จับไว้เก็บในเครื่องนี้เท่านั้น ปิดเว็บแล้วเปิดใหม่ก็ยังอยู่ แต่ตอนปิดเว็บจะไม่มีแจ้งเตือน</li>
     </ul>
   </details>
 
@@ -210,14 +209,14 @@ function renderSched() {
   const now = Date.now(), { today, tom } = schedule(), open = today.filter((x) => sState(x, now) !== 'done').length;
   const rows = (L, day) => L.map((x) => {
     const st = sState(x, now), on = !!S.watch[x.key];
-    const lab = st === 'live' ? `<span class="state st-live">อยู่ในแมพ · เหลือ ${human((x.at + x.dur * 60000 - now) / 1000)}</span>` : st === 'soon' ? `<span class="state st-soon">ใกล้ตื่น · อีก ${human((x.at - now) / 1000)}</span>`
+    const lab = st === 'live' ? `<span class="state st-live">อยู่ในแมพ เหลือ ${human((x.at + x.dur * 60000 - now) / 1000)}</span>` : st === 'soon' ? `<span class="state st-soon">ใกล้ตื่น อีก ${human((x.at - now) / 1000)}</span>`
       : st === 'done' ? '<span class="state st-done">จบแล้ว</span>' : `<span class="state st-wait">อีก ${human((x.at - now) / 1000)}</span>`;
     return `<div class="slot ${st}"><div class="t">${hhmm(x.at)}<small>${day}</small></div>
-      <div class="who"><b>${wl(x.w, x.n)}</b><span class="tag">Lv 99</span>${x.two ? '<span class="tag">สองร่าง</span>' : ''}<br><span class="muted">${wl(x.map.w, x.map.n)} · อยู่ ${x.dur} นาที</span></div>
+      <div class="who"><b>${wl(x.w, x.n)}</b><span class="tag">Lv 99</span>${x.two ? '<span class="tag">สองร่าง</span>' : ''}<br><span class="muted">${wl(x.map.w, x.map.n)}, อยู่ ${x.dur} นาที</span></div>
       <div class="r">${lab}${st === 'done' ? '' : `<button class="btn sm" type="button" data-watch="${x.key}" aria-pressed="${on}">${on ? '✓ จะเตือน' : 'เตือนฉัน'}</button>`}</div></div>`;
   }).join('');
   $('#sched').innerHTML = rows(today, 'วันนี้') + (open < 2 ? rows(tom.slice(0, 3 - open), 'พรุ่งนี้') : '');
-  $('#wbNote').textContent = `ทุกวัน ${D.wb.times.concat(D.baph.times).sort((a, b) => a[0] * 60 + a[1] - b[0] * 60 - b[1]).map(([h, m]) => pad(h) + ':' + pad(m)).join(' · ')} น. ตามเวลาในเครื่องคุณ · บอสและแมพสลับทุกวัน · เกมเตือนก่อน 10 นาที`;
+  $('#wbNote').textContent = `ทุกวันเวลา ${D.wb.times.concat(D.baph.times).sort((a, b) => a[0] * 60 + a[1] - b[0] * 60 - b[1]).map(([h, m]) => pad(h) + ':' + pad(m)).join(', ')} น. บอสและแมพสลับทุกวัน`;
 }
 
 // ---------- timers (after a kill) ----------
@@ -229,7 +228,7 @@ function card(b) {
   return `<article class="card ${st}"><h3>${wl(b.w, b.n)}<span class="tag">${esc(KIND[b.k])}</span></h3><div class="muted" style="font-size:13.5px">${b.maps.map((m) => wl(m.w, m.n)).join(' · ')}</div>
     <div class="row" style="justify-content:space-between"><span class="clock" data-clock="${b.id}">${st === 'up' ? '+' + mmss(-l) : mmss(l)}</span>${lab}</div>
     <div class="meter"><i style="width:${pct}%"></i></div>
-    <div class="muted" style="font-size:13px">ตายตอน ${hhmm(T[b.id])} น. · ${st === 'up' ? 'ครบเวลาเกิดตอน' : 'เกิดประมาณ'} ${hhmm(T[b.id] + b.r * 1000)} น. · เกิดใหม่ทุก ${mins(b.r)}</div>
+    <div class="muted" style="font-size:13px">ตายตอน ${hhmm(T[b.id])} น. ${st === 'up' ? 'ครบเวลาเกิดตอน' : 'เกิดประมาณ'} ${hhmm(T[b.id] + b.r * 1000)} น.</div>
     <div class="row"><button class="btn main sm" data-kill="${b.id}" type="button">ตายอีกรอบ</button><button class="btn sm" data-adj="${b.id}" data-d="-60" type="button" title="ตายเร็วกว่านี้ 1 นาที">−1 นาที</button><button class="btn sm" data-adj="${b.id}" data-d="60" type="button" title="ตายช้ากว่านี้ 1 นาที">+1 นาที</button><button class="btn sm" data-stop="${b.id}" type="button">เลิกจับ</button></div></article>`;
 }
 function renderTimers() {
@@ -252,8 +251,8 @@ function renderNext() {
   const now = Date.now(), ev = [];
   for (const x of schedule().all) {
     const st = sState(x, now);
-    if (st === 'live') ev.push({ t: now - 1, html: `<span class="k">ตอนนี้</span><b>${esc(x.n)}</b><span>ที่ ${wl(x.map.w, x.map.n)} · เหลือ</span><span class="clock">${mmss((x.at + x.dur * 60000 - now) / 1000)}</span>` });
-    else if (st !== 'done') ev.push({ t: x.at, html: `<span class="k">บอสโลกถัดไป</span><b>${hhmm(x.at)} · ${esc(x.n)}</b><span>${wl(x.map.w, x.map.n)} · อีก</span><span class="clock">${mmss((x.at - now) / 1000)}</span>` });
+    if (st === 'live') ev.push({ t: now - 1, html: `<span class="k">ตอนนี้</span><b>${esc(x.n)}</b><span>ที่ ${wl(x.map.w, x.map.n)} เหลือ</span><span class="clock">${mmss((x.at + x.dur * 60000 - now) / 1000)}</span>` });
+    else if (st !== 'done') ev.push({ t: x.at, html: `<span class="k">บอสโลกถัดไป</span><b>${hhmm(x.at)} ${esc(x.n)}</b><span>ที่ ${wl(x.map.w, x.map.n)} อีก</span><span class="clock">${mmss((x.at - now) / 1000)}</span>` });
   }
   for (const id in T) { const b = BY[id], l = left(b); if (l > 0) ev.push({ t: now + l * 1000, html: `<span class="k">บอสแมพถัดไป</span><b>${esc(b.n)}</b><span>อีก</span><span class="clock">${mmss(l)}</span>` }); }
   ev.sort((a, b) => a.t - b.t);
@@ -299,8 +298,8 @@ function beep(n) {
 function notifUi() {
   const ok = 'Notification' in window, p = ok ? Notification.permission : 'none';
   $('#notif').hidden = p !== 'default';
-  $('#notifPill').innerHTML = p === 'granted' ? '<span class="pill on">● แจ้งเตือนเบราว์เซอร์: เปิดแล้ว</span>' : p === 'denied' ? '<span class="pill off">แจ้งเตือนถูกปิด · เปิดได้ที่การตั้งค่าเว็บไซต์ของเบราว์เซอร์ (ใช้เสียงแทนได้)</span>'
-    : p === 'none' ? '<span class="pill off">เบราว์เซอร์นี้ไม่มีแจ้งเตือน · ใช้เสียงแทน</span>' : '<span class="pill off">แจ้งเตือนเบราว์เซอร์: ยังไม่เปิด</span>';
+  $('#notifPill').innerHTML = p === 'granted' ? '<span class="pill on">แจ้งเตือนเบราว์เซอร์เปิดแล้ว</span>' : p === 'denied' ? '<span class="pill off">แจ้งเตือนถูกปิดในเบราว์เซอร์ ใช้เสียงแทนได้</span>'
+    : p === 'none' ? '<span class="pill off">เบราว์เซอร์นี้ไม่มีแจ้งเตือน ใช้เสียงแทน</span>' : '<span class="pill off">แจ้งเตือนเบราว์เซอร์: ยังไม่เปิด</span>';
 }
 document.addEventListener('click', (e) => {
   const t = e.target.closest('button'); if (!t) return;

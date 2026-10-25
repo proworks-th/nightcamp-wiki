@@ -24,8 +24,8 @@
   }).join('');
   var sxi = document.querySelector('form.sx input'); if (sxi && en) sxi.placeholder = 'Search the site';
   var ft = document.querySelector('footer.ft[data-build]');
-  if (ft) ft.innerHTML = '<div class="fti"><div><b class="ftb">NightCamp Wiki</b><p>' + X(T('วิกิแฟนเกม NightCamp โดย KhumGameLab · ข้อมูลอ่านจากไฟล์เกมโดยตรง', 'A NightCamp fan wiki by KhumGameLab · data read straight from the game files')) + '</p><p class="muted">'
-    + X(T('ไฟล์เกมรุ่น ' + ft.dataset.build + ' · ภาพและชื่อในเกมเป็นของทีม Night Camp ใช้โดยได้รับอนุญาต · ไม่ใช่เว็บทางการของเกม', 'Game files ' + ft.dataset.build + ' · in-game art and names belong to the Night Camp team, used with permission · not an official site')) + '</p></div><nav class="ftl">'
+  if (ft) ft.innerHTML = '<div class="fti"><div><b class="ftb">NightCamp Wiki</b><p>' + X(T('วิกิแฟนเกม NightCamp โดย KhumGameLab ข้อมูลอ่านจากไฟล์เกม', 'A NightCamp fan wiki by KhumGameLab, data read from the game files')) + '</p><p class="muted">'
+    + X(T('ไฟล์เกมรุ่น ' + ft.dataset.build + ' ภาพและชื่อในเกมเป็นของทีม Night Camp ใช้โดยได้รับอนุญาต ไม่ใช่เว็บทางการของเกม', 'Game files ' + ft.dataset.build + '. In-game art and names belong to the Night Camp team, used with permission. Not an official site.')) + '</p></div><nav class="ftl">'
     + [[W + 'index.html', 'หน้าแรก', 'Home'], [W + 'about.html', 'เกี่ยวกับเว็บ', 'About'], [ROOT + 'index.html#patch', 'อัปเดตเกม', 'Game updates'], [ROOT + 'sitemap.xml', 'แผนผังเว็บ', 'Sitemap']].map(function (l) { return '<a href="' + l[0] + '">' + X(T(l[1], l[2])) + '</a>'; }).join('') + '</nav></div>';
   if (b) { b.textContent = en ? 'ไทย' : 'EN'; b.onclick = function () { try { localStorage.setItem('nc_lang', en ? 'th' : 'en'); } catch (e) {} location.reload(); }; }
   // the menu: pointing opens a group (CSS); a click or tap opens it too and keeps it open until a click elsewhere or Esc
