@@ -114,3 +114,7 @@ table.num td:nth-child(n+2){text-align:right;font-family:var(--mono)}
 
 /* inside the site's frame: the site has the header already */
 .embed .top,.embed .ft{display:none}.embed .wrap{padding-top:6px}.embed body{background-attachment:scroll}
+/* a rune: no game picture yet, a carved stone with its name */
+.ib.rune{--ec:#7a5cd6}
+.rn{display:grid;place-items:center;width:96px;height:96px;border-radius:22px;font:600 30px var(--display);color:#fff;background:radial-gradient(circle at 35% 30%,#9d86f0,#4b3596 70%);box-shadow:inset 0 -6px 0 rgba(0,0,0,.25),0 0 0 3px color-mix(in srgb,#9d86f0 40%,transparent),0 0 24px rgba(157,134,240,.45);text-shadow:0 2px 3px rgba(0,0,0,.4)}
+.tw table.wrap td{white-space:normal!important}.tw table.wrap td:first-child{white-space:nowrap!important;width:1%}
