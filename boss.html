@@ -76,6 +76,10 @@ input[type=search]{width:240px;min-width:0}
 .card.run{border-color:var(--warn)}.card.soon{border-color:var(--bad)}.card.up{border-color:var(--line);opacity:.72}.card.up:hover{opacity:1}
 .since{font:500 15px var(--display);color:var(--good)}
 .card h3{font:500 17px var(--display);margin:0}
+.fav{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;margin:-4px 2px -4px -6px;padding:0;border:0;background:none;color:var(--muted);cursor:pointer;border-radius:8px;vertical-align:middle;flex:none}
+.fav:hover{color:var(--ember);background:var(--panel2)}.fav svg{width:19px;height:19px}.fav[aria-pressed="true"]{color:var(--ember)}.fav[aria-pressed="true"] svg path{fill:currentColor}
+.card.isfav{box-shadow:inset 3px 0 0 var(--ember)}
+.runbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
 .clock{font:600 30px var(--mono);letter-spacing:.5px}
 .meter{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden}.meter i{display:block;height:100%;background:var(--good)}
 .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -146,6 +150,7 @@ details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-s
     <b style="font-family:var(--display);font-weight:500">แจ้งเตือน</b>
     <label>เตือนก่อน <select id="lead"><option value="0">ตอนเกิด</option><option value="60">1 นาที</option><option value="120">2 นาที</option><option value="300">5 นาที</option><option value="600">10 นาที</option></select></label>
     <label><input type="checkbox" id="sound"> มีเสียง</label>
+    <label><input type="checkbox" id="favAlert"> เตือนเฉพาะบอสที่ติดตาม</label>
     <button class="btn sm" id="test" type="button">ลองแจ้งเตือน</button>
     <span id="notifPill"></span>
     <button class="btn sm main" id="notif" type="button">เปิดแจ้งเตือน</button>
@@ -159,7 +164,8 @@ details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-s
 
   <section class="block">
     <h2>กำลังจับเวลา <span class="muted" id="runCount" style="font-size:15px"></span></h2>
-    <div class="sub">บอสแมพที่คุณกด "ตายแล้ว" ไว้ เรียงจากใกล้เกิดที่สุด</div>
+    <div class="runbar"><div class="sub">บอสแมพที่กด "ตายแล้ว" ไว้ เรียงจากใกล้เกิดที่สุด กดรูปดาวเพื่อติดตามบอสที่สนใจ</div>
+      <label class="muted" style="font-size:14px"><input type="checkbox" id="favOnly"> ดูเฉพาะที่ติดตาม</label></div>
     <div class="grid" id="running"></div>
   </section>
 
@@ -182,7 +188,11 @@ const load = (k, d) => { try { return JSON.parse(store.get(k) || 'null') ?? d; }
 const BY = Object.fromEntries(D.bosses.map((b) => [b.id, b]));
 $('#build').textContent = D.build;
 let T = load('nc_boss_t', {}); for (const k in T) if (!BY[k] || typeof T[k] !== 'number') delete T[k];
-const S = Object.assign({ lead: 60, sound: false, kind: '', q: '', watch: {} }, load('nc_boss_s', {}));
+const S = Object.assign({ lead: 60, sound: false, kind: '', q: '', watch: {}, fav: {}, favOnly: false, favAlert: false }, load('nc_boss_s', {}));
+// favourites: kept on this device only (each friend follows their own bosses)
+const isFav = (id) => !!S.fav[id];
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+const favBtn = (b) => `<button class="fav" data-fav="${b.id}" type="button" aria-pressed="${isFav(b.id)}" title="${isFav(b.id) ? 'เลิกติดตาม' : 'ติดตาม'}" aria-label="${isFav(b.id) ? 'เลิกติดตาม' : 'ติดตาม'} ${esc(b.n)}">${STAR}</button>`;
 if (!S.watch || typeof S.watch !== 'object') S.watch = {};
 const saveT = () => { if (!SH.ok) store.set('nc_boss_t', JSON.stringify(T)); }, saveS = () => store.set('nc_boss_s', JSON.stringify(S));
 // ---------- shared timers (Supabase: everyone who opens this page sees the same kills; only CH1 has bosses) ----------
@@ -282,7 +292,7 @@ function card(b) {
   const M = SH.ok ? META[b.id] : null;
   const l = left(b), st = stateOf(b), pct = Math.min(100, Math.max(0, (Date.now() - T[b.id]) / ((b.r2 || b.r) * 10)));
   const lab = st === 'up' ? '<span class="state st-up">น่าจะเกิดแล้ว</span>' : st === 'win' ? '<span class="state st-soon">อยู่ในช่วงที่อาจเกิด</span>' : st === 'soon' ? '<span class="state st-soon">ใกล้เกิด</span>' : '<span class="state st-run">รอเกิด</span>';
-  return `<article class="card ${st === 'win' ? 'soon' : st}" data-id="${b.id}"><h3>${wl(b.w, b.n)}<span class="tag">${esc(KIND[b.k])}</span></h3><div class="muted" style="font-size:13.5px">${b.maps.map((m) => wl(m.w, m.n)).join(' · ')}</div>
+  return `<article class="card ${st === 'win' ? 'soon' : st}${isFav(b.id) ? ' isfav' : ''}" data-id="${b.id}"><h3>${favBtn(b)}${wl(b.w, b.n)}<span class="tag">${esc(KIND[b.k])}</span></h3><div class="muted" style="font-size:13.5px">${b.maps.map((m) => wl(m.w, m.n)).join(' · ')}</div>
     <div class="row" style="justify-content:space-between">${st === 'up' ? `<span class="since" data-since="${b.id}">${sinceTxt(b)}</span>` : `<span class="clock" data-clock="${b.id}">${clockTxt(b)}</span>`}${lab}</div>
     ${st === 'up' ? '' : `<div class="meter"><i style="width:${pct}%"></i></div>`}
     <div class="muted" style="font-size:13px">ตายตอน ${hhmm(T[b.id])} น. ${b.r2 ? `เกิดได้ตั้งแต่ ${hhmm(T[b.id] + b.r * 1000)} ถึง ${hhmm(T[b.id] + b.r2 * 1000)} น.` : (st === 'up' ? '' : `เกิดประมาณ ${hhmm(T[b.id] + b.r * 1000)} น.`)}${b.note ? `<br>${esc(b.note)}` : ''}</div>
@@ -291,20 +301,24 @@ function card(b) {
 }
 function renderTimers() {
   // waiting first (the soonest on top), then the ones already due (the latest on top)
-  const run = D.bosses.filter(live).sort((a, c) => { const ua = stateOf(a) === 'up', uc = stateOf(c) === 'up'; return ua !== uc ? ua - uc : ua ? dueAt(c) - dueAt(a) : left(a) - left(c); });
-  $('#running').innerHTML = run.length ? run.map(card).join('') : '<div class="empty">ยังไม่ได้จับเวลา · ตีบอสแมพตายแล้วกด "ตายแล้ว" ในรายการด้านล่าง</div>';
+  const all = D.bosses.filter(live), run = all.filter((b) => !S.favOnly || isFav(b.id)).sort((a, c) => { const ua = stateOf(a) === 'up', uc = stateOf(c) === 'up'; return ua !== uc ? ua - uc : ua ? dueAt(c) - dueAt(a) : left(a) - left(c); });
+  $('#running').innerHTML = run.length ? run.map(card).join('')
+    : S.favOnly && !Object.keys(S.fav).length ? '<div class="empty">ยังไม่ได้ติดตามบอสตัวไหน · กดรูปดาวหน้าชื่อบอสในรายการด้านล่าง</div>'
+    : S.favOnly && all.length ? `<div class="empty">บอสที่ติดตามยังไม่มีใครจับเวลา · ตัวอื่นจับอยู่ ${all.length} ตัว</div>`
+    : '<div class="empty">ยังไม่ได้จับเวลา · ตีบอสแมพตายแล้วกด "ตายแล้ว" ในรายการด้านล่าง</div>';
   $('#runCount').textContent = run.length ? `(${run.length})` : '';
 }
 function renderList() {
-  $('#kinds').innerHTML = [['', 'ทั้งหมด']].concat(Object.entries(KIND)).map(([k, n]) => `<button class="chip" data-kind="${k}" aria-pressed="${S.kind === k}">${esc(n)}</button>`).join('');
+  const nf = D.bosses.filter((b) => isFav(b.id)).length;
+  $('#kinds').innerHTML = [['', 'ทั้งหมด'], ['fav', `ที่ติดตาม (${nf})`]].concat(Object.entries(KIND)).map(([k, n]) => `<button class="chip" data-kind="${k}" aria-pressed="${S.kind === k}">${esc(n)}</button>`).join('');
   const q = S.q.trim().toLowerCase();
-  const L = D.bosses.filter((b) => (!S.kind || b.k === S.kind) && (!q || (b.n + ' ' + b.maps.map((m) => m.n).join(' ')).toLowerCase().includes(q)));
+  const L = D.bosses.filter((b) => (!S.kind || (S.kind === 'fav' ? isFav(b.id) : b.k === S.kind)) && (!q || (b.n + ' ' + b.maps.map((m) => m.n).join(' ')).toLowerCase().includes(q))).sort((a, c) => isFav(c.id) - isFav(a.id));
   $('#all').innerHTML = L.length ? '<div class="li lh"><span>บอส</span><span>อยู่ที่</span><span>เกิดใหม่</span><span></span></div>' + L.map((b) => `<div class="li">
-      <div class="nm"><b>${wl(b.w, b.n)}</b><span class="tag">Lv ${b.lv}</span>${live(b) && stateOf(b) === 'up' ? ' <span class="state st-up">น่าจะเกิดแล้ว</span>' : ''}<br><span class="muted">${esc(KIND[b.k])}</span></div>
+      <div class="nm">${favBtn(b)}<b>${wl(b.w, b.n)}</b><span class="tag">Lv ${b.lv}</span>${live(b) && stateOf(b) === 'up' ? ' <span class="state st-up">น่าจะเกิดแล้ว</span>' : ''}<br><span class="muted">${esc(KIND[b.k])}</span></div>
       <div class="mp">${b.maps.map((m) => wl(m.w, m.n)).join(' · ')}</div>
       <div class="rs">${b.r2 ? every(b) : 'ทุก ' + mins(b.r)}</div>
       <div class="go">${live(b) && stateOf(b) !== 'up' ? `<span class="state st-${stateOf(b) === 'win' ? 'soon' : stateOf(b)}">${stateOf(b) === 'win' ? 'อาจเกิดแล้ว' : 'จับเวลาอยู่'}</span>` : `<select data-ago="${b.id}" aria-label="ตายเมื่อ"><option value="0">ตายเมื่อ: ตอนนี้</option><option value="1">1 นาทีก่อน</option><option value="2">2 นาทีก่อน</option><option value="5">5 นาทีก่อน</option><option value="10">10 นาทีก่อน</option><option value="30">30 นาทีก่อน</option></select><button class="btn main sm" data-kill="${b.id}" type="button">ตายแล้ว</button>`}</div></div>`).join('')
-    : '<div class="empty" style="border:0">ไม่เจอบอสที่ตรงกับตัวกรอง</div>';
+    : `<div class="empty" style="border:0">${S.kind === 'fav' && !nf ? 'ยังไม่ได้ติดตามบอสตัวไหน · กดรูปดาวหน้าชื่อบอสในแท็บ "ทั้งหมด"' : 'ไม่เจอบอสที่ตรงกับตัวกรอง'}</div>`;
 }
 function renderNext() {
   const now = Date.now(), ev = [];
@@ -314,6 +328,7 @@ function renderNext() {
     else if (st !== 'done') ev.push({ t: x.at, html: `<span class="k">บอสโลกถัดไป</span><b>${hhmm(x.at)} ${esc(x.n)}</b><span>ที่ ${wl(x.map.w, x.map.n)} อีก</span><span class="clock">${mmss((x.at - now) / 1000)}</span>` });
   }
   for (const id in T) {
+    if (S.favOnly && !isFav(id)) continue;
     const b = BY[id], l = left(b), l2 = left2(b);
     if (l > 0) ev.push({ t: now + l * 1000, html: `<span class="k">บอสแมพถัดไป</span><b>${esc(b.n)}</b><span>${b.r2 ? 'เริ่มช่วงเกิดอีก' : 'อีก'}</span><span class="clock">${mmss(l)}</span>` });
     else if (b.r2 && l2 > 0) ev.push({ t: now, html: `<span class="k">อาจเกิดแล้ว</span><b>${esc(b.n)}</b><span>ช่วงสุ่มจบใน</span><span class="clock">${mmss(l2)}</span>` });
@@ -336,7 +351,7 @@ function tick() {
     const st = stateOf(b), key = T[id] + ':' + st;
     if ((st === 'soon' || st === 'up' || st === 'win') && told[id] !== key) {
       told[id] = key;
-      if (!(st === 'soon' && S.lead === 0) && !(st === 'up' && b.r2)) alertMe(st === 'up' ? `${b.n} น่าจะเกิดแล้ว` : st === 'win' ? `${b.n} อาจเกิดได้แล้ว (ช่วงสุ่ม) ดูประกาศในเกม` : `${b.n} ใกล้เกิด อีก ${mmss(l)}`, 'b' + id, st === 'up' ? 2 : 1);
+      if (!(st === 'soon' && S.lead === 0) && !(st === 'up' && b.r2) && !(S.favAlert && !isFav(id))) alertMe(st === 'up' ? `${b.n} น่าจะเกิดแล้ว` : st === 'win' ? `${b.n} อาจเกิดได้แล้ว (ช่วงสุ่ม) ดูประกาศในเกม` : `${b.n} ใกล้เกิด อีก ${mmss(l)}`, 'b' + id, st === 'up' ? 2 : 1);
       renderTimers(); renderList();
     }
   }
@@ -369,6 +384,7 @@ function notifUi() {
 }
 document.addEventListener('click', (e) => {
   const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.fav) { const k = t.dataset.fav; if (S.fav[k]) delete S.fav[k]; else S.fav[k] = 1; saveS(); renderTimers(); renderList(); renderNext(); return; }
   if (SH.ok && (t.dataset.kill || t.dataset.adj || t.dataset.undo || t.dataset.hide)) { shared(t); return; }
   if (t.dataset.kill) { const sel = document.querySelector(`[data-ago="${t.dataset.kill}"]`), ago = sel ? +sel.value : 0; T[t.dataset.kill] = Date.now() - ago * 60000; delete told[t.dataset.kill]; saveT(); renderAll(); }
   else if (t.dataset.adj) { T[t.dataset.adj] += +t.dataset.d * 1000; delete told[t.dataset.adj]; saveT(); renderAll(); }
@@ -394,6 +410,8 @@ $('#who').value = S.name || ''; $('#who').onchange = (e) => { S.name = e.target.
 $('#refresh').onclick = () => sbPull();
 $('#q').value = S.q; $('#q').oninput = (e) => { S.q = e.target.value; saveS(); renderList(); };
 $('#lead').value = String(S.lead); $('#lead').onchange = (e) => { S.lead = +e.target.value; saveS(); renderAll(); };
+$('#favOnly').checked = !!S.favOnly; $('#favOnly').onchange = (e) => { S.favOnly = e.target.checked; saveS(); renderTimers(); renderNext(); };
+$('#favAlert').checked = !!S.favAlert; $('#favAlert').onchange = (e) => { S.favAlert = e.target.checked; saveS(); };
 $('#sound').checked = !!S.sound; $('#sound').onchange = (e) => { S.sound = e.target.checked; saveS(); if (S.sound) beep(1); };
 $('#test').onclick = () => alertMe('ทดสอบแจ้งเตือน', 'test', 1);
 $('#notif').onclick = () => { try { Notification.requestPermission().then(notifUi); } catch (e) { notifUi(); } };
@@ -411,7 +429,7 @@ if (SH.on) { T = {}; sbPull(); setInterval(() => { if (!document.hidden) sbPull(
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=2231dca7'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=c3d3aad2'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
