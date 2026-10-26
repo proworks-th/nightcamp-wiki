@@ -73,7 +73,8 @@ input[type=search]{width:240px;min-width:0}
 @media (prefers-reduced-motion:reduce){.st-soon{animation:none}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
-.card.run{border-color:var(--warn)}.card.soon{border-color:var(--bad)}.card.up{border-color:var(--good)}
+.card.run{border-color:var(--warn)}.card.soon{border-color:var(--bad)}.card.up{border-color:var(--line);opacity:.72}.card.up:hover{opacity:1}
+.since{font:500 15px var(--display);color:var(--good)}
 .card h3{font:500 17px var(--display);margin:0}
 .clock{font:600 30px var(--mono);letter-spacing:.5px}
 .meter{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden}.meter i{display:block;height:100%;background:var(--good)}
@@ -266,23 +267,31 @@ function renderSched() {
 }
 
 // ---------- timers (after a kill) ----------
-const left = (b) => (T[b.id] ? (T[b.id] + b.r * 1000 - Date.now()) / 1000 : null);
-const left2 = (b) => (T[b.id] && b.r2 ? (T[b.id] + b.r2 * 1000 - Date.now()) / 1000 : null);
+// a kill report is news until 30 min after the boss is due (after the end of the window for the random ones): after that
+// nobody can tell whether it is still standing or was killed again, so it goes back to the list
+const KEEP = 30 * 60;
+const dueAt = (b) => T[b.id] + (b.r2 || b.r) * 1000;
+const live = (b) => !!T[b.id] && Date.now() < dueAt(b) + KEEP * 1000;
+const left = (b) => (live(b) ? (T[b.id] + b.r * 1000 - Date.now()) / 1000 : null);
+const left2 = (b) => (live(b) && b.r2 ? (T[b.id] + b.r2 * 1000 - Date.now()) / 1000 : null);
 const stateOf = (b) => { const l = left(b); if (l === null) return ''; if (b.r2 && l <= 0) return left2(b) <= 0 ? 'up' : 'win'; if (l <= 0) return 'up'; if (l <= S.lead) return 'soon'; return 'run'; };
-const clockTxt = (b) => { const l = left(b); if (b.r2 && l <= 0 && left2(b) > 0) return '≤' + mmss(left2(b)); return l <= 0 ? '+' + mmss(-(b.r2 ? left2(b) : l)) : mmss(l); };
+// the big number: the countdown while waiting, the time left in the window for the random ones, nothing once it is due
+const clockTxt = (b) => { const l = left(b); if (b.r2 && l <= 0 && left2(b) > 0) return '≤' + mmss(left2(b)); return l > 0 ? mmss(l) : ''; };
+const sinceTxt = (b) => { const m = Math.max(0, Math.floor((Date.now() - dueAt(b)) / 60000)); return `${b.r2 ? 'ครบช่วงเกิด' : 'เกิดแล้ว'}ตั้งแต่ ${hhmm(dueAt(b))} น. (${m ? m + ' นาทีที่แล้ว' : 'เมื่อกี้'})`; };
 function card(b) {
   const M = SH.ok ? META[b.id] : null;
-  const l = left(b), st = stateOf(b), pct = Math.min(100, Math.max(0, 100 - (l / b.r) * 100));
+  const l = left(b), st = stateOf(b), pct = Math.min(100, Math.max(0, (Date.now() - T[b.id]) / ((b.r2 || b.r) * 10)));
   const lab = st === 'up' ? '<span class="state st-up">น่าจะเกิดแล้ว</span>' : st === 'win' ? '<span class="state st-soon">อยู่ในช่วงที่อาจเกิด</span>' : st === 'soon' ? '<span class="state st-soon">ใกล้เกิด</span>' : '<span class="state st-run">รอเกิด</span>';
-  return `<article class="card ${st === 'win' ? 'soon' : st}"><h3>${wl(b.w, b.n)}<span class="tag">${esc(KIND[b.k])}</span></h3><div class="muted" style="font-size:13.5px">${b.maps.map((m) => wl(m.w, m.n)).join(' · ')}</div>
-    <div class="row" style="justify-content:space-between"><span class="clock" data-clock="${b.id}">${clockTxt(b)}</span>${lab}</div>
-    <div class="meter"><i style="width:${pct}%"></i></div>
-    <div class="muted" style="font-size:13px">ตายตอน ${hhmm(T[b.id])} น. ${b.r2 ? `เกิดได้ตั้งแต่ ${hhmm(T[b.id] + b.r * 1000)} ถึง ${hhmm(T[b.id] + b.r2 * 1000)} น.` : `${st === 'up' ? 'ครบเวลาเกิดตอน' : 'เกิดประมาณ'} ${hhmm(T[b.id] + b.r * 1000)} น.`}${b.note ? `<br>${esc(b.note)}` : ''}</div>
+  return `<article class="card ${st === 'win' ? 'soon' : st}" data-id="${b.id}"><h3>${wl(b.w, b.n)}<span class="tag">${esc(KIND[b.k])}</span></h3><div class="muted" style="font-size:13.5px">${b.maps.map((m) => wl(m.w, m.n)).join(' · ')}</div>
+    <div class="row" style="justify-content:space-between">${st === 'up' ? `<span class="since" data-since="${b.id}">${sinceTxt(b)}</span>` : `<span class="clock" data-clock="${b.id}">${clockTxt(b)}</span>`}${lab}</div>
+    ${st === 'up' ? '' : `<div class="meter"><i style="width:${pct}%"></i></div>`}
+    <div class="muted" style="font-size:13px">ตายตอน ${hhmm(T[b.id])} น. ${b.r2 ? `เกิดได้ตั้งแต่ ${hhmm(T[b.id] + b.r * 1000)} ถึง ${hhmm(T[b.id] + b.r2 * 1000)} น.` : (st === 'up' ? '' : `เกิดประมาณ ${hhmm(T[b.id] + b.r * 1000)} น.`)}${b.note ? `<br>${esc(b.note)}` : ''}</div>
     ${M ? `<div class="muted" style="font-size:13px">แจ้งโดย <b>${esc(M.by)}</b> ตอน ${hhmm(M.made)} น.</div>` : ''}
     <div class="row"><button class="btn main sm" data-kill="${b.id}" type="button">ตายอีกรอบ</button>${!M || Date.now() - M.made < 30 * 60000 ? `<button class="btn sm" data-adj="${b.id}" data-d="-60" type="button" title="ตายเร็วกว่านี้ 1 นาที">−1 นาที</button><button class="btn sm" data-adj="${b.id}" data-d="60" type="button" title="ตายช้ากว่านี้ 1 นาที">+1 นาที</button>` : ''}${M ? (Date.now() - M.made < 10 * 60000 ? `<button class="btn sm" data-undo="${b.id}" type="button" title="ยกเลิกได้ภายใน 10 นาทีหลังแจ้ง">ยกเลิก</button>` : `<button class="btn sm" data-hide="${b.id}" type="button" title="ซ่อนจากหน้าจอนี้เท่านั้น">ซ่อน</button>`) : `<button class="btn sm" data-stop="${b.id}" type="button">เลิกจับ</button>`}</div></article>`;
 }
 function renderTimers() {
-  const run = D.bosses.filter((b) => T[b.id]).sort((a, c) => left(a) - left(c));
+  // waiting first (the soonest on top), then the ones already due (the latest on top)
+  const run = D.bosses.filter(live).sort((a, c) => { const ua = stateOf(a) === 'up', uc = stateOf(c) === 'up'; return ua !== uc ? ua - uc : ua ? dueAt(c) - dueAt(a) : left(a) - left(c); });
   $('#running').innerHTML = run.length ? run.map(card).join('') : '<div class="empty">ยังไม่ได้จับเวลา · ตีบอสแมพตายแล้วกด "ตายแล้ว" ในรายการด้านล่าง</div>';
   $('#runCount').textContent = run.length ? `(${run.length})` : '';
 }
@@ -291,10 +300,10 @@ function renderList() {
   const q = S.q.trim().toLowerCase();
   const L = D.bosses.filter((b) => (!S.kind || b.k === S.kind) && (!q || (b.n + ' ' + b.maps.map((m) => m.n).join(' ')).toLowerCase().includes(q)));
   $('#all').innerHTML = L.length ? '<div class="li lh"><span>บอส</span><span>อยู่ที่</span><span>เกิดใหม่</span><span></span></div>' + L.map((b) => `<div class="li">
-      <div class="nm"><b>${wl(b.w, b.n)}</b><span class="tag">Lv ${b.lv}</span><br><span class="muted">${esc(KIND[b.k])}</span></div>
+      <div class="nm"><b>${wl(b.w, b.n)}</b><span class="tag">Lv ${b.lv}</span>${live(b) && stateOf(b) === 'up' ? ' <span class="state st-up">น่าจะเกิดแล้ว</span>' : ''}<br><span class="muted">${esc(KIND[b.k])}</span></div>
       <div class="mp">${b.maps.map((m) => wl(m.w, m.n)).join(' · ')}</div>
       <div class="rs">${b.r2 ? every(b) : 'ทุก ' + mins(b.r)}</div>
-      <div class="go">${T[b.id] ? `<span class="state st-${stateOf(b) === 'win' ? 'soon' : stateOf(b)}">${stateOf(b) === 'up' ? 'น่าจะเกิดแล้ว' : 'จับเวลาอยู่'}</span>` : `<select data-ago="${b.id}" aria-label="ตายเมื่อ"><option value="0">ตายเมื่อ: ตอนนี้</option><option value="1">1 นาทีก่อน</option><option value="2">2 นาทีก่อน</option><option value="5">5 นาทีก่อน</option><option value="10">10 นาทีก่อน</option><option value="30">30 นาทีก่อน</option></select><button class="btn main sm" data-kill="${b.id}" type="button">ตายแล้ว</button>`}</div></div>`).join('')
+      <div class="go">${live(b) && stateOf(b) !== 'up' ? `<span class="state st-${stateOf(b) === 'win' ? 'soon' : stateOf(b)}">${stateOf(b) === 'win' ? 'อาจเกิดแล้ว' : 'จับเวลาอยู่'}</span>` : `<select data-ago="${b.id}" aria-label="ตายเมื่อ"><option value="0">ตายเมื่อ: ตอนนี้</option><option value="1">1 นาทีก่อน</option><option value="2">2 นาทีก่อน</option><option value="5">5 นาทีก่อน</option><option value="10">10 นาทีก่อน</option><option value="30">30 นาทีก่อน</option></select><button class="btn main sm" data-kill="${b.id}" type="button">ตายแล้ว</button>`}</div></div>`).join('')
     : '<div class="empty" style="border:0">ไม่เจอบอสที่ตรงกับตัวกรอง</div>';
 }
 function renderNext() {
@@ -304,7 +313,11 @@ function renderNext() {
     if (st === 'live') ev.push({ t: now - 1, html: `<span class="k">ตอนนี้</span><b>${esc(x.n)}</b><span>ที่ ${wl(x.map.w, x.map.n)} เหลือ</span><span class="clock">${mmss((x.at + x.dur * 60000 - now) / 1000)}</span>` });
     else if (st !== 'done') ev.push({ t: x.at, html: `<span class="k">บอสโลกถัดไป</span><b>${hhmm(x.at)} ${esc(x.n)}</b><span>ที่ ${wl(x.map.w, x.map.n)} อีก</span><span class="clock">${mmss((x.at - now) / 1000)}</span>` });
   }
-  for (const id in T) { const b = BY[id], l = left(b); if (l > 0) ev.push({ t: now + l * 1000, html: `<span class="k">บอสแมพถัดไป</span><b>${esc(b.n)}</b><span>อีก</span><span class="clock">${mmss(l)}</span>` }); }
+  for (const id in T) {
+    const b = BY[id], l = left(b), l2 = left2(b);
+    if (l > 0) ev.push({ t: now + l * 1000, html: `<span class="k">บอสแมพถัดไป</span><b>${esc(b.n)}</b><span>${b.r2 ? 'เริ่มช่วงเกิดอีก' : 'อีก'}</span><span class="clock">${mmss(l)}</span>` });
+    else if (b.r2 && l2 > 0) ev.push({ t: now, html: `<span class="k">อาจเกิดแล้ว</span><b>${esc(b.n)}</b><span>ช่วงสุ่มจบใน</span><span class="clock">${mmss(l2)}</span>` });
+  }
   ev.sort((a, b) => a.t - b.t);
   $('#next').innerHTML = ev.length ? ev[0].html : '<span class="k">ยังไม่มีอะไรรอ</span>';
 }
@@ -315,12 +328,15 @@ let ticks = 0;
 function tick() {
   const now = Date.now();
   for (const id in T) {
-    const b = BY[id], l = left(b), el = document.querySelector(`[data-clock="${id}"]`);
+    const b = BY[id];
+    if (!live(b)) { if (document.querySelector(`#running [data-id="${id}"]`)) { renderTimers(); renderList(); } continue; }
+    const l = left(b), el = document.querySelector(`[data-clock="${id}"]`), sn = document.querySelector(`[data-since="${id}"]`);
     if (el) el.textContent = clockTxt(b);
+    if (sn && ticks % 15 === 0) sn.textContent = sinceTxt(b);
     const st = stateOf(b), key = T[id] + ':' + st;
     if ((st === 'soon' || st === 'up' || st === 'win') && told[id] !== key) {
       told[id] = key;
-      if (!(st === 'soon' && S.lead === 0)) alertMe(st === 'up' ? `${b.n} น่าจะเกิดแล้ว` : st === 'win' ? `${b.n} อาจเกิดได้แล้ว (ช่วงสุ่ม) ดูประกาศในเกม` : `${b.n} ใกล้เกิด อีก ${mmss(l)}`, 'b' + id, st === 'up' ? 2 : 1);
+      if (!(st === 'soon' && S.lead === 0) && !(st === 'up' && b.r2)) alertMe(st === 'up' ? `${b.n} น่าจะเกิดแล้ว` : st === 'win' ? `${b.n} อาจเกิดได้แล้ว (ช่วงสุ่ม) ดูประกาศในเกม` : `${b.n} ใกล้เกิด อีก ${mmss(l)}`, 'b' + id, st === 'up' ? 2 : 1);
       renderTimers(); renderList();
     }
   }
@@ -381,7 +397,7 @@ $('#lead').value = String(S.lead); $('#lead').onchange = (e) => { S.lead = +e.ta
 $('#sound').checked = !!S.sound; $('#sound').onchange = (e) => { S.sound = e.target.checked; saveS(); if (S.sound) beep(1); };
 $('#test').onclick = () => alertMe('ทดสอบแจ้งเตือน', 'test', 1);
 $('#notif').onclick = () => { try { Notification.requestPermission().then(notifUi); } catch (e) { notifUi(); } };
-for (const id in T) { if (left(BY[id]) < -600) told[id] = T[id] + ':up'; }   // (old news: no alert on load)
+for (const id in T) { if (live(BY[id]) && left(BY[id]) < -600) told[id] = T[id] + ':up'; }   // (old news: no alert on load)
 notifUi(); shareUi(); renderAll(); setInterval(tick, 1000);
 // shared: read now, then every 15 s while the page is in view (and when it comes back)
 if (SH.on) { T = {}; sbPull(); setInterval(() => { if (!document.hidden) sbPull(); }, 15000); document.addEventListener('visibilitychange', () => { if (!document.hidden) sbPull(); }); }
@@ -395,7 +411,7 @@ if (SH.on) { T = {}; sbPull(); setInterval(() => { if (!document.hidden) sbPull(
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=3a2fe2d8'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=2231dca7'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
