@@ -12,6 +12,11 @@
     document.documentElement.lang = 'en';
   })();
   // the site's menu (same groups and pages as the site's header) and the footer: written here once for every page
+  // a mistake on this page: a new issue on the site's GitHub, the page and what to write already filled in
+  window.NC_REPORT = function (title) {
+    var body = 'หน้า: ' + location.href + '\n\nข้อมูลที่ผิด:\n\nในเกมเป็นแบบนี้:\n\n(แนบรูปหน้าจอได้)';
+    return 'https://github.com/proworks-th/nightcamp-wiki/issues/new?title=' + encodeURIComponent('ข้อมูลผิด: ' + String(title || '').replace(/ · NightCamp Wiki$/, '')) + '&body=' + encodeURIComponent(body);
+  };
   var T = function (th, e) { return en ? e : th; }, X = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var MENU = [['คู่มือ', 'Guide', [['หน้าแรก', 'Home', ''], ['คู่มือ', 'Guide', 'guide'], ['อัปเดตเกม', 'Game updates', 'patch'], ['เกี่ยวกับเว็บ', 'About', 'about']]],
     ['ข้อมูล', 'Data', [['อาชีพและสกิล', 'Jobs & skills', 'jobs'], ['อุปกรณ์', 'Equipment', 'equip'], ['มอนสเตอร์และแมพ', 'Monsters & maps', 'mon'], ['แผนที่', 'Map', 'map'], ['อาชีพเสริม', 'Life skills', 'life'], ['รูน', 'Runes', 'rune']]],
@@ -26,6 +31,7 @@
   var ft = document.querySelector('footer.ft[data-build]');
   if (ft) ft.innerHTML = '<div class="fti"><div><b class="ftb">NightCamp Wiki</b><p>' + X(T('วิกิแฟนเกม NightCamp โดย KhumGameLab ข้อมูลอ่านจากไฟล์เกม', 'A NightCamp fan wiki by KhumGameLab, data read from the game files')) + '</p><p class="muted">'
     + X(T('ไฟล์เกมรุ่น ' + ft.dataset.build + ' ภาพและชื่อในเกมเป็นของทีม Night Camp ใช้โดยได้รับอนุญาต ไม่ใช่เว็บทางการของเกม', 'Game files ' + ft.dataset.build + '. In-game art and names belong to the Night Camp team, used with permission. Not an official site.')) + '</p></div><nav class="ftl">'
+    + '<a class="rep" href="' + X(window.NC_REPORT(document.title)) + '" target="_blank" rel="noopener">' + X(T('แจ้งข้อมูลผิด', 'Report a mistake')) + '</a>'
     + [[W + 'index.html', 'หน้าแรก', 'Home'], [W + 'about.html', 'เกี่ยวกับเว็บ', 'About'], [ROOT + 'index.html#patch', 'อัปเดตเกม', 'Game updates'], [ROOT + 'sitemap.xml', 'แผนผังเว็บ', 'Sitemap']].map(function (l) { return '<a href="' + l[0] + '">' + X(T(l[1], l[2])) + '</a>'; }).join('') + '</nav></div>';
   if (b) { b.textContent = en ? 'ไทย' : 'EN'; b.onclick = function () { try { localStorage.setItem('nc_lang', en ? 'th' : 'en'); } catch (e) {} location.reload(); }; }
   // the menu: pointing opens a group (CSS); a click or tap opens it too and keeps it open until a click elsewhere or Esc
@@ -34,6 +40,14 @@
   for (var i = 0; i < B.length; i++) B[i].onclick = function (e) { e.stopPropagation(); var d = this.parentElement, o = !d.classList.contains('open'); close(d); d.classList.toggle('open', o); this.setAttribute('aria-expanded', o); };
   document.addEventListener('click', function () { close(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  // the phone's search button: the box opens under the row
+  var top = document.querySelector('.top'), sb = null;
+  if (top && top.querySelector('form.sx')) {   // (made here, not written into every page)
+    sb = document.createElement('button'); sb.className = 'sbtn'; sb.type = 'button'; sb.setAttribute('aria-label', en ? 'Search' : 'ค้นหา'); sb.setAttribute('aria-expanded', 'false');
+    sb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+    top.insertBefore(sb, document.getElementById('lang'));
+  }
+  if (sb && top) sb.onclick = function () { var on = !top.classList.contains('sopen'); top.classList.toggle('sopen', on); sb.setAttribute('aria-expanded', on); if (on) { var i = top.querySelector('form.sx input'); if (i) i.focus(); } };
   // the header's search: the site's own search, on the site's page
   var sx = document.querySelector('form.sx');
   if (sx) sx.addEventListener('submit', function (e) { e.preventDefault(); var q = sx.q.value.trim(); if (q) location.href = sx.getAttribute('data-go') + '#search/' + encodeURIComponent(q); });

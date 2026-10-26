@@ -85,7 +85,7 @@ details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-s
 <body>
 <div class="wrap">
   <header class="top">
-    <h1>รูน<span>จารึกสกิล</span></h1>
+    <h1>รูนจารึกสกิล</h1>
     <p class="lead muted" id="lead"></p>
   </header>
   <div class="how" id="how"></div>
@@ -141,7 +141,7 @@ function renderAll() {
     <div>${ktag(r.on)}</div>
     <p class="fx">${esc(r.t[F.tier - 1])}</p>
     <ul class="tiers">${[1, 2, 3].map((t) => `<li class="${t === F.tier ? 'on' : ''}"><b>${ROM[t]}</b>${esc(r.t[t - 1])}</li>`).join('')}</ul>
-    <div class="foot"><span>ใส่ได้ <b>${D.count[k]}</b> สกิล</span><span class="src">${esc(src(k))}</span>${D.w[k] ? `<a href="${esc(D.w[k])}" target="_top">หน้าวิกิ ↗</a>` : ''}</div></article>`).join('')
+    <div class="foot"><span>ใส่ได้ ${D.count[k]} สกิล</span><span class="src">${esc(src(k))}</span>${D.w[k] ? `<a href="${esc(D.w[k])}" target="_top">หน้าวิกิ ↗</a>` : ''}</div></article>`).join('')
     : '<div class="empty">ไม่เจอรูนที่ตรงกับตัวกรอง</div>';
   store.set('nc_rune_f', JSON.stringify(F));
 }
@@ -189,6 +189,103 @@ window.addEventListener('message', (e) => {
 });
 fillJobs(); renderAll(); renderMine(); view(store.get('nc_rune_v') === 'mine' ? 'mine' : 'all');
 </script>
+<script>/* English mode: when the viewer picked EN (localStorage nc_lang), swap the Thai interface text for English as the page
+   renders. Game names that have no official English (items, monsters) stay Thai. */
+(function () {
+  var lang = 'th';
+  try { lang = localStorage.getItem('nc_lang') || 'th'; } catch (e) {}
+  if (lang !== 'en') return;
+  // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
+  if (window.NC_I18N) return start(window.NC_I18N);
+  var sc = document.createElement('script');
+  sc.src = 'i18n.js?v=36f44a7c'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  document.head.appendChild(sc);
+  function start(I) {
+  document.documentElement.lang = 'en';
+  // the English name beside a Thai name would say the same thing twice; and the "more/less" labels drawn by CSS
+  var st = document.createElement('style');
+  st.textContent = '.en2{display:none!important}' + (document.querySelector('nav.ch') ? ' details>summary::after{content:"More \\25BE"!important} details[open]>summary::after{content:"Hide \\25B4"!important}' : '');
+  document.head.appendChild(st);
+  var TH = /[฀-๿]/, NUM = /\d[\d,]*(?:\.\d+)?/g;
+  var R = I.r.map(function (x) { return [new RegExp(x[0]), x[1], !!x[2]]; });
+  var WK = Object.keys(I.w).sort(function (a, b) { return b.length - a.length; });
+  var memo = new Map();
+  function core(c) {
+    if (!TH.test(c)) return c;
+    if (I.x[c] != null) return I.x[c];
+    var nums = c.match(NUM) || [], n = c.replace(NUM, '{n}');
+    if (I.x[n] != null) { var i = 0; return I.x[n].replace(/\{n\}/g, function () { return nums[i++] != null ? nums[i - 1] : ''; }); }
+    // lists first: "a · b" and "a, b" are translated part by part (a repeated name like "Shinobi · Shinobi" collapses)
+    var sep = c.indexOf(' · ') >= 0 ? ' · ' : c.indexOf(', ') >= 0 && !/[()]/.test(c) ? ', ' : null;
+    if (sep) {
+      var parts = c.split(sep).map(function (p) { var t = core(p.trim()); return t == null ? p : t; });
+      if (sep === ' · ' && parts.length === 2 && parts[0] === parts[1]) return parts[0];
+      if (parts.some(function (p, i) { return p !== c.split(sep)[i]; })) return parts.join(sep);
+    }
+    for (var k = 0; k < R.length; k++) {
+      var g = c.match(R[k][0]);
+      if (!g) continue;
+      var ok = true, raw = R[k][2];
+      var res = R[k][1].replace(/\{(\d)\}/g, function (_, d) { var v = g[+d] || ''; var t = core(v); if (t == null) { if (!raw) ok = false; return v; } return t; });
+      if (ok) return res;
+    }
+    var w = c;
+    for (var j = 0; j < WK.length; j++) if (w.indexOf(WK[j]) >= 0) w = w.split(WK[j]).join(I.w[WK[j]]);
+    if (!TH.test(w)) return w;
+    return null;
+  }
+  function tr(s) {
+    if (!s || !TH.test(s)) return s;
+    if (memo.has(s)) return memo.get(s);
+    var m = s.match(/^(\s*)([\s\S]*?)(\s*)$/), out = core(m[2]);
+    var r = out == null ? s : m[1] + out + m[3];
+    memo.set(s, r);
+    return r;
+  }
+  var ATTR = ['placeholder', 'title', 'aria-label'];
+  function el(e) {
+    for (var a = 0; a < ATTR.length; a++) { var v = e.getAttribute && e.getAttribute(ATTR[a]); if (v && TH.test(v)) { var t = tr(v); if (t !== v) e.setAttribute(ATTR[a], t); } }
+  }
+  function walk(root) {
+    if (root.nodeType === 3) { text(root); return; }
+    if (root.nodeType !== 1 || /^(SCRIPT|STYLE|TEXTAREA)$/.test(root.tagName)) return;
+    el(root);
+    var it = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT), n;
+    while ((n = it.nextNode())) {
+      if (n.nodeType === 3) text(n);
+      else if (!/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.tagName)) el(n);
+    }
+  }
+  function text(n) {
+    var p = n.parentNode;
+    if (!p || /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.nodeName)) return;
+    var v = n.nodeValue, t = tr(v);
+    if (t !== v) n.nodeValue = t;
+  }
+  if (TH.test(document.title)) document.title = tr(document.title);
+  walk(document.body);
+  new MutationObserver(function (ms) {
+    for (var i = 0; i < ms.length; i++) {
+      var m = ms[i];
+      if (m.type === 'characterData') text(m.target);
+      else if (m.type === 'attributes') el(m.target);
+      else for (var j = 0; j < m.addedNodes.length; j++) walk(m.addedNodes[j]);
+    }
+  }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTR });
+  window.NC_TR = tr;
+  }
+})();
+</script><p class="ncrep"><a id="ncrep" href="https://github.com/proworks-th/nightcamp-wiki/issues/new" target="_blank" rel="noopener">แจ้งข้อมูลผิด</a> <span>เจอตัวเลขหรือชื่อที่ไม่ตรงกับในเกม กดแจ้งได้เลย</span></p>
+<style>.ncrep{max-width:1240px;margin:24px auto 18px;padding:0 16px;font-size:13px;color:var(--muted,#56607c)}.ncrep a{color:var(--ember,#c4561a);font-weight:600;margin-right:6px}</style>
+<script>(function () {
+  // a mistake on this page: a new issue on the site's GitHub, the page and what to write already filled in
+  var a = document.getElementById('ncrep'); if (!a) return;
+  var page = function () { var h = location.hash.replace(/^#v=/, ''); return document.title.replace(/^NightCamp\s*/, '') + (h ? ' (' + h + ')' : ''); };
+  a.addEventListener('click', function () {
+    var body = 'หน้า: ' + (window.top !== window ? (function () { try { return window.top.location.href; } catch (e) { return location.href; } })() : location.href) + '\n\nข้อมูลที่ผิด:\n\nในเกมเป็นแบบนี้:\n\n(แนบรูปหน้าจอได้)';
+    a.href = 'https://github.com/proworks-th/nightcamp-wiki/issues/new?title=' + encodeURIComponent('ข้อมูลผิด: ' + page()) + '&body=' + encodeURIComponent(body);
+  });
+})();</script>
 <script>// Words players trip over, explained where they appear: a table header, a label or a tag whose whole text is one of these
 // gets a dotted underline; hover (or tap on a phone) shows what it means. site.py puts this in every page.
 (function () {

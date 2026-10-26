@@ -574,7 +574,7 @@ function gearItems(b, slot) {
   if (slot === 'set') return EQ.s.map((x) => ({ id: x[0], n: x[2], lv: x[3], sub: `ชุด${x[1]} · ${Object.values(x[4]).map((p) => stShort(p[1])).join(' / ')}`, ab: `ครบ 3 ชิ้น: ${stShort(x[6])}${x[7] ? ' · ' + x[7] : ''}`, key: x[3],
     it: { slot: 'set', id: x[0], n: x[2], P: Object.fromEntries(Object.entries(x[4]).map(([k, p]) => [k, { n: p[0], st: p[1] }])), b1: x[5], b2: x[6], fx: x[7] } }));
   const L = slot === 'hat' ? EQ.h.map((h) => [h[0], h[1], h[3], h[4], h[2]]) : slot === 'glasses' ? EQ.g.map((g) => [g[0], g[1], g[2], g[3], 'แว่น']) : EQ.d.map((x) => [x[0], x[1], x[2], x[3], 'โล่']);
-  return L.map(([id, n, lv, st, grp]) => ({ id, n, lv, sub: `${grp} · ${stShort(st)}`, ab: '', key: lv, it: { slot, id, n, st } }));
+  return L.map(([id, n, lv, st, grp]) => ({ id, n, lv, sub: [grp, stShort(st)].filter(Boolean).join(' · '), ab: '', key: lv, it: { slot, id, n, st } }));
 }
 function drawPicker() {
   const b = bld(), all = gearItems(b, GP.slot), q = GP.q.trim().toLowerCase();
@@ -825,7 +825,7 @@ render();
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=1a30db9c'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=36f44a7c'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
@@ -902,7 +902,18 @@ render();
   window.NC_TR = tr;
   }
 })();
-</script><script>// Words players trip over, explained where they appear: a table header, a label or a tag whose whole text is one of these
+</script><p class="ncrep"><a id="ncrep" href="https://github.com/proworks-th/nightcamp-wiki/issues/new" target="_blank" rel="noopener">แจ้งข้อมูลผิด</a> <span>เจอตัวเลขหรือชื่อที่ไม่ตรงกับในเกม กดแจ้งได้เลย</span></p>
+<style>.ncrep{max-width:1240px;margin:24px auto 18px;padding:0 16px;font-size:13px;color:var(--muted,#56607c)}.ncrep a{color:var(--ember,#c4561a);font-weight:600;margin-right:6px}</style>
+<script>(function () {
+  // a mistake on this page: a new issue on the site's GitHub, the page and what to write already filled in
+  var a = document.getElementById('ncrep'); if (!a) return;
+  var page = function () { var h = location.hash.replace(/^#v=/, ''); return document.title.replace(/^NightCamp\s*/, '') + (h ? ' (' + h + ')' : ''); };
+  a.addEventListener('click', function () {
+    var body = 'หน้า: ' + (window.top !== window ? (function () { try { return window.top.location.href; } catch (e) { return location.href; } })() : location.href) + '\n\nข้อมูลที่ผิด:\n\nในเกมเป็นแบบนี้:\n\n(แนบรูปหน้าจอได้)';
+    a.href = 'https://github.com/proworks-th/nightcamp-wiki/issues/new?title=' + encodeURIComponent('ข้อมูลผิด: ' + page()) + '&body=' + encodeURIComponent(body);
+  });
+})();</script>
+<script>// Words players trip over, explained where they appear: a table header, a label or a tag whose whole text is one of these
 // gets a dotted underline; hover (or tap on a phone) shows what it means. site.py puts this in every page.
 (function () {
   const EN = (() => { try { return localStorage.getItem('nc_lang') === 'en'; } catch (e) { return false; } })();
