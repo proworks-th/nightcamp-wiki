@@ -10,6 +10,22 @@ details.howto>ul{margin:0;padding:0 14px 6px 30px}
 details.howto li{margin:4px 0}
 details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-size:13px}
 .wk{white-space:nowrap}
+</style><style>/* touch screens: every control at least 44 x 44 CSS px (Apple / Android guidance), links in lists and tables at least
+   24 px tall (WCAG 2.2 target size). Only on touch (pointer: coarse); the desktop look is unchanged. Loaded after each
+   page's own style, so it wins; !important only on the sizes, because some widgets add their style later. */
+@media (pointer: coarse) {
+  button, select, summary, [role=button], .btn, .chip, a.btn,
+  input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]) { min-height: 44px !important; }
+  button, [role=button], .btn, .chip, a.btn, select { min-width: 44px !important; }
+  summary { display: list-item; padding-block: 10px; box-sizing: border-box; }
+  label:has(> input[type=checkbox]), label:has(> input[type=radio]) { display: inline-flex; align-items: center; gap: 8px; min-height: 44px !important; }
+  a.brand, #brand, .ddm a, [role=menuitem] { display: inline-flex; align-items: center; min-height: 44px !important; }
+  .ddm a, [role=menuitem] { display: flex; }
+  /* plain links: 4 px above and below (an inline link's padding grows its tap area without moving the text); :where()
+     keeps this weaker than any padding a page sets itself */
+  :where(a[href]:not(.btn):not(.chip)) { padding-block: 4px; }
+  a.kt { padding-block: 4px; }   /* the skill-kind tags on the wiki (links drawn as small tags) */
+}
 </style></head><body><title>NightCamp Build Sim</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -303,7 +319,7 @@ const kids = (id) => Object.keys(JOBS).filter((k) => JOBS[k].f === id);
 const EL = { fire: 'ไฟ', water: 'น้ำ', wind: 'ลม', earth: 'ดิน', poison: 'พิษ', holy: 'แสง', shadow: 'มืด', ghost: 'วิญญาณ', undead: 'อมตะ' };
 const TY = { phys: 'ATK', magic: 'MATK', best: 'ATK/MATK' };
 const CLS = { s: 'เป้าเดี่ยว', a: 'หมู่', z: 'เขต', d: 'พุ่ง', m: 'อัญเชิญ', h: 'ฮีล', u: 'ยูทิลิตี้', B: 'สกิลใหญ่', buff: 'บัฟ', passive: 'ติดตัว', active: 'ติดตัว' };
-const icon = (id, c = '') => (D.ic[SK[id].ic] ? `<img class="ico ${c}" src="${D.ic[SK[id].ic]}" alt="">` : '');
+const icon = (id, c = '') => (D.ic[SK[id].ic] ? `<${'img'} class="ico ${c}" src="${D.ic[SK[id].ic]}" alt="">` : '');
 const STATS = ['str', 'agi', 'vit', 'int', 'dex', 'luk'];
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
 $('#buildTag').textContent = 'build ' + D.build; $('#buildFoot').textContent = D.build;
@@ -367,7 +383,7 @@ function setJob(job) {
 // ---------- path picker ----------
 function renderPath() {
   const b = bld(), L = line(b.job), first = L[0], second = L[1], third = L[2];
-  const btn = (j, sel) => `<button class="jbtn" data-job="${j}" aria-pressed="${j === sel}">${D.img[j] ? `<img src="${D.img[j]}" alt="">` : ''}<span>${esc(JOBS[j].n)}<span class="en2"><br></span><span class="muted en2">${esc(JOBS[j].en)}</span></span></button>`;
+  const btn = (j, sel) => `<button class="jbtn" data-job="${j}" aria-pressed="${j === sel}">${D.img[j] ? `<${'img'} src="${D.img[j]}" alt="">` : ''}<span>${esc(JOBS[j].n)}<span class="en2"><br></span><span class="muted en2">${esc(JOBS[j].en)}</span></span></button>`;
   const none = (to, on) => `<button class="jbtn none" data-job="${to}" aria-pressed="${on}">ยังไม่เปลี่ยน</button>`;
   $('#pathBox').innerHTML = `<div class="jp" style="flex:1;min-width:0">
     <div class="kicker">1st job</div><div class="jrow">${FIRST.map((j) => btn(j, first)).join('')}</div>
@@ -405,7 +421,7 @@ function renderBoard() {
     const groups = {};
     for (const id of J.own) { const ln = D.shared.includes(id) ? 'shared' : SK[id].ln || 'other'; (groups[ln] = groups[ln] || []).push(id); }
     const used = J.own.reduce((a, id) => a + (b.add[id] || 0), 0);
-    h += `<section class="jobsec"><div class="jobhead">${D.img[job] ? `<img class="jhimg" src="${D.img[job]}" alt="">` : ''}<div class="kicker">${['', '1st job', '2nd job', 'Class 3'][J.t]}</div><h2>${esc(J.n)} <span class="muted en2">${esc(J.en)}</span></h2><span class="muted mono">ลงไป ${used} แต้ม</span></div><div class="lanes">`;
+    h += `<section class="jobsec"><div class="jobhead">${D.img[job] ? `<${'img'} class="jhimg" src="${D.img[job]}" alt="">` : ''}<div class="kicker">${['', '1st job', '2nd job', 'Class 3'][J.t]}</div><h2>${esc(J.n)} <span class="muted en2">${esc(J.en)}</span></h2><span class="muted mono">ลงไป ${used} แต้ม</span></div><div class="lanes">`;
     for (const [ln, ids] of Object.entries(groups)) {
       const name = ln === 'shared' ? 'ทักษะพื้นฐาน (ทุกอาชีพ)' : J.lines[ln] || (ln === 'other' || ln === 'null' ? 'อื่น ๆ' : ln);
       h += `<div class="lane"><div class="lname">${esc(name)}</div>`;
@@ -825,7 +841,7 @@ render();
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=5b6ee558'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=c89fb0d3'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';

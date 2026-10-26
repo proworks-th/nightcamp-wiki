@@ -10,6 +10,22 @@ details.howto>ul{margin:0;padding:0 14px 6px 30px}
 details.howto li{margin:4px 0}
 details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-size:13px}
 .wk{white-space:nowrap}
+</style><style>/* touch screens: every control at least 44 x 44 CSS px (Apple / Android guidance), links in lists and tables at least
+   24 px tall (WCAG 2.2 target size). Only on touch (pointer: coarse); the desktop look is unchanged. Loaded after each
+   page's own style, so it wins; !important only on the sizes, because some widgets add their style later. */
+@media (pointer: coarse) {
+  button, select, summary, [role=button], .btn, .chip, a.btn,
+  input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]) { min-height: 44px !important; }
+  button, [role=button], .btn, .chip, a.btn, select { min-width: 44px !important; }
+  summary { display: list-item; padding-block: 10px; box-sizing: border-box; }
+  label:has(> input[type=checkbox]), label:has(> input[type=radio]) { display: inline-flex; align-items: center; gap: 8px; min-height: 44px !important; }
+  a.brand, #brand, .ddm a, [role=menuitem] { display: inline-flex; align-items: center; min-height: 44px !important; }
+  .ddm a, [role=menuitem] { display: flex; }
+  /* plain links: 4 px above and below (an inline link's padding grows its tap area without moving the text); :where()
+     keeps this weaker than any padding a page sets itself */
+  :where(a[href]:not(.btn):not(.chip)) { padding-block: 4px; }
+  a.kt { padding-block: 4px; }   /* the skill-kind tags on the wiki (links drawn as small tags) */
+}
 </style></head><body><title>NightCamp Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -490,7 +506,7 @@ let pickJob = null;
 function renderFams() {
   $('#fams').innerHTML = FIRST.map((f) => {
     const t2 = G.jobs.filter((j) => j.f === f && j.t === 2), t3 = G.jobs.filter((j) => j.t === 3 && t2.some((x) => x.id === j.f));
-    const pic = (j) => `<button class="pic" data-j="${j.id}" aria-pressed="${j.id === (pickJob || P.job)}" title="${esc(j.n)} · ${esc(EN[j.id] || '')}"><img src="${jobImg(j.id)}" alt=""><span>${esc(j.n)}</span></button>`;
+    const pic = (j) => `<button class="pic" data-j="${j.id}" aria-pressed="${j.id === (pickJob || P.job)}" title="${esc(j.n)} · ${esc(EN[j.id] || '')}"><${'img'} src="${jobImg(j.id)}" alt=""><span>${esc(j.n)}</span></button>`;
     // one row per 2nd job, with the class 3 it becomes
     const rows = t2.map((j2) => { const j3 = t3.find((x) => x.f === j2.id); return `<div class="ln">${pic(j2)}<span class="ar" aria-hidden="true">→</span>${j3 ? pic(j3) : '<span class="pic soon">ยังไม่เปิด</span>'}</div>`; }).join('');
     return `<div class="card fam"><h3>${esc(J[f].n)} <span class="muted en2">${esc(EN[f])}</span></h3><div class="root">${pic(J[f])}<span class="k">1ST JOB</span></div>
@@ -513,7 +529,7 @@ function renderJob() {
     const rows = (j.sk || []).map((s) => `<tr><td><b>${esc(s.n)}</b>${s.u ? ' <span class="chip">ท่าใหญ่</span>' : ''}<br><span class="muted" style="font-size:13px">${esc(s.ln || '')}</span></td><td>${s.el ? dot(s.el) + esc(ELT[s.el]) : '<span class="muted">ตามอาวุธ</span>'}</td><td>${SX.TERM[s.c] ? `<span title="${esc(SX.TERM[s.c][1])}" style="text-decoration:underline dotted;text-underline-offset:3px;cursor:help">${esc(SX.TERM[s.c][0])}</span>` : esc(CLS[s.c] || 'ติดตัว')}</td><td class="num">${esc(SX.label(SX.dmg(s.d)))}${s.sp ? `<br><span class="muted" style="font-size:12px">SP ${s.sp}</span>` : ''}</td><td class="num">${s.cd != null ? s.cd + ' วิ' : '—'}</td><td>${esc(s.g || '')}${histBox('s:' + s.n)}</td></tr>`).join('');
     more = `<details><summary>สกิลทั้งหมด (${(j.sk || []).length})</summary><div class="in"><p class="muted" style="font-size:13.5px;margin-bottom:8px">ค่าที่เลเวลสกิลสูงสุด อ่านจากคำอธิบายสกิลในเกม <span class="src game">จากไฟล์เกม</span> · ดูทีละเลเวลและดาเมจกับบิลด์ของคุณได้ใน Build Sim</p><div class="tw"><table><thead><tr><th>สกิล</th><th>ธาตุ</th><th>แบบ</th><th class="num">แรง</th><th class="num">คูลดาวน์</th><th>จุดเปลี่ยน</th></tr></thead><tbody>${rows}</tbody></table></div></div></details>`;
   }
-  $('#jobDetail').innerHTML = `<div class="jd"><img src="${jobImg(id)}" alt="${esc(j.n)}"><div>
+  $('#jobDetail').innerHTML = `<div class="jd"><${'img'} src="${jobImg(id)}" alt="${esc(j.n)}"><div>
     <div class="kicker">${tier} · ${lineage(id).map((x) => esc(EN[x])).join(' → ')}</div>
     <h2>${esc(j.n)} <span class="muted en2">${esc(EN[id])}</span></h2>
     <p style="margin-top:6px">${esc(j.d)}</p>
@@ -609,7 +625,7 @@ if (!inShell) for (const b of document.querySelectorAll('[data-nav]')) b.hidden 
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=5b6ee558'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=c89fb0d3'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';

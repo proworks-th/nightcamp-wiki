@@ -125,3 +125,20 @@ table.num td:nth-child(n+2),table.num th:nth-child(n+2){text-align:right}table.n
 a.kt:hover{text-decoration:none;filter:brightness(1.1)}
 .kt-proj{--kc:var(--e-water)}.kt-area{--kc:var(--e-wind)}.kt-melee{--kc:var(--ember)}.kt-attack{--kc:var(--e-fire)}.kt-buff{--kc:var(--e-holy)}.kt-pet{--kc:var(--e-poison)}
 .ftl a.rep{color:var(--ember);font-weight:500}
+
+/* touch screens: every control at least 44 x 44 CSS px (Apple / Android guidance), links in lists and tables at least
+   24 px tall (WCAG 2.2 target size). Only on touch (pointer: coarse); the desktop look is unchanged. Loaded after each
+   page's own style, so it wins; !important only on the sizes, because some widgets add their style later. */
+@media (pointer: coarse) {
+  button, select, summary, [role=button], .btn, .chip, a.btn,
+  input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]) { min-height: 44px !important; }
+  button, [role=button], .btn, .chip, a.btn, select { min-width: 44px !important; }
+  summary { display: list-item; padding-block: 10px; box-sizing: border-box; }
+  label:has(> input[type=checkbox]), label:has(> input[type=radio]) { display: inline-flex; align-items: center; gap: 8px; min-height: 44px !important; }
+  a.brand, #brand, .ddm a, [role=menuitem] { display: inline-flex; align-items: center; min-height: 44px !important; }
+  .ddm a, [role=menuitem] { display: flex; }
+  /* plain links: 4 px above and below (an inline link's padding grows its tap area without moving the text); :where()
+     keeps this weaker than any padding a page sets itself */
+  :where(a[href]:not(.btn):not(.chip)) { padding-block: 4px; }
+  a.kt { padding-block: 4px; }   /* the skill-kind tags on the wiki (links drawn as small tags) */
+}

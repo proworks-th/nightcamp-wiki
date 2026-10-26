@@ -10,6 +10,22 @@ details.howto>ul{margin:0;padding:0 14px 6px 30px}
 details.howto li{margin:4px 0}
 details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-size:13px}
 .wk{white-space:nowrap}
+</style><style>/* touch screens: every control at least 44 x 44 CSS px (Apple / Android guidance), links in lists and tables at least
+   24 px tall (WCAG 2.2 target size). Only on touch (pointer: coarse); the desktop look is unchanged. Loaded after each
+   page's own style, so it wins; !important only on the sizes, because some widgets add their style later. */
+@media (pointer: coarse) {
+  button, select, summary, [role=button], .btn, .chip, a.btn,
+  input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]) { min-height: 44px !important; }
+  button, [role=button], .btn, .chip, a.btn, select { min-width: 44px !important; }
+  summary { display: list-item; padding-block: 10px; box-sizing: border-box; }
+  label:has(> input[type=checkbox]), label:has(> input[type=radio]) { display: inline-flex; align-items: center; gap: 8px; min-height: 44px !important; }
+  a.brand, #brand, .ddm a, [role=menuitem] { display: inline-flex; align-items: center; min-height: 44px !important; }
+  .ddm a, [role=menuitem] { display: flex; }
+  /* plain links: 4 px above and below (an inline link's padding grows its tap area without moving the text); :where()
+     keeps this weaker than any padding a page sets itself */
+  :where(a[href]:not(.btn):not(.chip)) { padding-block: 4px; }
+  a.kt { padding-block: 4px; }   /* the skill-kind tags on the wiki (links drawn as small tags) */
+}
 </style></head><body><title>NightCamp Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -148,7 +164,7 @@ const ELS = ['neutral', 'water', 'earth', 'fire', 'wind', 'poison', 'holy', 'sha
 const elMul = (a, d) => Math.max(0, D.T[ELS.indexOf(a || 'neutral')][ELS.indexOf(d || 'neutral')]) / 100;
 const KT = { field: 'ทุ่ง', dungeon: 'ดันเจี้ยน', section: 'เขตย่อย', tower: 'หอคอย', pvp: 'PvP', camp: 'ค่าย', safe: 'ปลอดภัย' };
 // an icon: a shimmering box until the picture loads (img/ic/<sprite>.webp)
-const icon = (k, cls) => (k ? `<span class="ic sk ${cls || ''}"><img loading="lazy" alt="" src="img/ic/${esc(k)}.webp"></span>` : `<span class="ic ${cls || ''}"></span>`);
+const icon = (k, cls) => (k ? `<span class="ic sk ${cls || ''}"><${'img'} loading="lazy" alt="" src="img/ic/${esc(k)}.webp"></span>` : `<span class="ic ${cls || ''}"></span>`);
 document.addEventListener('load', (e) => { const w = e.target.closest && e.target.closest('.sk'); if (w) w.classList.remove('sk'); }, true);
 document.addEventListener('error', (e) => { const w = e.target.closest && e.target.closest('.sk'); if (w) { w.classList.remove('sk'); e.target.remove(); } }, true);
 
@@ -352,7 +368,7 @@ render();
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=5b6ee558'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=c89fb0d3'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
