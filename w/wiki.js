@@ -1,3 +1,82 @@
+// "report a mistake": a small form on the page itself, sent to the site's Supabase (submit_report). Nobody needs an account,
+// and nothing about the person is asked or kept: only the page, what is wrong, and what the game shows instead.
+// Used by the wiki pages (wiki.js) and the tool pages (report_snip.html). window.NC_OPEN_REPORT() opens it.
+(function () {
+  if (window.NC_OPEN_REPORT) return;
+  var SB = 'https://xjimxvllspnzutidlvwl.supabase.co', KEY = 'sb_publishable_TB7sX2Gdbk4gKz6wf6whpw_1kH0KJ-k';
+  var GH = 'https://github.com/proworks-th/nightcamp-wiki/issues/new';
+  var en = false; try { en = localStorage.getItem('nc_lang') === 'en'; } catch (e) {}
+  var T = function (th, e) { return en ? e : th; };
+  var X = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  // the page being reported: the site's own address when this page sits inside the site's frame
+  var where = function () {
+    var u = location.href, t = document.title;   // (the title of this page, also inside the site's frame)
+    try { if (window.top !== window) u = window.top.location.href; } catch (e) {}
+    try { u = decodeURI(u); } catch (e) {}   // (Thai page names readable in the table)
+    return { url: u.slice(0, 400), title: String(t).replace(/^NightCamp\s*/, '').replace(/\s*·\s*NightCamp Wiki$/, '').slice(0, 200) };
+  };
+  var ghUrl = function (p) {
+    return GH + '?title=' + encodeURIComponent('ข้อมูลผิด: ' + p.title) + '&body=' + encodeURIComponent('หน้า: ' + p.url + '\n\nข้อมูลที่ผิด:\n\nในเกมเป็นแบบนี้:\n\n(แนบรูปหน้าจอได้)');
+  };
+  var css = '.ncr{border:1px solid var(--line,#d5d9e4);border-radius:14px;padding:0;width:min(520px,calc(100vw - 32px));background:var(--panel,#fff);color:var(--fg,#1b2135);box-shadow:0 12px 40px rgba(0,0,0,.25)}'
+    + '.ncr::backdrop{background:rgba(10,14,28,.55)}.ncr form{display:grid;gap:12px;padding:20px}'
+    + '.ncr .hd{font:600 19px var(--display,inherit);margin:0}.ncr .pg{font-size:13.5px;color:var(--muted,#56607c);overflow-wrap:anywhere}'
+    + '.ncr label{display:grid;gap:5px;font-size:14px;font-weight:600}.ncr label span{font-weight:400;color:var(--muted,#56607c)}'
+    + '.ncr textarea{font:15px/1.5 var(--body,inherit);color:inherit;background:var(--bg,#f6f7fb);border:1px solid var(--line,#d5d9e4);border-radius:10px;padding:8px 10px;resize:vertical;min-height:72px}'
+    + '.ncr textarea:focus{outline:2px solid var(--ember,#c4561a);outline-offset:1px}'
+    + '.ncr .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}'
+    + '.ncr .nt{font-size:12.5px;color:var(--muted,#56607c);margin:0}.ncr .nt a{color:inherit}'
+    + '.ncr .bt{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}'
+    + '.ncr button{font:600 14.5px var(--body,inherit);border-radius:10px;padding:8px 16px;min-height:40px;cursor:pointer;border:1px solid var(--line,#d5d9e4);background:var(--panel,#fff);color:inherit}'
+    + '.ncr button.go{background:var(--ember,#c4561a);border-color:var(--ember,#c4561a);color:#fff}.ncr button:disabled{opacity:.6;cursor:wait}'
+    + '.ncr .msg{font-size:14px;margin:0;min-height:1em}.ncr .msg.bad{color:var(--bad,#c0392b)}.ncr .msg.ok{color:var(--good,#2e7d4f)}';
+  var dlg = null;
+  function build() {
+    var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+    dlg = document.createElement('dialog'); dlg.className = 'ncr'; dlg.setAttribute('aria-labelledby', 'ncrH');
+    dlg.innerHTML = '<form novalidate><p class="hd" id="ncrH">' + X(T('แจ้งข้อมูลผิด', 'Report a mistake')) + '</p><div class="pg" id="ncrP"></div>'
+      + '<label>' + X(T('อะไรผิด', 'What is wrong')) + '<textarea id="ncrW" maxlength="1000" rows="3" required placeholder="' + X(T('เช่น HP ของมอนตัวนี้ที่ Lv 50 ไม่ตรงกับในเกม', 'e.g. this monster\'s HP at Lv 50 does not match the game')) + '"></textarea></label>'
+      + '<label><div>' + X(T('ในเกมเป็นแบบไหน', 'What the game shows')) + ' <span>' + X(T('(ไม่ใส่ก็ได้)', '(optional)')) + '</span></div><textarea id="ncrC" maxlength="1000" rows="2"></textarea></label>'
+      + '<div class="hp" aria-hidden="true"><label>Website<input id="ncrHp" tabindex="-1" autocomplete="off"></label></div>'
+      + '<p class="nt">' + X(T('ไม่ต้องใส่ชื่อหรือช่องทางติดต่อ เราไม่เก็บข้อมูลส่วนตัว แนบรูปที่นี่ไม่ได้ ถ้าอยากแนบรูป ', 'No name or contact needed, nothing personal is kept. Pictures cannot be attached here; to send one, ')) + '<a id="ncrG" target="_blank" rel="noopener">' + X(T('แจ้งผ่าน GitHub', 'use GitHub')) + '</a></p>'
+      + '<p class="msg" id="ncrM" role="status" aria-live="polite"></p>'
+      + '<div class="bt"><button type="button" id="ncrX">' + X(T('ปิด', 'Close')) + '</button><button type="submit" class="go" id="ncrS">' + X(T('ส่ง', 'Send')) + '</button></div></form>';
+    document.body.appendChild(dlg);
+    var $ = function (id) { return dlg.querySelector('#' + id); };
+    $('ncrX').onclick = function () { dlg.close(); };
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });   // a tap outside the box
+    dlg.querySelector('form').onsubmit = function (e) {
+      e.preventDefault();
+      var m = $('ncrM'), w = $('ncrW').value.trim(), c = $('ncrC').value.trim(), p = where(), s = $('ncrS');
+      var say = function (t, cls) { m.textContent = t; m.className = 'msg ' + (cls || ''); };
+      if (w.length < 3) { say(T('เขียนว่าอะไรผิดสักหน่อยก่อนส่ง', 'Write what is wrong first'), 'bad'); $('ncrW').focus(); return; }
+      if ($('ncrHp').value) { done(); return; }   // (a bot filled the hidden box: look sent, send nothing)
+      s.disabled = true; say(T('กำลังส่ง…', 'Sending…'));
+      fetch(SB + '/rest/v1/rpc/submit_report', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_url: p.url, p_title: p.title, p_wrong: w, p_correct: c, p_lang: en ? 'en' : 'th' }) })
+        .then(function (r) { if (r.ok) return null; return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j && j.message || 'http ' + r.status); }); })
+        .then(done)
+        .catch(function (err) {
+          var t = String(err && err.message || '');
+          say(/already sent/.test(t) ? T('เรื่องนี้ส่งไปแล้ว ขอบคุณครับ', 'Already sent, thank you')
+            : /too many/.test(t) ? T('ตอนนี้มีคนแจ้งเยอะ ลองใหม่ในอีกสักครู่ หรือแจ้งผ่าน GitHub', 'Too many reports right now, try again in a minute or use GitHub')
+            : T('ส่งไม่สำเร็จ ลองใหม่อีกครั้ง หรือแจ้งผ่าน GitHub', 'Could not send, try again or use GitHub'), 'bad');
+          s.disabled = false;
+        });
+      function done() { $('ncrW').value = ''; $('ncrC').value = ''; s.disabled = false; say(T('ได้รับแล้ว ขอบคุณที่ช่วยแจ้งครับ', 'Got it, thank you for the report'), 'ok'); }
+    };
+  }
+  window.NC_OPEN_REPORT = function () {
+    var p = where();
+    if (typeof HTMLDialogElement === 'undefined') { window.open(ghUrl(p), '_blank', 'noopener'); return; }   // (very old browsers: the GitHub form)
+    if (!dlg) build();
+    dlg.querySelector('#ncrP').textContent = T('หน้า: ', 'Page: ') + p.title;
+    dlg.querySelector('#ncrG').href = ghUrl(p);
+    dlg.querySelector('#ncrM').textContent = '';
+    dlg.showModal(); dlg.querySelector('#ncrW').focus();
+  };
+  window.NC_REPORT_GH = function () { return ghUrl(where()); };
+})();
 // the wiki pages' own script: the language button, the menu's drop-downs, the search box, the English texts, and (inside
 // the site's frame) handing links to the site. Loaded from w/wiki.js; the site's files are one folder up.
 (function () {
@@ -12,11 +91,6 @@
     document.documentElement.lang = 'en';
   })();
   // the site's menu (same groups and pages as the site's header) and the footer: written here once for every page
-  // a mistake on this page: a new issue on the site's GitHub, the page and what to write already filled in
-  window.NC_REPORT = function (title) {
-    var body = 'หน้า: ' + location.href + '\n\nข้อมูลที่ผิด:\n\nในเกมเป็นแบบนี้:\n\n(แนบรูปหน้าจอได้)';
-    return 'https://github.com/proworks-th/nightcamp-wiki/issues/new?title=' + encodeURIComponent('ข้อมูลผิด: ' + String(title || '').replace(/ · NightCamp Wiki$/, '')) + '&body=' + encodeURIComponent(body);
-  };
   var T = function (th, e) { return en ? e : th; }, X = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var MENU = [['คู่มือ', 'Guide', [['หน้าแรก', 'Home', ''], ['คู่มือ', 'Guide', 'guide'], ['อัปเดตเกม', 'Game updates', 'patch'], ['เกี่ยวกับเว็บ', 'About', 'about']]],
     ['ข้อมูล', 'Data', [['อาชีพและสกิล', 'Jobs & skills', 'jobs'], ['อุปกรณ์', 'Equipment', 'equip'], ['มอนสเตอร์และแมพ', 'Monsters & maps', 'mon'], ['แผนที่', 'Map', 'map'], ['อาชีพเสริม', 'Life skills', 'life'], ['รูน', 'Runes', 'rune']]],
@@ -31,8 +105,10 @@
   var ft = document.querySelector('footer.ft[data-build]');
   if (ft) ft.innerHTML = '<div class="fti"><div><b class="ftb">NightCamp Wiki</b><p>' + X(T('วิกิแฟนเกม NightCamp โดย KhumGameLab ข้อมูลอ่านจากไฟล์เกม', 'A NightCamp fan wiki by KhumGameLab, data read from the game files')) + '</p><p class="muted">'
     + X(T('ไฟล์เกมรุ่น ' + ft.dataset.build + ' ภาพและชื่อในเกมเป็นของทีม Night Camp ใช้โดยได้รับอนุญาต ไม่ใช่เว็บทางการของเกม', 'Game files ' + ft.dataset.build + '. In-game art and names belong to the Night Camp team, used with permission. Not an official site.')) + '</p></div><nav class="ftl">'
-    + '<a class="rep" href="' + X(window.NC_REPORT(document.title)) + '" target="_blank" rel="noopener">' + X(T('แจ้งข้อมูลผิด', 'Report a mistake')) + '</a>'
+    + '<a class="rep" href="' + X(window.NC_REPORT_GH()) + '" target="_blank" rel="noopener">' + X(T('แจ้งข้อมูลผิด', 'Report a mistake')) + '</a>'
     + [[W + 'index.html', 'หน้าแรก', 'Home'], [W + 'about.html', 'เกี่ยวกับเว็บ', 'About'], [ROOT + 'index.html#patch', 'อัปเดตเกม', 'Game updates'], [ROOT + 'sitemap.xml', 'แผนผังเว็บ', 'Sitemap']].map(function (l) { return '<a href="' + l[0] + '">' + X(T(l[1], l[2])) + '</a>'; }).join('') + '</nav></div>';
+  // a mistake on this page: the form on the page (report_dialog.js); the link itself is the GitHub form, for no script
+  var rep = document.querySelector('footer .rep'); if (rep) rep.onclick = function (e) { e.preventDefault(); e.stopPropagation(); window.NC_OPEN_REPORT(); };
   if (b) { b.textContent = en ? 'ไทย' : 'EN'; b.onclick = function () { try { localStorage.setItem('nc_lang', en ? 'th' : 'en'); } catch (e) {} location.reload(); }; }
   // the menu: pointing opens a group (CSS); a click or tap opens it too and keeps it open until a click elsewhere or Esc
   function close(x) { var D = document.querySelectorAll('.dd'); for (var i = 0; i < D.length; i++) if (D[i] !== x) { D[i].classList.remove('open'); D[i].querySelector('.ddb').setAttribute('aria-expanded', 'false'); } }

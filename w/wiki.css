@@ -1,3 +1,4 @@
+button,input,select,textarea{font-family:inherit}
 /* NightCamp Wiki: one stylesheet for every wiki page (cached once). The same colours, fonts and menu as the site's tools,
    with a night-camp feel: a night sky behind the page, campfire orange for what matters, element colours for elements. */
 :root{--bg:#eef0f6;--bg2:#e2e5f2;--panel:#fff;--panel2:#e8ebf5;--line:#c9cfdf;--fg:#18203a;--muted:#56607c;--ember:#c4561a;--ember2:#e8813a;--moon:#3c4fa8;--good:#2f8a55;--warn:#b26a00;--bad:#b33a3a;

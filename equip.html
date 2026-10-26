@@ -1,4 +1,4 @@
-<!doctype html><html lang="th"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://xjimxvllspnzutidlvwl.supabase.co; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>[hidden]{display:none!important}</style><style>/* shared by every page (site.py puts it in each head): where a number comes from, and "how to read this" */
+<!doctype html><html lang="th"><head><style>button,input,select,textarea{font-family:inherit}</style><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://xjimxvllspnzutidlvwl.supabase.co; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>[hidden]{display:none!important}</style><style>/* shared by every page (site.py puts it in each head): where a number comes from, and "how to read this" */
 .src{display:inline-block;font:600 11px/1.6 var(--body,system-ui);padding:0 7px;border-radius:999px;vertical-align:middle;white-space:nowrap;letter-spacing:.2px}
 .src.game{background:color-mix(in srgb,var(--moon,#3c4fa8) 14%,transparent);color:var(--moon,#3c4fa8)}
 .src.est{background:color-mix(in srgb,var(--ember,#c4561a) 16%,transparent);color:var(--ember,#c4561a)}
@@ -12,7 +12,7 @@ details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-s
 .wk{white-space:nowrap}
 </style></head><body><title>NightCamp Equipment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
 /* Layout: the camp quartermaster's ledger — one sticky filter rail, then a long column of item cards. */
 :root{
@@ -696,7 +696,7 @@ syncUi(); run();
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=c3d3aad2'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=61d4b5a9'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
@@ -773,16 +773,92 @@ syncUi(); run();
   window.NC_TR = tr;
   }
 })();
-</script><p class="ncrep"><a id="ncrep" href="https://github.com/proworks-th/nightcamp-wiki/issues/new" target="_blank" rel="noopener">แจ้งข้อมูลผิด</a> <span>เจอตัวเลขหรือชื่อที่ไม่ตรงกับในเกม กดแจ้งได้เลย</span></p>
+</script><p class="ncrep"><a id="ncrep" href="https://github.com/proworks-th/nightcamp-wiki/issues/new" target="_blank" rel="noopener">แจ้งข้อมูลผิด</a> <span>เจอตัวเลขหรือชื่อที่ไม่ตรงกับในเกม กดแจ้งได้เลย ไม่ต้องมีบัญชี</span></p>
 <style>.ncrep{max-width:1240px;margin:24px auto 18px;padding:0 16px;font-size:13px;color:var(--muted,#56607c)}.ncrep a{color:var(--ember,#c4561a);font-weight:600;margin-right:6px}</style>
-<script>(function () {
-  // a mistake on this page: a new issue on the site's GitHub, the page and what to write already filled in
+<script>// "report a mistake": a small form on the page itself, sent to the site's Supabase (submit_report). Nobody needs an account,
+// and nothing about the person is asked or kept: only the page, what is wrong, and what the game shows instead.
+// Used by the wiki pages (wiki.js) and the tool pages (report_snip.html). window.NC_OPEN_REPORT() opens it.
+(function () {
+  if (window.NC_OPEN_REPORT) return;
+  var SB = 'https://xjimxvllspnzutidlvwl.supabase.co', KEY = 'sb_publishable_TB7sX2Gdbk4gKz6wf6whpw_1kH0KJ-k';
+  var GH = 'https://github.com/proworks-th/nightcamp-wiki/issues/new';
+  var en = false; try { en = localStorage.getItem('nc_lang') === 'en'; } catch (e) {}
+  var T = function (th, e) { return en ? e : th; };
+  var X = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  // the page being reported: the site's own address when this page sits inside the site's frame
+  var where = function () {
+    var u = location.href, t = document.title;   // (the title of this page, also inside the site's frame)
+    try { if (window.top !== window) u = window.top.location.href; } catch (e) {}
+    try { u = decodeURI(u); } catch (e) {}   // (Thai page names readable in the table)
+    return { url: u.slice(0, 400), title: String(t).replace(/^NightCamp\s*/, '').replace(/\s*·\s*NightCamp Wiki$/, '').slice(0, 200) };
+  };
+  var ghUrl = function (p) {
+    return GH + '?title=' + encodeURIComponent('ข้อมูลผิด: ' + p.title) + '&body=' + encodeURIComponent('หน้า: ' + p.url + '\n\nข้อมูลที่ผิด:\n\nในเกมเป็นแบบนี้:\n\n(แนบรูปหน้าจอได้)');
+  };
+  var css = '.ncr{border:1px solid var(--line,#d5d9e4);border-radius:14px;padding:0;width:min(520px,calc(100vw - 32px));background:var(--panel,#fff);color:var(--fg,#1b2135);box-shadow:0 12px 40px rgba(0,0,0,.25)}'
+    + '.ncr::backdrop{background:rgba(10,14,28,.55)}.ncr form{display:grid;gap:12px;padding:20px}'
+    + '.ncr .hd{font:600 19px var(--display,inherit);margin:0}.ncr .pg{font-size:13.5px;color:var(--muted,#56607c);overflow-wrap:anywhere}'
+    + '.ncr label{display:grid;gap:5px;font-size:14px;font-weight:600}.ncr label span{font-weight:400;color:var(--muted,#56607c)}'
+    + '.ncr textarea{font:15px/1.5 var(--body,inherit);color:inherit;background:var(--bg,#f6f7fb);border:1px solid var(--line,#d5d9e4);border-radius:10px;padding:8px 10px;resize:vertical;min-height:72px}'
+    + '.ncr textarea:focus{outline:2px solid var(--ember,#c4561a);outline-offset:1px}'
+    + '.ncr .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}'
+    + '.ncr .nt{font-size:12.5px;color:var(--muted,#56607c);margin:0}.ncr .nt a{color:inherit}'
+    + '.ncr .bt{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}'
+    + '.ncr button{font:600 14.5px var(--body,inherit);border-radius:10px;padding:8px 16px;min-height:40px;cursor:pointer;border:1px solid var(--line,#d5d9e4);background:var(--panel,#fff);color:inherit}'
+    + '.ncr button.go{background:var(--ember,#c4561a);border-color:var(--ember,#c4561a);color:#fff}.ncr button:disabled{opacity:.6;cursor:wait}'
+    + '.ncr .msg{font-size:14px;margin:0;min-height:1em}.ncr .msg.bad{color:var(--bad,#c0392b)}.ncr .msg.ok{color:var(--good,#2e7d4f)}';
+  var dlg = null;
+  function build() {
+    var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+    dlg = document.createElement('dialog'); dlg.className = 'ncr'; dlg.setAttribute('aria-labelledby', 'ncrH');
+    dlg.innerHTML = '<form novalidate><p class="hd" id="ncrH">' + X(T('แจ้งข้อมูลผิด', 'Report a mistake')) + '</p><div class="pg" id="ncrP"></div>'
+      + '<label>' + X(T('อะไรผิด', 'What is wrong')) + '<textarea id="ncrW" maxlength="1000" rows="3" required placeholder="' + X(T('เช่น HP ของมอนตัวนี้ที่ Lv 50 ไม่ตรงกับในเกม', 'e.g. this monster\'s HP at Lv 50 does not match the game')) + '"></textarea></label>'
+      + '<label><div>' + X(T('ในเกมเป็นแบบไหน', 'What the game shows')) + ' <span>' + X(T('(ไม่ใส่ก็ได้)', '(optional)')) + '</span></div><textarea id="ncrC" maxlength="1000" rows="2"></textarea></label>'
+      + '<div class="hp" aria-hidden="true"><label>Website<input id="ncrHp" tabindex="-1" autocomplete="off"></label></div>'
+      + '<p class="nt">' + X(T('ไม่ต้องใส่ชื่อหรือช่องทางติดต่อ เราไม่เก็บข้อมูลส่วนตัว แนบรูปที่นี่ไม่ได้ ถ้าอยากแนบรูป ', 'No name or contact needed, nothing personal is kept. Pictures cannot be attached here; to send one, ')) + '<a id="ncrG" target="_blank" rel="noopener">' + X(T('แจ้งผ่าน GitHub', 'use GitHub')) + '</a></p>'
+      + '<p class="msg" id="ncrM" role="status" aria-live="polite"></p>'
+      + '<div class="bt"><button type="button" id="ncrX">' + X(T('ปิด', 'Close')) + '</button><button type="submit" class="go" id="ncrS">' + X(T('ส่ง', 'Send')) + '</button></div></form>';
+    document.body.appendChild(dlg);
+    var $ = function (id) { return dlg.querySelector('#' + id); };
+    $('ncrX').onclick = function () { dlg.close(); };
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });   // a tap outside the box
+    dlg.querySelector('form').onsubmit = function (e) {
+      e.preventDefault();
+      var m = $('ncrM'), w = $('ncrW').value.trim(), c = $('ncrC').value.trim(), p = where(), s = $('ncrS');
+      var say = function (t, cls) { m.textContent = t; m.className = 'msg ' + (cls || ''); };
+      if (w.length < 3) { say(T('เขียนว่าอะไรผิดสักหน่อยก่อนส่ง', 'Write what is wrong first'), 'bad'); $('ncrW').focus(); return; }
+      if ($('ncrHp').value) { done(); return; }   // (a bot filled the hidden box: look sent, send nothing)
+      s.disabled = true; say(T('กำลังส่ง…', 'Sending…'));
+      fetch(SB + '/rest/v1/rpc/submit_report', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_url: p.url, p_title: p.title, p_wrong: w, p_correct: c, p_lang: en ? 'en' : 'th' }) })
+        .then(function (r) { if (r.ok) return null; return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j && j.message || 'http ' + r.status); }); })
+        .then(done)
+        .catch(function (err) {
+          var t = String(err && err.message || '');
+          say(/already sent/.test(t) ? T('เรื่องนี้ส่งไปแล้ว ขอบคุณครับ', 'Already sent, thank you')
+            : /too many/.test(t) ? T('ตอนนี้มีคนแจ้งเยอะ ลองใหม่ในอีกสักครู่ หรือแจ้งผ่าน GitHub', 'Too many reports right now, try again in a minute or use GitHub')
+            : T('ส่งไม่สำเร็จ ลองใหม่อีกครั้ง หรือแจ้งผ่าน GitHub', 'Could not send, try again or use GitHub'), 'bad');
+          s.disabled = false;
+        });
+      function done() { $('ncrW').value = ''; $('ncrC').value = ''; s.disabled = false; say(T('ได้รับแล้ว ขอบคุณที่ช่วยแจ้งครับ', 'Got it, thank you for the report'), 'ok'); }
+    };
+  }
+  window.NC_OPEN_REPORT = function () {
+    var p = where();
+    if (typeof HTMLDialogElement === 'undefined') { window.open(ghUrl(p), '_blank', 'noopener'); return; }   // (very old browsers: the GitHub form)
+    if (!dlg) build();
+    dlg.querySelector('#ncrP').textContent = T('หน้า: ', 'Page: ') + p.title;
+    dlg.querySelector('#ncrG').href = ghUrl(p);
+    dlg.querySelector('#ncrM').textContent = '';
+    dlg.showModal(); dlg.querySelector('#ncrW').focus();
+  };
+  window.NC_REPORT_GH = function () { return ghUrl(where()); };
+})();
+
+(function () {
+  // a mistake on this page: the form on the page (report_dialog.js); the link itself is the GitHub form, for no script
   var a = document.getElementById('ncrep'); if (!a) return;
-  var page = function () { var h = location.hash.replace(/^#v=/, ''); return document.title.replace(/^NightCamp\s*/, '') + (h ? ' (' + h + ')' : ''); };
-  a.addEventListener('click', function () {
-    var body = 'หน้า: ' + (window.top !== window ? (function () { try { return window.top.location.href; } catch (e) { return location.href; } })() : location.href) + '\n\nข้อมูลที่ผิด:\n\nในเกมเป็นแบบนี้:\n\n(แนบรูปหน้าจอได้)';
-    a.href = 'https://github.com/proworks-th/nightcamp-wiki/issues/new?title=' + encodeURIComponent('ข้อมูลผิด: ' + page()) + '&body=' + encodeURIComponent(body);
-  });
+  a.addEventListener('click', function (e) { e.preventDefault(); window.NC_OPEN_REPORT(); });
 })();</script>
 <script>// Words players trip over, explained where they appear: a table header, a label or a tag whose whole text is one of these
 // gets a dotted underline; hover (or tap on a phone) shows what it means. site.py puts this in every page.
