@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="th">
-<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://xjimxvllspnzutidlvwl.supabase.co; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NightCamp Wiki</title>
@@ -94,20 +94,20 @@ details.howto>p{margin:0;padding:4px 12px 10px;color:var(--muted,#56607c);font-s
 </header>
 <div class="stage">
 <iframe id="f-home" title="หน้าแรก" data-src="w/index.html?v=0a654aee" hidden></iframe>
-<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=cc8d2d98#v=guide" hidden></iframe>
-<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=72305c51" hidden></iframe>
+<iframe id="f-guide" title="คู่มือ" data-src="guide.html?v=c5e53378#v=guide" hidden></iframe>
+<iframe id="f-patch" title="อัปเดตเกม" data-src="patch.html?v=5fac8725" hidden></iframe>
 <iframe id="f-about" title="เกี่ยวกับเว็บ" data-src="w/about.html?v=5cc6a1fe" hidden></iframe>
-<iframe id="f-jobs" title="อาชีพและสกิล" data-src="guide.html?v=cc8d2d98#v=jobs" hidden></iframe>
-<iframe id="f-equip" title="อุปกรณ์" data-src="equip.html?v=a3dd483d" hidden></iframe>
-<iframe id="f-mon" title="มอนสเตอร์และแมพ" data-src="mon.html?v=98380055" hidden></iframe>
-<iframe id="f-map" title="แผนที่" data-src="map.html?v=f872cffb" hidden></iframe>
-<iframe id="f-life" title="อาชีพเสริม" data-src="life.html?v=9a1669c9" hidden></iframe>
-<iframe id="f-rune" title="รูน" data-src="rune.html?v=d3fc43dd" hidden></iframe>
-<iframe id="f-me" title="ตัวละครของฉัน" data-src="guide.html?v=cc8d2d98#v=me" hidden></iframe>
-<iframe id="f-sim" title="Build Sim" data-src="sim.html?v=4e3c8511" hidden></iframe>
-<iframe id="f-plan" title="วางแผนฟาร์ม" data-src="plan.html?v=e470b60c" hidden></iframe>
-<iframe id="f-calc" title="ตีบวก / ขัดเกรด" data-src="equip.html?v=a3dd483d#v=calc" hidden></iframe>
-<iframe id="f-boss" title="จับเวลาบอส" data-src="boss.html?v=56292207" hidden></iframe>
+<iframe id="f-jobs" title="อาชีพและสกิล" data-src="guide.html?v=c5e53378#v=jobs" hidden></iframe>
+<iframe id="f-equip" title="อุปกรณ์" data-src="equip.html?v=6a2bf44f" hidden></iframe>
+<iframe id="f-mon" title="มอนสเตอร์และแมพ" data-src="mon.html?v=2266cc50" hidden></iframe>
+<iframe id="f-map" title="แผนที่" data-src="map.html?v=4245809e" hidden></iframe>
+<iframe id="f-life" title="อาชีพเสริม" data-src="life.html?v=ef390c90" hidden></iframe>
+<iframe id="f-rune" title="รูน" data-src="rune.html?v=f98e7e69" hidden></iframe>
+<iframe id="f-me" title="ตัวละครของฉัน" data-src="guide.html?v=c5e53378#v=me" hidden></iframe>
+<iframe id="f-sim" title="Build Sim" data-src="sim.html?v=157095ab" hidden></iframe>
+<iframe id="f-plan" title="วางแผนฟาร์ม" data-src="plan.html?v=1f9398e0" hidden></iframe>
+<iframe id="f-calc" title="ตีบวก / ขัดเกรด" data-src="equip.html?v=6a2bf44f#v=calc" hidden></iframe>
+<iframe id="f-boss" title="จับเวลาบอส" data-src="boss.html?v=89139363" hidden></iframe>
 <div class="skel" id="skel" aria-hidden="true"><div class="in"><i style="height:150px"></i><i style="height:22px;width:55%"></i><i style="height:110px"></i><i style="height:110px"></i><i style="height:180px"></i></div></div>
 </div>
 <script>
@@ -315,7 +315,7 @@ document.addEventListener('error', (e) => { const w = e.target.closest && e.targ
   // the dictionary is its own file (i18n.js sets window.NC_I18N), fetched only for English viewers
   if (window.NC_I18N) return start(window.NC_I18N);
   var sc = document.createElement('script');
-  sc.src = 'i18n.js?v=8028de42'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
+  sc.src = 'i18n.js?v=3a2fe2d8'; sc.onload = function () { if (window.NC_I18N) start(window.NC_I18N); };
   document.head.appendChild(sc);
   function start(I) {
   document.documentElement.lang = 'en';
