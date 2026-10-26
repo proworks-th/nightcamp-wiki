@@ -125,6 +125,7 @@ table.num td:nth-child(n+2),table.num th:nth-child(n+2),.tw th.n,.tw td.n{text-a
 a.kt:hover{text-decoration:none;filter:brightness(1.1)}
 .kt-proj{--kc:var(--e-water)}.kt-area{--kc:var(--e-wind)}.kt-melee{--kc:var(--ember)}.kt-attack{--kc:var(--e-fire)}.kt-buff{--kc:var(--e-holy)}.kt-pet{--kc:var(--e-poison)}
 .ftl a.rep{color:var(--ember);font-weight:500}
+.warnline{margin:6px 0 10px;padding:6px 10px;border-left:3px solid var(--bad);background:var(--panel,transparent);line-height:1.5}
 
 /* touch screens: every control at least 44 x 44 CSS px (Apple / Android guidance), links in lists and tables at least
    24 px tall (WCAG 2.2 target size). Only on touch (pointer: coarse); the desktop look is unchanged. Loaded after each
