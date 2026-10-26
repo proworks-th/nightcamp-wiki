@@ -73,7 +73,7 @@ table{border-collapse:collapse;width:100%;font-size:14.5px}
 .tw tbody tr:hover{background:color-mix(in srgb,var(--ember) 8%,transparent)}
 .tw thead th{font:600 12px var(--mono);color:var(--muted);background:var(--panel2);white-space:nowrap;text-transform:uppercase;letter-spacing:.3px}
 .tw td:nth-child(n+2){white-space:nowrap}
-table.num td:nth-child(n+2),table.num th:nth-child(n+2){text-align:right}table.num td:nth-child(n+2){font-family:var(--mono)}
+table.num td:nth-child(n+2),table.num th:nth-child(n+2),.tw th.n,.tw td.n{text-align:right}.tw td.n{font-family:var(--mono);white-space:nowrap}table.num td:nth-child(n+2){font-family:var(--mono)}
 .ic{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--panel2);vertical-align:middle;margin-right:8px;overflow:hidden;border:1px solid var(--line)}.ic img{width:100%;height:100%;object-fit:contain}
 .ic.l{width:104px;height:104px;border-radius:16px;margin:0;background:transparent;border:0}
 
